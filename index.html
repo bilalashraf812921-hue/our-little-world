@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Our Little World</title>
+  <meta name="theme-color" content="#efe6f3">
+  <script>
+    /* Page dikhne se PEHLE chalta hai (taake flash na ho):
+       1) password laga ho aur is session mein unlock na hua ho to content chhupa do
+       2) saved theme + layout lagao ("Auto night" on ho to raat 8 se subah 6 (Pakistan time) Midnight theme) */
+    (function () {
+      var d = document.documentElement;
+      try {
+        if (localStorage.getItem('olw_lock_v1') && !sessionStorage.getItem('olw_ok')) d.dataset.locked = '1';
+        var t = JSON.parse(localStorage.getItem('olw_theme_v1') || '{}');
+        var h = +new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Karachi', hour: 'numeric', hourCycle: 'h23' }).format(new Date());
+        d.dataset.theme = (t.autoNight && (h >= 20 || h < 6)) ? 'midnight' : (t.theme || 'lavender');
+        d.dataset.view = t.view || 'classic';
+      } catch (e) { d.dataset.theme = 'lavender'; d.dataset.view = 'classic'; }
+    })();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;500;600&family=Dancing+Script:wght@500;600&family=Playfair+Display:wght@500;600&family=Lora:wght@500;600&family=Poppins:wght@400;500;600&family=Pacifico&family=Caveat:wght@500;600&family=Great+Vibes&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="home.css">
+</head>
+<body>
+
+<header class="top">
+  <a class="brand" href="#top" data-go="home" aria-label="Our Little World - Home">
+    <span class="ico heart" data-icon="heart"></span>
+    <span class="brand-name">Our Little World</span>
+  </a>
+
+  <div class="search" role="search">
+    <span class="ico" data-icon="search"></span>
+    <input id="searchInput" type="search" placeholder="Search our memories..." autocomplete="off"
+           aria-label="Search" aria-controls="searchResults" aria-expanded="false">
+    <ul id="searchResults" class="search-results" role="listbox" hidden></ul>
+  </div>
+
+  <button class="icon-btn" id="settingsBtn" aria-label="Settings"><span class="ico" data-icon="gear"></span></button>
+  <div class="profile-wrap">
+    <button class="avatar" id="profileBtn" aria-label="Account menu" aria-haspopup="true" aria-expanded="false">
+      <span class="ico" data-icon="user"></span>
+    </button>
+    <div class="profile-menu" id="profileMenu" hidden>
+      <strong id="profileName">Owner</strong>
+      <small>Demo mode: login abhi connect nahi hua.</small>
+      <button type="button" id="lockNowBtn">🔒 Lock app</button>
+      <button type="button" id="logoutBtn">Log out</button>
+    </div>
+  </div>
+</header>
+
+<main id="top">
+
+  <!-- HERO -->
+  <section class="hero" aria-labelledby="heroTitle">
+    <div class="hero-photo" role="img" aria-label="Couple watching the sunset"></div>
+
+    <figure class="polaroid hero-polaroid">
+      <div class="tape"></div>
+      <div class="photo hero-photo-m" role="img" aria-label="Couple watching the sunset"></div>
+      <div class="note note-m">Forever<br>and<br>Always <span>♡</span></div>
+    </figure>
+    <div class="note note-d">Together<br>is my<br>Favourite<br>Place <span>♡</span></div>
+
+    <div class="paper hero-card">
+      <span class="lav l1"></span><span class="lav l2"></span>
+      <p class="script" id="welcomeText">Welcome Back, My Love</p>
+      <h1 id="heroTitle">Meri Zindagi, Tum Ho ♡</h1>
+      <p class="intro" id="introText"></p>
+      <button class="btn" id="exploreBtn" type="button">Explore Our World <span class="ico" data-icon="arrow"></span></button>
+      <span class="dots" aria-hidden="true"><i class="on"></i><i></i><i></i><i></i></span>
+    </div>
+  </section>
+
+  <!-- FEATURE CARDS -->
+  <section class="cards" id="featureCards" aria-label="Explore">
+    <button class="card" data-go="story"><span class="round"><span class="ico" data-icon="book"></span></span>
+      <span class="ctext"><b>Story</b><small>Our journey</small></span><span class="ico arrow" data-icon="arrow"></span></button>
+    <button class="card" data-go="gallery"><span class="round"><span class="ico" data-icon="image"></span></span>
+      <span class="ctext"><b>Gallery</b><small>Photos &amp; videos</small></span><span class="ico arrow" data-icon="arrow"></span></button>
+    <button class="card" data-go="letters"><span class="round"><span class="ico" data-icon="mail"></span></span>
+      <span class="ctext"><b>Letters</b><small>From my heart</small></span><span class="ico arrow" data-icon="arrow"></span></button>
+    <button class="card" data-go="chat"><span class="round"><span class="ico" data-icon="chat"></span></span>
+      <span class="ctext"><b>Chat</b><small>Talk to each other</small></span><span class="ico arrow" data-icon="arrow"></span></button>
+  </section>
+
+  <!-- WHY + MOMENTS -->
+  <section class="lower">
+    <article class="paper why" id="whySection" aria-labelledby="whyTitle">
+      <span class="lav l3"></span>
+      <figure class="polaroid why-polaroid">
+        <div class="tape"></div>
+        <div class="photo memory-photo" role="img" aria-label="Flowers"></div>
+        <span class="mini-heart">♡</span>
+      </figure>
+      <div class="why-text">
+        <h2 id="whyTitle">Why I Made This ♡</h2>
+        <p id="whyText"></p>
+        <p class="script signoff" id="signoff">Always you ♡</p>
+        <button class="btn small" id="readMoreBtn" type="button">Read More <span class="ico" data-icon="arrow"></span></button>
+      </div>
+    </article>
+
+    <aside class="moments" id="momentsSection" aria-labelledby="momTitle">
+      <div class="moments-head">
+        <h2 id="momTitle"><span class="spark">✧</span> Our Special Moments <span class="pink">♡</span></h2>
+        <button class="link" data-go="memories">View All <span class="ico" data-icon="arrow"></span></button>
+      </div>
+      <button class="moment" data-go="memories"><span class="round soft"><span class="ico" data-icon="calendar"></span></span>
+        <span class="ctext"><b>Next Special Date</b><small id="nextDateText">-</small></span><span class="ico arrow" data-icon="arrow"></span></button>
+      <button class="moment" data-go="memories"><span class="round soft"><span class="ico" data-icon="image"></span></span>
+        <span class="ctext"><b>Featured Memory</b><small id="memoryText">-</small></span><span class="ico arrow" data-icon="arrow"></span></button>
+      <button class="moment" data-go="memories"><span class="round soft"><span class="ico" data-icon="clock"></span></span>
+        <span class="ctext"><b>Countdown</b><small id="countdownText">-</small></span><span class="ico arrow" data-icon="arrow"></span></button>
+    </aside>
+  </section>
+
+  <!-- SURPRISE -->
+  <section class="surprise" id="surpriseSection">
+    <span class="ico gift" data-icon="gift"></span>
+    <div class="ctext"><b>A little surprise for you...</b><small>Some things are better experienced than explained.</small></div>
+    <button class="btn small" id="surpriseBtn" type="button">Open Surprise <span class="ico" data-icon="heart"></span></button>
+    <span class="lav l4"></span>
+  </section>
+</main>
+
+<!-- BOTTOM NAVIGATION -->
+<nav class="bottom" aria-label="Main navigation">
+  <button class="nav-item active" data-go="home" aria-current="page"><span class="ico" data-icon="home"></span><span>Home</span></button>
+  <button class="nav-item" data-go="story"><span class="ico" data-icon="book"></span><span>Story</span></button>
+  <button class="nav-item" data-go="gallery"><span class="ico" data-icon="image"></span><span>Gallery</span></button>
+  <button class="nav-item" data-go="letters"><span class="ico" data-icon="mail"></span><span>Letters</span></button>
+  <button class="nav-item" data-go="chat"><span class="ico" data-icon="chat"></span><span>Chat</span></button>
+</nav>
+
+<!-- READ MORE DIALOG -->
+<dialog id="readDialog" aria-labelledby="readTitle">
+  <div class="dlg paper-dlg">
+    <h2 id="readTitle">Why I Made This ♡</h2>
+    <p id="readFull"></p>
+    <p class="script" id="readSign"></p>
+    <button class="btn small" data-close type="button">Close</button>
+  </div>
+</dialog>
+
+<!-- SURPRISE DIALOG -->
+<dialog id="surpriseDialog" aria-labelledby="surTitle">
+  <div class="dlg paper-dlg center">
+    <h2 id="surTitle" class="script big">For you ♡</h2>
+    <p id="surpriseMsg"></p>
+    <button class="btn small" data-close type="button">Close</button>
+  </div>
+</dialog>
+
+<!-- SETTINGS DIALOG -->
+<dialog id="settingsDialog" aria-labelledby="setTitle">
+  <form class="dlg" id="settingsForm" method="dialog">
+    <h2 id="setTitle">Home Page Settings</h2>
+    <p class="hint" id="roleNotice" hidden>Yeh settings sirf owner account ke liye hain.</p>
+    <div id="settingsBody">
+      <p class="hint">Changes live preview mein nazar aate hain. <b>Publish</b> dabane tak save nahi hotin; Cancel se purana design wapas aa jata hai.</p>
+      <div class="set-actions">
+        <button type="button" class="btn" id="openThemeBtn">✨ Themes &amp; Layouts</button>
+        <button type="button" class="btn ghost" id="openDesignBtn">🎨 Design Editor</button>
+      </div>
+      <p class="hint"><b>Themes &amp; Layouts:</b> ek click se poora page ka rang, font, shape aur tarteeb badal jata hai. <b>Design Editor:</b> kisi bhi ek cheez ka shape, font, rang, animation, jagah badalna ya usay hata dena. Dono saath chalte hain.</p>
+      <label>Welcome line (handwritten)<input name="welcome" maxlength="60"></label>
+      <label>Main heading<input name="heading" maxlength="80"></label>
+      <label>Introduction text<textarea name="intro" rows="3" maxlength="300"></textarea></label>
+      <label>"Why I Made This" text<textarea name="why" rows="4" maxlength="800"></textarea></label>
+      <label>Sign-off<input name="signoff" maxlength="40"></label>
+      <label>Surprise message<textarea name="surprise" rows="3" maxlength="400"></textarea></label>
+      <div class="row">
+        <label>Next special date<input type="date" name="specialDate"></label>
+        <label>Date label<input name="specialLabel" maxlength="40" placeholder="e.g. Anniversary"></label>
+      </div>
+      <div class="row">
+        <label>Featured memory title<input name="memoryTitle" maxlength="60" placeholder="e.g. Our first trip"></label>
+        <label>Together since<input type="date" name="togetherSince"></label>
+      </div>
+      <div class="row">
+        <div class="inline-field"><label>Accent colour<input type="color" name="accent"></label>
+          <button type="button" class="btn ghost small" id="accentReset" title="Theme ka apna rang wapas lagayein">Theme ka rang</button></div>
+        <label>Animations
+          <select name="motion"><option value="auto">Follow device setting</option><option value="off">Off</option></select>
+        </label>
+      </div>
+      <label>Hero photo (JPG/PNG/WebP, max 8 MB)<input type="file" name="heroFile" accept="image/jpeg,image/png,image/webp"></label>
+      <label>"Why I Made This" photo<input type="file" name="memoryFile" accept="image/jpeg,image/png,image/webp"></label>
+      <p class="hint">Timezone: Asia/Karachi (UTC+5). Countdown isi hisab se chalta hai.</p>
+      <details class="pw-box" id="pwBox">
+        <summary>🔒 Password lock</summary>
+        <p class="hint" id="pwStatus"></p>
+        <label id="pwCurRow">Maujooda password<input type="password" id="pwCur" autocomplete="current-password"></label>
+        <label>Naya password (kam az kam 4 characters)<input type="password" id="pwNew" autocomplete="new-password"></label>
+        <label>Naya password dobara<input type="password" id="pwNew2" autocomplete="new-password"></label>
+        <p class="error" id="pwError" role="alert" hidden></p>
+        <div class="dlg-actions">
+          <button type="button" class="btn small" id="pwSave">Password lagayein</button>
+          <button type="button" class="btn ghost small" id="pwRemove">Password hata dein</button>
+        </div>
+        <p class="hint">Yeh sirf is device/browser ka screen-lock hai, encryption nahi. Password bhool gaye to recovery nahi hai (browser data clear karna parega, jis se saved settings bhi jayengi). Asli security login system aane par milegi.</p>
+      </details>
+      <p class="error" id="settingsError" role="alert" hidden></p>
+    </div>
+    <div class="dlg-actions">
+      <button type="button" class="btn ghost small" id="resetBtn">Reset</button>
+      <span class="spacer"></span>
+      <button type="button" class="btn ghost small" id="cancelBtn">Cancel</button>
+      <button type="submit" class="btn small" id="publishBtn" value="publish">Publish</button>
+    </div>
+  </form>
+</dialog>
+
+<div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+<div class="hearts" id="hearts" aria-hidden="true"></div>
+<div id="fx" aria-hidden="true"></div>
+
+<!-- LOCK SCREEN -->
+<div id="lockScreen" class="lock" role="dialog" aria-modal="true" aria-labelledby="lockTitle">
+  <form id="lockForm" class="lock-card paper-dlg" autocomplete="off">
+    <span class="ico heart" data-icon="heart"></span>
+    <h2 id="lockTitle" class="script big">Our Little World</h2>
+    <p>Andar jane ke liye password likhein</p>
+    <input type="password" id="lockInput" aria-label="Password" autocomplete="current-password" required>
+    <label class="chk"><input type="checkbox" id="lockShow"> Password dikhayein</label>
+    <p class="error" id="lockError" role="alert" hidden></p>
+    <button class="btn" type="submit">Kholein ♡</button>
+  </form>
+</div>
+
+<!-- PASSWORD PROMPT (settings kholne ke liye) -->
+<dialog id="askDialog" aria-labelledby="askTitle">
+  <form class="dlg" id="askForm" method="dialog">
+    <h2 id="askTitle">Password</h2>
+    <input type="password" id="askInput" aria-label="Password" autocomplete="current-password" required>
+    <p class="error" id="askError" role="alert" hidden></p>
+    <div class="dlg-actions">
+      <span class="spacer"></span>
+      <button type="button" class="btn ghost small" id="askCancel">Cancel</button>
+      <button type="submit" class="btn small">Kholein</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- THEMES & LAYOUTS PANEL -->
+<aside class="dpanel tpanel" id="themePanel" hidden aria-label="Themes and layouts">
+  <div class="dp-head">
+    <strong>✨ Themes &amp; Layouts</strong>
+    <span class="dp-actions">
+      <button type="button" class="btn small" id="tpSave">Save</button>
+      <button type="button" class="btn ghost small" id="tpCancel">Cancel</button>
+      <button type="button" class="icon-btn" id="tpMin" aria-label="Panel chhota/bara karein" title="Chhota / Bara">▾</button>
+    </span>
+  </div>
+  <div id="tpBody">
+    <p class="hint">Kisi theme ya layout par click karein: page fauran badal jata hai (preview). Pasand aaye to <b>Save</b> dabayein, warna <b>Cancel</b>.</p>
+    <div class="tp-title">Themes (rang, font, shape)</div>
+    <div class="t-grid" id="tpThemes"></div>
+    <div class="tp-title">Layouts (page ki tarteeb)</div>
+    <div class="v-grid" id="tpViews"></div>
+    <label class="chk"><input type="checkbox" id="tpFx"> Floating effects (patti, dil, sitare, bubbles)</label>
+    <label class="chk"><input type="checkbox" id="tpNight"> Raat 8 baje se subah 6 baje tak (Pakistan time) khud "Midnight Stars" lagayein</label>
+    <label class="chk"><input type="checkbox" id="tpClear"> Save karte waqt mere Design Editor ke badlaav bhi hata dein</label>
+    <div class="dlg-actions">
+      <button type="button" class="btn ghost small" id="tpRandom">🎲 Random</button>
+      <button type="button" class="btn ghost small" id="tpUndo">↩ Pichla look</button>
+    </div>
+  </div>
+</aside>
+
+<!-- DESIGN EDITOR PANEL -->
+<aside class="dpanel" id="designPanel" hidden aria-label="Design Editor">
+  <div class="dp-head">
+    <strong>🎨 Design Editor</strong>
+    <span class="dp-actions">
+      <button type="button" class="btn small" id="dpSave">Save</button>
+      <button type="button" class="btn ghost small" id="dpDiscard">Discard</button>
+      <button type="button" class="icon-btn" id="dpMin" aria-label="Panel chhota/bara karein" title="Chhota / Bara">▾</button>
+    </span>
+  </div>
+  <div id="dpBody">
+    <p class="hint" id="dpHint">Kisi bhi cheez par click karein, phir drag karke jahan chahein rakh dein (arrow keys bhi chalti hain). Save dabane tak design permanent nahi hota.</p>
+
+    <div id="dpControls" hidden>
+      <h3 id="dpName"></h3>
+      <button type="button" class="btn ghost small" id="dpParent">⬆ Upar wala group select karein</button>
+      <label class="chk" id="dpAllRow"><input type="checkbox" id="dpAll"> Sab milti-julti cheezon par lagayein</label>
+
+      <label data-cap="shape">Shape
+        <select id="dpShape">
+          <option value="">Default</option><option value="pill">Pill (gol kinaray)</option><option value="rounded">Rounded</option>
+          <option value="square">Square</option><option value="leaf">Leaf</option><option value="cut">Cut corners</option><option value="circle">Circle / Oval</option>
+        </select>
+      </label>
+      <label data-cap="frame">Frame<select id="dpFrame"></select></label>
+      <label data-cap="variant">Style
+        <select id="dpVariant">
+          <option value="">Default</option><option value="solid">Solid</option><option value="outline">Outline</option>
+          <option value="soft">Soft</option><option value="glass">Glass</option>
+        </select>
+      </label>
+      <label data-cap="layout">Layout (andar ki cheezein)
+        <select id="dpLayout">
+          <option value="">Default</option><option value="row">Horizontal (qatar)</option>
+          <option value="column">Vertical (neechay neechay)</option><option value="grid2">2 columns grid</option>
+        </select>
+      </label>
+      <label data-cap="navlayout">Navigation ki jagah
+        <select id="dpNavLayout">
+          <option value="">Neechay (horizontal)</option><option value="left">Left side (vertical)</option><option value="right">Right side (vertical)</option>
+        </select>
+      </label>
+      <div data-cap="colors" class="dp-colors">
+        <label>Background rang<span class="dp-c"><input type="color" id="dpBg" value="#ffffff"><button type="button" class="btn ghost small" id="dpBgReset">Default</button></span></label>
+        <label>Text rang<span class="dp-c"><input type="color" id="dpColor" value="#4c3b58"><button type="button" class="btn ghost small" id="dpColorReset">Default</button></span></label>
+      </div>
+      <label data-cap="font">Font
+        <select id="dpFont">
+          <option value="">Default</option><option>Cormorant Garamond</option><option>Playfair Display</option><option>Lora</option>
+          <option>Inter</option><option>Poppins</option><option>Dancing Script</option><option>Great Vibes</option>
+          <option>Pacifico</option><option>Caveat</option><option>Georgia</option><option>Courier New</option>
+        </select>
+      </label>
+      <label data-cap="anim">Animation
+        <select id="dpAnim">
+          <option value="">Default</option><option value="none">Koi nahi</option><option value="lift">Lift (upar uthay)</option>
+          <option value="grow">Grow (bara ho)</option><option value="glow">Glow</option><option value="wiggle">Wiggle (hilay)</option>
+          <option value="pulse">Pulse (hamesha)</option><option value="heartbeat">Heartbeat (hamesha)</option><option value="float">Float (hamesha)</option>
+        </select>
+      </label>
+      <label>Size <output id="dpSizeOut">100%</output>
+        <input type="range" id="dpSize" min="50" max="200" step="5" value="100">
+      </label>
+      <div class="dp-move">
+        <span>Jagah</span>
+        <button type="button" class="btn ghost small" data-dx="0" data-dy="-10" aria-label="Upar">↑</button>
+        <button type="button" class="btn ghost small" data-dx="-10" data-dy="0" aria-label="Left">←</button>
+        <button type="button" class="btn ghost small" data-dx="10" data-dy="0" aria-label="Right">→</button>
+        <button type="button" class="btn ghost small" data-dx="0" data-dy="10" aria-label="Neechay">↓</button>
+        <button type="button" class="btn ghost small" id="dpPosReset">Reset</button>
+      </div>
+      <div class="dlg-actions">
+        <button type="button" class="btn small" id="dpHide">🗑 Hata dein</button>
+        <button type="button" class="btn ghost small" id="dpReset">Is ka design reset</button>
+      </div>
+    </div>
+
+    <details id="dpRemoved"><summary>Hata hui cheezein (<span id="dpCount">0</span>)</summary><ul id="dpRemovedList"></ul></details>
+    <label class="chk"><input type="checkbox" id="dpShowAll"> Mobile par woh cheezein bhi dikhayein jo reference mein sirf desktop par thin (feature cards, Special Moments, Read More)</label>
+    <button type="button" class="btn ghost small" id="dpResetAll">Poora design reset karein</button>
+  </div>
+</aside>
+
+<script src="olw-config.js"></script>
+<script src="olw-sync.js" data-reload="1"></script>
+<script src="home.js"></script>
+</body>
+</html>

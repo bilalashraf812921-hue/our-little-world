@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
+  <title>Our Story - Our Little World</title>
+  <meta name="theme-color" content="#d9cdb8">
+  <script>
+    /* Runs before the page paints: (1) if a password is set and not unlocked, go back to Home (lock screen)
+       (2) apply the saved theme (set from Home > Themes). */
+    (function () {
+      var d = document.documentElement;
+      try {
+        if (localStorage.getItem('olw_lock_v1') && !sessionStorage.getItem('olw_ok')) { location.replace('index.html'); return; }
+        var t = JSON.parse(localStorage.getItem('olw_theme_v1') || '{}');
+        var h = +new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Karachi', hour: 'numeric', hourCycle: 'h23' }).format(new Date());
+        d.dataset.theme = (t.autoNight && (h >= 20 || h < 6)) ? 'midnight' : (t.theme || 'lavender');
+      } catch (e) { d.dataset.theme = 'lavender'; }
+    })();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500;1,600&family=Inter:wght@400;500;600&family=Dancing+Script:wght@500;600&family=Playfair+Display:wght@500;600&family=Lora:wght@500;600&family=Poppins:wght@400;500;600&family=Pacifico&family=Caveat:wght@500;600&family=Great+Vibes&family=Kalam:wght@300;400&family=Patrick+Hand&family=Indie+Flower&family=Handlee&family=Shadows+Into+Light&family=Kaushan+Script&family=Sacramento&family=Mrs+Saint+Delafield&family=La+Belle+Aurore&family=Allura&family=Homemade+Apple&family=Parisienne&family=Satisfy&family=Yellowtail&family=Cookie&family=Courgette&family=Lobster&family=Marck+Script&family=Playball&family=Rouge+Script&family=Alex+Brush&family=Tangerine&family=Pinyon+Script&family=Italianno&family=Mr+Dafoe&family=Norican&family=Kristi&family=Birthstone&family=Fleur+De+Leah&family=Over+the+Rainbow&family=Gloria+Hallelujah&family=Reenie+Beanie&family=Zeyada&family=Nothing+You+Could+Do&family=Covered+By+Your+Grace&family=Cinzel:wght@500&family=Abril+Fatface&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="home.css">
+  <link rel="stylesheet" href="story.css">
+</head>
+<body class="story">
+<noscript><p style="padding:20px">Please turn on JavaScript to use this page.</p></noscript>
+
+<div class="st-bg" id="stBg" aria-hidden="true"></div>
+
+<!-- ===== Top: back button (+ small caption + menu). Nothing else. ===== -->
+<header class="st-topbar" id="stTop">
+  <button class="st-fab" id="stBack" type="button" aria-label="Back to Home" data-go="home"><span class="ico" data-icon="back"></span></button>
+  <div class="st-cap" aria-live="polite">
+    <h1 id="stHead">Our Story</h1>
+    <p><span id="stSub">Cover</span><span class="st-cnt"> • <b id="stNow">--</b>/<span id="stTot">00</span></span></p>
+  </div>
+  <div class="st-menu-wrap">
+    <button class="st-fab" id="stMenuBtn" type="button" aria-haspopup="menu" aria-expanded="false" aria-label="More options"><span class="ico" data-icon="dots"></span></button>
+    <div class="st-menu" id="stMenu" role="menu" hidden>
+      <button type="button" role="menuitem" data-act="contents"><span class="ico" data-icon="list"></span>Contents</button>
+      <button type="button" role="menuitem" data-act="search"><span class="ico" data-icon="search"></span>Search the diary</button>
+      <button type="button" role="menuitem" id="stFav" aria-pressed="false"><span class="ico" data-icon="heart"></span><span class="st-fl">Bookmark this page</span></button>
+      <button type="button" role="menuitem" data-act="cover"><span class="ico" data-icon="book"></span>Go to cover</button>
+      <button type="button" role="menuitem" data-act="print"><span class="ico" data-icon="print"></span>Print / save as PDF</button>
+      <button type="button" role="menuitem" data-act="export"><span class="ico" data-icon="download"></span>Download backup (JSON)</button>
+      <button type="button" role="menuitem" class="st-owner" data-act="import"><span class="ico" data-icon="upload"></span>Restore backup (into draft)</button>
+    </div>
+  </div>
+</header>
+
+<div class="st-banner" id="stBanner" hidden></div>
+
+<!-- ===== Editor toolbar (owner only, appears after pressing Edit) ===== -->
+<div class="st-editbar" id="stEditbar" hidden>
+  <button type="button" class="st-tb st-close" id="edExit" aria-label="Close editor" title="Close editor"><span class="ico" data-icon="x"></span></button>
+  <div class="st-tools">
+    <button type="button" class="st-tb" id="edPrev" aria-label="Previous page" title="Previous page"><span class="ico" data-icon="arrowL"></span></button>
+    <button type="button" class="st-tb" id="edNext" aria-label="Next page" title="Next page"><span class="ico" data-icon="arrow"></span></button>
+    <i class="st-sep"></i>
+    <button type="button" class="st-tb" id="edUndo" aria-label="Undo" title="Undo (Ctrl+Z)"><span class="ico" data-icon="undo"></span></button>
+    <button type="button" class="st-tb" id="edRedo" aria-label="Redo" title="Redo (Ctrl+Y)"><span class="ico" data-icon="redo"></span></button>
+    <i class="st-sep"></i>
+    <button type="button" class="st-tb" data-cmd="bold" aria-label="Bold" title="Bold (Ctrl+B)"><b>B</b></button>
+    <button type="button" class="st-tb" data-cmd="italic" aria-label="Italic" title="Italic (Ctrl+I)"><i>I</i></button>
+    <button type="button" class="st-tb" data-cmd="underline" aria-label="Underline" title="Underline (Ctrl+U)"><u>U</u></button>
+    <button type="button" class="st-tb" data-cmd="mark" aria-label="Highlight" title="Highlight"><span class="st-hl">H</span></button>
+    <button type="button" class="st-tb" data-cmd="clear" aria-label="Clear formatting" title="Clear formatting"><span class="ico" data-icon="eraser"></span></button>
+  </div>
+  <span class="st-status" id="edStatus" role="status" aria-live="polite">Draft</span>
+  <div class="st-eactions">
+    <button type="button" class="btn ghost small" id="edPreview"><span class="ico" data-icon="eye"></span>Preview</button>
+    <button type="button" class="btn small" id="edPublish"><span class="ico" data-icon="check"></span>Publish</button>
+  </div>
+</div>
+
+<!-- ===== Book + studio ===== -->
+<div class="st-main">
+  <section class="st-stage" id="stStage" aria-label="Diary">
+    <div class="st-zoom" id="stZoom" role="group" aria-label="Zoom"><button type="button" id="zIn" aria-label="Zoom in">+</button><button type="button" id="zFit" aria-label="Fit to screen" title="Fit to screen">100%</button><button type="button" id="zOut" aria-label="Zoom out">−</button></div>
+    <div class="st-book" id="stBook"></div>
+  </section>
+
+  <aside class="st-studio" id="stStudio" hidden aria-label="Diary editor">
+    <button type="button" class="st-collapse" id="stCollapse" aria-expanded="true" aria-label="Show or hide the editor panel"><span class="ico" data-icon="chev"></span></button>
+    <div class="st-tabs" role="tablist">
+      <button type="button" role="tab" data-tab="page" aria-selected="true">Page</button>
+      <button type="button" role="tab" data-tab="design" aria-selected="false">Design</button>
+      <button type="button" role="tab" data-tab="photos" aria-selected="false">Photos</button>
+      <button type="button" role="tab" data-tab="decor" aria-selected="false">Decor</button>
+      <button type="button" role="tab" data-tab="pages" aria-selected="false">Pages</button>
+      <button type="button" role="tab" data-tab="book" aria-selected="false">Style</button>
+    </div>
+
+    <div class="st-panels">
+      <!-- PAGE -->
+      <section class="st-panel" data-panel="page">
+        <p class="hint" id="pgInfo"></p>
+        <label>Chapter<select data-f="page.ch" id="pgCh"></select></label>
+        <label>Page title<input data-f="page.title" maxlength="90" placeholder="e.g. Our first meeting"></label>
+        <div class="st-row2">
+          <label>Date<input type="date" data-f="page.date"></label>
+          <button type="button" class="btn ghost small" id="pgDateClear">Clear date</button>
+        </div>
+        <label>Handwritten line at the bottom<input data-f="page.sign" maxlength="160" placeholder="e.g. Maybe that is where our story began... ♡"></label>
+        <label>Text size on this page <output id="pgScaleOut">100%</output><input type="range" data-f="page.scale" min="70" max="130" step="2"></label>
+        <div class="st-warn" id="stOverflow" hidden>
+          <b>The text is going outside the page.</b>
+          <span>Make the text smaller, or send the extra text to a new next page.</span>
+          <button type="button" class="btn small" id="pgSpill">Move extra text to next page</button>
+        </div>
+        <div class="st-btnrow">
+          <button type="button" class="btn small" id="pgAdd"><span class="ico" data-icon="plus"></span>New page (after this)</button>
+          <button type="button" class="btn ghost small" id="pgDup">Duplicate</button>
+          <button type="button" class="btn ghost small" id="pgUp">← Move earlier</button>
+          <button type="button" class="btn ghost small" id="pgDown">Move later →</button>
+          <button type="button" class="btn ghost small st-danger" id="pgDel"><span class="ico" data-icon="trash"></span>Delete page</button>
+        </div>
+        <p class="hint">Write directly on the page. Press Enter for a new paragraph. You can write in Roman Urdu or any language.</p>
+      </section>
+
+      <!-- DESIGN (heading, page design, lines) -->
+      <section class="st-panel" data-panel="design" hidden>
+        <h3>Heading</h3>
+        <label>Heading font<select data-f="page.hf" id="pgHf"></select></label>
+        <label>Heading size <output id="pgHsOut"></output><input type="range" data-f="page.hs" min="60" max="160" step="2"></label>
+        <div class="st-row2">
+          <label>Align<select data-f="page.ha"><option value="left">Left</option><option value="center">Centre</option><option value="right">Right</option></select></label>
+          <label>Decoration<select data-f="page.hd" id="pgHd"></select></label>
+        </div>
+        <div class="st-field"><span>Heading colour</span><div class="st-swatches" id="swHc"></div></div>
+        <label>Writing font on this page<select data-f="page.bf" id="pgBf"></select></label>
+
+        <h3>Page design</h3>
+        <div class="st-designs" id="dsGrid"></div>
+        <div class="st-field"><span>Design colour</span><div class="st-swatches" id="swDc"></div>
+          <label class="st-custom">Custom colour <input type="color" data-f="page.dc"></label></div>
+        <label>Design strength <output id="pgDopOut"></output><input type="range" data-f="page.dop" min="20" max="100" step="2"></label>
+
+        <h3>Lines on this page</h3>
+        <p class="hint" id="lnInfo"></p>
+        <label>Line style<select data-f="lines.style" id="lnStyle"></select></label>
+        <label>Line size (distance between lines) <output id="lnGapOut"></output><input type="range" data-f="lines.gap" min="70" max="170" step="2"></label>
+        <label>Line thickness <output id="lnWOut"></output><input type="range" data-f="lines.w" min="6" max="90" step="2"></label>
+        <label>Line strength <output id="lnOpOut"></output><input type="range" data-f="lines.op" min="5" max="95" step="1"></label>
+        <label>Move lines up / down <output id="lnOffOut"></output><input type="range" data-f="lines.off" min="-50" max="50" step="1"></label>
+        <div class="st-field"><span>Line colour</span><div class="st-swatches" id="swLn"></div>
+          <label class="st-custom">Custom colour <input type="color" data-f="lines.color"></label></div>
+        <div class="st-row2">
+          <label class="chk"><input type="checkbox" data-f="lines.margin"> Margin line</label>
+          <label>Lines go<select data-f="lines.fill"><option value="page">To bottom of page</option><option value="text">Only under the text</option></select></label>
+        </div>
+        <div class="st-btnrow">
+          <button type="button" class="btn small" id="lnAll">Use for all pages</button>
+          <button type="button" class="btn ghost small" id="lnReset">Use diary default here</button>
+        </div>
+
+        <h3>Areas without lines</h3>
+        <p class="hint">Add a box, then drag it on the page. Lines disappear inside the box. Drag its corner to resize.</p>
+        <div class="st-btnrow">
+          <button type="button" class="btn small" id="znAdd"><span class="ico" data-icon="plus"></span>Add no-lines area</button>
+          <button type="button" class="btn ghost small st-danger" id="znDel">Remove selected</button>
+        </div>
+        <ul class="st-list" id="znList"></ul>
+        <div class="st-sel" id="znCtl" hidden>
+          <label>Width <output id="znWOut"></output><input type="range" data-f="zone.w" min="4" max="100" step="1"></label>
+          <label>Height <output id="znHOut"></output><input type="range" data-f="zone.h" min="3" max="100" step="1"></label>
+        </div>
+      </section>
+
+      <!-- PHOTOS -->
+      <section class="st-panel" data-panel="photos" hidden>
+        <button type="button" class="btn small" id="phAdd"><span class="ico" data-icon="image"></span>Add a photo to this page</button>
+        <p class="hint">JPG, PNG or WebP, up to 8 MB each. Drag a photo on the page to move it.</p>
+        <ul class="st-list" id="phList"></ul>
+        <div class="st-sel" id="phCtl" hidden>
+          <h3>Selected photo</h3>
+          <label>Caption<input data-f="photo.cap" maxlength="80"></label>
+          <label>Frame<select data-f="photo.frame" id="phFrame"></select></label>
+          <div class="st-row2">
+            <label>Side<select data-f="photo.side"><option value="right">Right</option><option value="left">Left</option><option value="center">Centre</option></select></label>
+            <label>Tape<select data-f="photo.tape"><option value="lavender">Lavender</option><option value="pink">Pink</option><option value="yellow">Yellow</option><option value="mint">Mint</option><option value="none">None</option></select></label>
+          </div>
+          <label>Size <output id="phSizeOut"></output><input type="range" data-f="photo.size" min="20" max="56" step="1"></label>
+          <label>Tilt <output id="phRotOut"></output><input type="range" data-f="photo.rot" min="-12" max="12" step="1"></label>
+          <label>After which paragraph (0 = at the top)<input type="number" data-f="photo.at" min="0" max="40" step="1"></label>
+          <div class="st-move">
+            <span>Nudge</span>
+            <button type="button" class="btn ghost small" data-nudge="0,-2" aria-label="Up">↑</button>
+            <button type="button" class="btn ghost small" data-nudge="-2,0" aria-label="Left">←</button>
+            <button type="button" class="btn ghost small" data-nudge="2,0" aria-label="Right">→</button>
+            <button type="button" class="btn ghost small" data-nudge="0,2" aria-label="Down">↓</button>
+            <button type="button" class="btn ghost small" data-nudge="reset">Reset</button>
+          </div>
+          <div class="st-btnrow">
+            <button type="button" class="btn ghost small" id="phReplace">Replace photo</button>
+            <button type="button" class="btn ghost small st-danger" id="phRemove"><span class="ico" data-icon="trash"></span>Remove</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- DECOR -->
+      <section class="st-panel" data-panel="decor" hidden>
+        <p class="hint">Tap one to add it, then drag it on the page. You can change its colour afterwards.</p>
+        <div id="dcGrid"></div>
+        <ul class="st-list" id="dcList"></ul>
+        <div class="st-sel" id="dcCtl" hidden>
+          <h3>Selected decoration</h3>
+          <label id="dcTextRow">Text<input data-f="deco.text" maxlength="90"></label>
+          <label id="dcFontRow">Text font<select data-f="deco.font" id="dcFont"></select></label>
+          <div class="st-field"><span>Colour</span><div class="st-swatches" id="swDeco"></div></div>
+          <label>Size <output id="dcWOut"></output><input type="range" data-f="deco.w" min="5" max="80" step="1"></label>
+          <label>Tilt <output id="dcRotOut"></output><input type="range" data-f="deco.rot" min="-60" max="60" step="1"></label>
+          <label class="chk"><input type="checkbox" data-f="deco.flip"> Flip (mirror)</label>
+          <label class="chk"><input type="checkbox" data-f="deco.st"> White sticker outline</label>
+          <label class="chk"><input type="checkbox" data-f="deco.bk"> Put behind the text</label>
+          <div class="st-move"><span>Nudge</span>
+            <button type="button" class="btn ghost small" data-dnudge="0,-1" aria-label="Up">↑</button><button type="button" class="btn ghost small" data-dnudge="-1,0" aria-label="Left">←</button>
+            <button type="button" class="btn ghost small" data-dnudge="1,0" aria-label="Right">→</button><button type="button" class="btn ghost small" data-dnudge="0,1" aria-label="Down">↓</button>
+          </div>
+          <div class="st-btnrow"><button type="button" class="btn ghost small st-danger" id="dcRemove"><span class="ico" data-icon="trash"></span>Remove</button></div>
+        </div>
+      </section>
+
+      <!-- PAGES / CHAPTERS -->
+      <section class="st-panel" data-panel="pages" hidden>
+        <div class="st-btnrow">
+          <button type="button" class="btn small" id="chAdd"><span class="ico" data-icon="plus"></span>New chapter</button>
+        </div>
+        <div id="stOutline" class="st-outline"></div>
+      </section>
+
+      <!-- STYLE -->
+      <section class="st-panel" data-panel="book" hidden>
+        <h3>Quick styles</h3>
+        <div class="st-presets" id="stPresets"></div>
+
+        <h3>Cover</h3>
+        <label>Diary title<input data-f="cover.title" maxlength="50"></label>
+        <label>Short line under the title<input data-f="cover.subtitle" maxlength="90"></label>
+        <div class="st-field"><span>Cover colour</span><div class="st-swatches" id="swCover"></div>
+          <label class="st-custom">Custom colour <input type="color" data-f="cover.color"></label></div>
+        <div class="st-row2">
+          <label>Cover material<select data-f="cover.finish" id="fFinish"></select></label>
+          <label>Title foil<select data-f="cover.foil"><option value="gold">Gold</option><option value="silver">Silver</option><option value="rose">Rose gold</option><option value="white">White</option><option value="none">Embossed only</option></select></label>
+        </div>
+        <div class="st-field"><span>Ribbon bookmark &amp; elastic colour</span><div class="st-swatches" id="swRibbon"></div>
+          <label class="st-custom">Custom colour <input type="color" data-f="cover.ribbon"></label></div>
+        <label class="chk"><input type="checkbox" data-f="cover.band"> Elastic band</label>
+        <div class="st-btnrow">
+          <button type="button" class="btn ghost small" id="cvPhoto">Add cover photo</button>
+          <button type="button" class="btn ghost small" id="cvPhotoDel">Remove cover photo</button>
+        </div>
+
+        <h3>Paper &amp; writing</h3>
+        <div class="st-field"><span>Paper colour</span><div class="st-swatches" id="swPaper"></div>
+          <label class="st-custom">Custom colour <input type="color" data-f="look.paper"></label></div>
+        <div class="st-field"><span>Ink colour</span><div class="st-swatches" id="swInk"></div>
+          <label class="st-custom">Custom colour <input type="color" data-f="look.ink"></label></div>
+        <div class="st-row2">
+          <label>Title font<select data-f="look.headFont" id="fHead"></select></label>
+          <label>Text font<select data-f="look.bodyFont" id="fBody"></select></label>
+        </div>
+        <label>Text size <output id="lkSizeOut"></output><input type="range" data-f="look.size" min="80" max="125" step="1"></label>
+        <label>Line spacing <output id="lkLeadOut"></output><input type="range" data-f="look.leading" min="85" max="125" step="1"></label>
+        <p class="hint">Lines, headings and page designs are set per page in the Design tab.</p>
+        <label>Aged paper <output id="lkAgedOut"></output><input type="range" data-f="look.aged" min="0" max="100" step="2"></label>
+
+        <h3>Background behind the diary</h3>
+        <label>Background<select data-f="bg.type" id="fBgType"></select></label>
+        <div class="st-row2">
+          <label>Colour<input type="color" data-f="bg.color"></label>
+          <label id="bgC2Row">Second colour<input type="color" data-f="bg.color2"></label>
+        </div>
+        <label>Blur <output id="bgBlurOut"></output><input type="range" data-f="bg.blur" min="0" max="24" step="1"></label>
+        <label>Darken <output id="bgDimOut"></output><input type="range" data-f="bg.dim" min="0" max="60" step="1"></label>
+        <label class="chk"><input type="checkbox" data-f="bg.flowers"> Flowers &amp; decorations</label>
+        <label class="chk"><input type="checkbox" data-f="bg.glow"> Soft light</label>
+        <div class="st-btnrow">
+          <button type="button" class="btn ghost small" id="bgPhoto">Upload background photo</button>
+          <button type="button" class="btn ghost small" id="bgPhotoDel">Remove photo</button>
+        </div>
+
+        <h3>Draft</h3>
+        <div class="st-btnrow">
+          <button type="button" class="btn ghost small" id="dfSave">Save draft now</button>
+          <button type="button" class="btn ghost small" id="dfRestore">Restore previous published</button>
+          <button type="button" class="btn ghost small st-danger" id="dfDiscard">Discard draft</button>
+          <button type="button" class="btn ghost small st-danger" id="dfBlank">Clear whole diary</button>
+        </div>
+      </section>
+    </div>
+  </aside>
+</div>
+
+<!-- ===== Bottom: only Previous / Edit / Next ===== -->
+<footer class="st-bar" id="stDock">
+  <div class="st-barin">
+    <button type="button" class="st-pbtn" id="stPrev"><span class="ico" data-icon="arrowL"></span><span>Previous</span></button>
+    <button type="button" class="st-editbtn st-owner" id="stEdit"><span class="ico" data-icon="pen"></span><span>Edit</span></button>
+    <button type="button" class="st-pbtn" id="stNext"><span>Next</span><span class="ico" data-icon="arrow"></span></button>
+  </div>
+  <i class="st-prog" aria-hidden="true"><b id="stBar"></b></i>
+</footer>
+
+<!-- ===== Dialogs ===== -->
+<dialog id="dlgContents" aria-labelledby="ctTitle">
+  <div class="dlg paper-dlg st-dlg">
+    <h2 id="ctTitle">Contents</h2>
+    <div class="st-tabs small" role="tablist">
+      <button type="button" role="tab" data-ct="chapters" aria-selected="true">Chapters</button>
+      <button type="button" role="tab" data-ct="timeline" aria-selected="false">Timeline</button>
+      <button type="button" role="tab" data-ct="marks" aria-selected="false">Bookmarks</button>
+    </div>
+    <div id="ctBody" class="st-ctbody"></div>
+    <div class="dlg-actions"><span class="spacer"></span><button type="button" class="btn small" data-close>Close</button></div>
+  </div>
+</dialog>
+
+<dialog id="dlgSearch" aria-labelledby="seTitle">
+  <div class="dlg paper-dlg st-dlg">
+    <h2 id="seTitle">Search the diary</h2>
+    <label>What are you looking for?<input id="seInput" type="search" autocomplete="off" placeholder="e.g. sunset, smile, first day..."></label>
+    <div id="seBody" class="st-ctbody" aria-live="polite"></div>
+    <div class="dlg-actions"><span class="spacer"></span><button type="button" class="btn small" data-close>Close</button></div>
+  </div>
+</dialog>
+
+<dialog id="dlgPublish" aria-labelledby="puTitle">
+  <div class="dlg paper-dlg st-dlg">
+    <h2 id="puTitle">Publish</h2>
+    <div id="puBody"></div>
+    <p class="error" id="puError" role="alert" hidden></p>
+    <div class="dlg-actions">
+      <span class="spacer"></span>
+      <button type="button" class="btn ghost small" data-close>Not now</button>
+      <button type="button" class="btn small" id="puGo">Publish</button>
+    </div>
+  </div>
+</dialog>
+
+<dialog id="dlgImport" aria-labelledby="imTitle">
+  <div class="dlg paper-dlg st-dlg">
+    <h2 id="imTitle">Restore backup</h2>
+    <div id="imBody"></div>
+    <p class="error" id="imError" role="alert" hidden></p>
+    <div class="dlg-actions">
+      <span class="spacer"></span>
+      <button type="button" class="btn ghost small" data-close>Cancel</button>
+      <button type="button" class="btn small" id="imGo" hidden>Restore into draft</button>
+    </div>
+  </div>
+</dialog>
+
+<dialog id="dlgConfirm" aria-labelledby="cfTitle">
+  <form class="dlg paper-dlg st-dlg" method="dialog" id="cfForm">
+    <h2 id="cfTitle">Are you sure?</h2>
+    <p id="cfMsg"></p>
+    <div class="dlg-actions">
+      <span class="spacer"></span>
+      <button type="button" class="btn ghost small" id="cfNo">No</button>
+      <button type="submit" class="btn small" id="cfYes">Yes</button>
+    </div>
+  </form>
+</dialog>
+
+<input type="file" id="fileImg" accept="image/jpeg,image/png,image/webp" hidden>
+<input type="file" id="fileJson" accept="application/json,.json" hidden>
+
+<div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+<div id="stPrint" aria-hidden="true"></div>
+
+<script src="story.js"></script>
+</body>
+</html>

@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Gallery - Our Little World</title>
+  <meta name="theme-color" content="#f3e6ee">
+  <script>
+    /* Runs before the page paints: (1) password lock -> back to Home, (2) apply the saved Home theme. */
+    (function () {
+      var d = document.documentElement;
+      try {
+        if (localStorage.getItem('olw_lock_v1') && !sessionStorage.getItem('olw_ok')) { location.replace('index.html'); return; }
+        var t = JSON.parse(localStorage.getItem('olw_theme_v1') || '{}');
+        var h = +new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Karachi', hour: 'numeric', hourCycle: 'h23' }).format(new Date());
+        d.dataset.theme = (t.autoNight && (h >= 20 || h < 6)) ? 'midnight' : (t.theme || 'lavender');
+      } catch (e) { d.dataset.theme = 'lavender'; }
+    })();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500;1,600&family=Inter:wght@400;500;600&family=Caveat:wght@500;600&family=Kaushan+Script&family=Dancing+Script:wght@500;600&family=Great+Vibes&family=Homemade+Apple&family=Sacramento&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="home.css">
+  <link rel="stylesheet" href="gallery.css">
+</head>
+<body class="gal">
+<noscript><p style="padding:20px">Please turn on JavaScript to use this page.</p></noscript>
+<div class="g-deco" id="deco" aria-hidden="true"></div>
+
+<div class="g-app" id="app">
+  <!-- ===== Top bar ===== -->
+  <header class="g-top">
+    <button class="g-logo" type="button" data-go="home" aria-label="Our Little World, back to Home"><span class="lg" id="logoHeart"></span><b>Our Little World</b></button>
+    <label class="g-search"><span data-i="search"></span><input id="qTop" type="search" placeholder="Search in gallery..." autocomplete="off" aria-label="Search in gallery"></label>
+    <div class="g-tr">
+      <button class="g-ib" id="btnGear" type="button" aria-haspopup="menu" aria-expanded="false" aria-label="Gallery options"><span data-i="gear"></span></button>
+      <button class="g-ib me" id="btnMe" type="button" aria-label="Account and sync"><span data-i="user"></span></button>
+      <div class="g-menu" id="menu" role="menu" hidden>
+        <button type="button" role="menuitem" data-act="view"><span data-i="image"></span>Simple / Scrapbook look</button>
+        <button type="button" role="menuitem" data-act="upload"><span data-i="plus"></span>Upload photos and videos</button>
+        <button type="button" role="menuitem" data-act="frame"><span data-i="frame"></span>Place photos in the app</button>
+        <button type="button" role="menuitem" data-act="select"><span data-i="check"></span>Select photos</button>
+        <button type="button" role="menuitem" data-act="albums"><span data-i="album"></span>Albums</button>
+        <button type="button" role="menuitem" data-act="note"><span data-i="pen"></span>Write the top note</button>
+        <button type="button" role="menuitem" data-act="sync"><span data-i="user"></span>Sync with Google</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ===== Left menu (desktop) ===== -->
+  <nav class="g-side" aria-label="Main navigation">
+    <button type="button" data-go="home"><span data-i="home"></span>Home</button>
+    <button type="button" data-go="story"><span data-i="book"></span>Story</button>
+    <button type="button" data-go="gallery" class="on" aria-current="page"><span data-i="image"></span>Gallery</button>
+    <button type="button" data-go="letters"><span data-i="mail"></span>Letters</button>
+    <button type="button" data-go="chat"><span data-i="chat"></span>Chat</button>
+    <div class="g-side-sig" id="sideSig" aria-hidden="true">Better<br>Together<span>♡</span></div>
+  </nav>
+
+  <!-- ===== Centre ===== -->
+  <main class="g-main">
+    <section class="g-panel g-hero">
+      <button class="g-note" id="note" type="button" aria-label="Edit the note"></button>
+      <div class="g-head">
+        <span class="g-badge" data-i="image"></span>
+        <div class="g-ttl"><h1>Gallery <span class="hrt">♡</span></h1><p>Our moments, our memories, forever <span class="hrt">♡</span></p></div>
+        <div class="g-act">
+          <button class="g-btn" id="btnUp" type="button"><span data-i="plus"></span>Upload Media</button>
+          <button class="g-ib sq" id="btnSort" type="button" aria-haspopup="menu" aria-label="Sort and size"><span data-i="sliders"></span></button>
+          <div class="g-menu sm" id="sortMenu" role="menu" hidden></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="g-panel g-body">
+      <div class="g-tools">
+        <div class="g-tabs" id="tabs" role="tablist">
+          <button type="button" role="tab" data-tab="all" class="on">All</button>
+          <button type="button" role="tab" data-tab="photo">Photos</button>
+          <button type="button" role="tab" data-tab="video">Videos</button>
+          <button type="button" role="tab" data-tab="fav">Favourites</button>
+        </div>
+        <label class="g-search in"><span data-i="search"></span><input id="qBar" type="search" placeholder="Search photos or albums..." autocomplete="off" aria-label="Search photos or albums"></label>
+        <label class="g-sel"><select id="albSel" aria-label="Album"></select><span data-i="down"></span></label>
+      </div>
+      <div class="g-selbar" id="selBar" hidden>
+        <b id="selCount">0 selected</b>
+        <button type="button" id="selFrame" class="g-btn sm"><span data-i="frame"></span>Place in app</button>
+        <button type="button" id="selMove" class="g-btn sm ghost"><span data-i="album"></span>Album</button>
+        <button type="button" id="selDel" class="g-btn sm ghost"><span data-i="trash"></span>Delete</button>
+        <button type="button" id="selDone" class="g-btn sm ghost">Done</button>
+      </div>
+      <div class="g-grid" id="grid" aria-live="polite"></div>
+      <div class="g-empty" id="empty" hidden></div>
+      <div class="g-feat" id="feat" hidden></div>
+    </section>
+  </main>
+
+  <!-- ===== Right column (desktop) ===== -->
+  <aside class="g-right">
+    <section class="g-panel g-alb"><div class="g-alb-h"><h2>My Albums</h2><button type="button" id="albAll" class="g-link">View All <span data-i="right"></span></button></div><div id="albList"></div></section>
+    <section class="g-collect" id="collect" aria-hidden="true"></section>
+  </aside>
+
+  <!-- ===== Bottom bar ===== -->
+  <nav class="g-bottom" aria-label="Main navigation">
+    <i class="bow" id="bowL" aria-hidden="true"></i>
+    <button type="button" data-go="home"><span data-i="home"></span><em>Home</em></button>
+    <button type="button" data-go="story"><span data-i="book"></span><em>Story</em></button>
+    <button type="button" data-go="gallery" class="on" aria-current="page"><span data-i="image"></span><em>Gallery</em></button>
+    <button type="button" data-go="letters"><span data-i="mail"></span><em>Letters</em></button>
+    <button type="button" data-go="chat"><span data-i="chat"></span><em>Chat</em></button>
+    <i class="hrtbig" id="hrtR" aria-hidden="true"></i>
+  </nav>
+</div>
+
+<!-- ===== Photo viewer ===== -->
+<div class="g-view" id="view" hidden role="dialog" aria-modal="true" aria-label="Photo viewer">
+  <div class="gv-top">
+    <button type="button" class="gv-b" id="vClose" aria-label="Close"><span data-i="close"></span></button>
+    <div class="gv-cnt" id="vCnt"></div>
+    <div class="gv-tools">
+      <button type="button" class="gv-b" id="vFav" aria-label="Favourite"><span data-i="heart"></span></button>
+      <button type="button" class="gv-b" id="vUse" aria-label="Place in app"><span data-i="frame"></span></button>
+      <button type="button" class="gv-b" id="vDl" aria-label="Download"><span data-i="download"></span></button>
+      <button type="button" class="gv-b" id="vDel" aria-label="Delete"><span data-i="trash"></span></button>
+    </div>
+  </div>
+  <button type="button" class="gv-nav l" id="vPrev" aria-label="Previous"><span data-i="left"></span></button>
+  <div class="gv-stage" id="vStage"></div>
+  <button type="button" class="gv-nav r" id="vNext" aria-label="Next"><span data-i="right"></span></button>
+  <div class="gv-info" id="vInfo"></div>
+</div>
+
+<!-- ===== Place in app (frame studio) ===== -->
+<div class="g-fs" id="fs" hidden role="dialog" aria-modal="true" aria-label="Place photos in the app">
+  <header class="fs-top">
+    <button type="button" class="g-ib" id="fsClose" aria-label="Close"><span data-i="close"></span></button>
+    <div><h2>Place in the app</h2><p>Choose where, how many photos fit, and adjust each one</p></div>
+  </header>
+  <div class="fs-body">
+    <div class="fs-prev">
+      <div class="fs-canvas-wrap" id="fsWrap"><canvas id="fsCanvas" aria-label="Frame preview. Drag a photo to move it inside its box."></canvas></div>
+      <p class="fs-hint" id="fsHint">Drag a photo to move it in its box</p>
+    </div>
+    <div class="fs-ctl" id="fsCtl"></div>
+  </div>
+  <footer class="fs-foot">
+    <button type="button" class="g-btn ghost" id="fsRemove" hidden>Remove from app</button>
+    <span class="grow"></span>
+    <button type="button" class="g-btn ghost" id="fsDl"><span data-i="download"></span>Download</button>
+    <button type="button" class="g-btn" id="fsPlace"><span data-i="check"></span>Place in app</button>
+  </footer>
+</div>
+
+<!-- ===== Photo picker (for the frame) ===== -->
+<div class="g-pick" id="pick" hidden role="dialog" aria-modal="true" aria-label="Choose a photo">
+  <div class="pk-card">
+    <header><h3 id="pkTitle">Choose a photo</h3><label class="g-sel"><select id="pkAlb" aria-label="Album"></select><span data-i="down"></span></label><button type="button" class="g-btn sm" id="pkDone">Done</button></header>
+    <div class="pk-grid" id="pkGrid"></div>
+  </div>
+</div>
+
+<!-- ===== Dialogs ===== -->
+<dialog class="g-dlg" id="dlgNote">
+  <form method="dialog" class="dl-in" id="noteForm">
+    <h3>Note at the top</h3>
+    <textarea id="nTxt" maxlength="140" rows="3" placeholder="Write something sweet..."></textarea>
+    <div class="dl-row"><span>Writing</span><div class="chips" id="nFont"></div></div>
+    <div class="dl-row"><span>Ink</span><div class="chips" id="nInk"></div></div>
+    <div class="dl-row"><span>Paper</span><div class="chips" id="nPaper"></div></div>
+    <label class="tg"><input type="checkbox" id="nPhoto"><span>Show a small photo on the note</span></label>
+    <button type="button" class="g-btn sm soft" id="nPhotoBtn"><span data-i="image"></span>Choose the note photo</button>
+    <div class="btnrow"><button type="button" class="g-btn ghost" id="nCancel">Cancel</button><button type="submit" class="g-btn" id="nSave">Save note</button></div>
+  </form>
+</dialog>
+<dialog class="g-dlg" id="dlgAlb">
+  <div class="dl-in"><h3>Albums</h3><div id="albMan"></div>
+    <div class="dl-add"><input id="albNew" type="text" maxlength="30" placeholder="New album name"><button type="button" class="g-btn sm" id="albAdd"><span data-i="plus"></span>Add</button></div>
+    <div class="btnrow"><button type="button" class="g-btn" id="albClose">Done</button></div></div>
+</dialog>
+<dialog class="g-dlg" id="dlgInfo">
+  <form method="dialog" class="dl-in" id="infoForm"><h3>Photo details</h3>
+    <label class="fl">Title<input id="iName" type="text" maxlength="60"></label>
+    <label class="fl">Date<input id="iDate" type="date"></label>
+    <label class="fl">Album<select id="iAlb"></select></label>
+    <label class="fl">A few words<textarea id="iCap" rows="2" maxlength="160"></textarea></label>
+    <label class="tg"><input type="checkbox" id="iFeat"><span>Show as the Featured Memory</span></label>
+    <div class="btnrow"><button type="button" class="g-btn ghost" id="iCancel">Cancel</button><button type="submit" class="g-btn">Save</button></div></form>
+</dialog>
+<dialog class="g-dlg" id="dlgUse">
+  <div class="dl-in"><h3>Use in the app</h3><p class="small">Choose where the photo goes. You can adjust it and pick how many photos fit before placing.</p><div class="sl-list" id="useList"></div><div class="btnrow"><button type="button" class="g-btn ghost" id="useCancel">Cancel</button></div></div>
+</dialog>
+<dialog class="g-dlg" id="dlgMove">
+  <div class="dl-in"><h3>Move to album</h3><div id="moveList"></div><div class="btnrow"><button type="button" class="g-btn ghost" id="moveCancel">Cancel</button></div></div>
+</dialog>
+<dialog class="g-dlg" id="dlgAsk">
+  <form method="dialog" class="dl-in"><h3 id="askT">Are you sure?</h3><p id="askP"></p><div class="btnrow"><button type="button" class="g-btn ghost" id="askNo">Cancel</button><button type="button" class="g-btn" id="askYes">Yes</button></div></form>
+</dialog>
+<dialog class="g-dlg" id="dlgSync"><div class="dl-in"><h3>Sync with Google</h3><div id="syncBody"></div><div class="btnrow"><button type="button" class="g-btn ghost" id="syncClose">Close</button></div></div></dialog>
+
+<input type="file" id="fileUp" accept="image/*,video/*" multiple hidden>
+<div class="g-toast" id="toast" role="status" aria-live="polite" hidden></div>
+<script src="olw-config.js"></script>
+<script src="gallery.js"></script>
+</body>
+</html>

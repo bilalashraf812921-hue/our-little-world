@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Chat - Our Little World</title>
+  <meta name="theme-color" content="#7b5fa6">
+  <script>
+    /* Runs before the page paints: (1) password lock -> back to Home, (2) apply the saved Home theme. */
+    (function () {
+      var d = document.documentElement;
+      try {
+        if (localStorage.getItem('olw_lock_v1') && !sessionStorage.getItem('olw_ok')) { location.replace('index.html'); return; }
+        var t = JSON.parse(localStorage.getItem('olw_theme_v1') || '{}');
+        var h = +new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Karachi', hour: 'numeric', hourCycle: 'h23' }).format(new Date());
+        d.dataset.theme = (t.autoNight && (h >= 20 || h < 6)) ? 'midnight' : (t.theme || 'lavender');
+      } catch (e) { d.dataset.theme = 'lavender'; }
+    })();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&family=Poppins:wght@400;500;600&family=Lora:wght@400;500&family=Noto+Nastaliq+Urdu:wght@400;600&family=Kalam&family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500;1,600&family=Inter:wght@400;500;600&family=Caveat:wght@500;600&family=Kaushan+Script&family=Dancing+Script:wght@500;600&family=Great+Vibes&family=Homemade+Apple&family=Sacramento&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="home.css">
+  <link rel="stylesheet" href="messages.css">
+</head>
+<body class="chat">
+<div class="deco" id="deco" aria-hidden="true"></div>
+<div class="shell">
+  <header class="ban">
+    <a class="brand" href="index.html"><span class="bh" aria-hidden="true">♥</span><b>Our Little World</b></a>
+    <label class="gs"><span data-i="search"></span><input id="gSearch" type="search" placeholder="Search in our chat..." aria-label="Search"></label>
+    <button type="button" class="ib" id="gGear" aria-label="Customize chat"><span data-i="brush"></span></button>
+    <button type="button" class="ib gp" id="gProf" aria-label="My profile"></button>
+  </header>
+  <section class="chero">
+    <div class="cnote l"><span>Our<br>Little<br>World ♡</span></div>
+    <div class="ht"><h1>Chat ♡</h1><p>A place where we can share our thoughts, ask anything, and understand each other.</p><div class="tag"><i></i><span>Every little thought matters ♡</span><i></i></div></div>
+    <div class="cnote r"><span>Together<br>is my<br>Favourite<br>Place ♡</span></div>
+  </section>
+  <div class="cols">
+    <aside class="side"><h2>Our Conversations ♡</h2><button type="button" id="convBtn" class="conv"></button>
+      <div class="env" aria-hidden="true"><svg viewBox="0 0 160 110"><rect x="10" y="26" width="140" height="78" rx="6" fill="#fbe6e6" stroke="#d9b3c6"/><path d="M10 30l70 46 70-46" fill="#f6d7dd" stroke="#d9b3c6"/><circle cx="80" cy="64" r="10" fill="#c2456f"/><path d="M80 69l-5-5a3 3 0 0 1 5-3 3 3 0 0 1 5 3z" fill="#fff"/></svg><span>You &amp; Me ♡</span></div>
+    </aside>
+    <div class="main">
+<div id="app" data-dark="">
+  <div id="bg" aria-hidden="true"></div>
+  <header class="ctop">
+    <button type="button" class="ib" id="back" aria-label="Back to Home"><span data-i="back"></span></button>
+    <button type="button" class="peer" id="peerBtn" aria-label="Open profile"></button>
+    <button type="button" class="ib" id="btnSearch" aria-label="Search"><span data-i="search"></span></button>
+    <button type="button" class="ib" id="btnBrush" aria-label="Customize chat"><span data-i="brush"></span></button>
+    <button type="button" class="ib" id="btnMenu" aria-label="Menu" aria-expanded="false"><span data-i="dots"></span></button>
+    <div id="menu" hidden>
+      <button type="button" data-act="me">My profile</button>
+      <button type="button" data-act="look">Customize chat</button>
+      <button type="button" data-act="search">Search</button>
+      <button type="button" data-act="ask">Ask something</button>
+      <button type="button" data-act="sync">Sync</button>
+      <button type="button" data-act="home">Home</button>
+    </div>
+  </header>
+  <div id="searchBar" hidden><input id="qIn" type="search" placeholder="Search messages" aria-label="Search messages"><button type="button" class="ib sm" id="qClose" aria-label="Close search"><span data-i="close"></span></button></div>
+  <main id="msgs" aria-live="polite"></main>
+  <button type="button" id="toBottom" class="ib" hidden aria-label="Latest messages"><span data-i="down"></span></button>
+  <div id="replyBar" hidden></div>
+  <div id="askCard"><span class="qm" data-i="smile"></span><span class="at"><b>Ask Something ♡</b><small>Feel free to ask anything, I'm here for you.</small></span><button type="button" class="btn" id="askNow">Ask Now</button></div>
+  <footer class="comp">
+    <button type="button" class="ib" id="btnEmoji" aria-label="Emoji"><span data-i="smile"></span></button>
+    <textarea id="inp" rows="1" placeholder="Message" aria-label="Message" autocomplete="off"></textarea>
+    <button type="button" class="ib" id="btnAttach" aria-label="Photo"><span data-i="clip"></span></button>
+    <button type="button" class="ib" id="btnKb" aria-label="Switch keyboard"><span data-i="kb"></span></button>
+    <button type="button" class="ib sendb" id="btnSend" aria-label="Add a photo"></button>
+  </footer>
+  <div id="kb" class="kb" hidden></div>
+</div>
+
+    </div>
+  </div>
+  <nav class="bnav" aria-label="Pages">
+    <a href="index.html"><span data-i="home"></span>Home</a><a href="story.html"><span data-i="book"></span>Story</a><a href="gallery.html"><span data-i="image"></span>Gallery</a><a href="letters.html"><span data-i="mail"></span>Letters</a><a href="messages.html" class="on"><span data-i="chatb"></span>Chat</a>
+  </nav>
+</div>
+
+<div id="sheetWrap" hidden><div id="sheet"></div></div>
+<div id="lightbox" hidden></div>
+<div id="toast" hidden role="status"></div>
+
+<dialog id="dlgAsk"><h3 id="askT"></h3><p id="askP"></p><div class="btnrow"><button type="button" class="btn ghost" id="askNo">Cancel</button><button type="button" class="btn" id="askYes">OK</button></div></dialog>
+
+<dialog id="dlgPick"><div class="dh"><h3 id="pickTitle">Choose a photo</h3><button type="button" class="ib sm" id="pickClose" aria-label="Close"><span data-i="close"></span></button></div>
+  <button type="button" class="btn soft" id="pickUp"><span data-i="image"></span> From this phone</button><input type="file" id="filePick" accept="image/*" hidden>
+  <div id="pickGrid"></div></dialog>
+
+<dialog id="dlgProf"><div class="dh"><h3>Profile</h3><button type="button" class="ib sm" id="profClose" aria-label="Close"><span data-i="close"></span></button></div><div id="profBody"></div></dialog>
+
+<dialog id="dlgLook" class="sheetd"><div class="dh"><h3>Customize chat</h3><button type="button" class="btn ghost sm" id="lookReset">Reset</button><button type="button" class="ib sm" id="lookClose" aria-label="Close"><span data-i="close"></span></button></div>
+  <div id="lookTabs"><button type="button" data-t="designs">Designs</button><button type="button" data-t="chat">Chat</button><button type="button" data-t="bg">Background</button><button type="button" data-t="kb">Keyboard</button><button type="button" data-t="show">Show</button></div>
+  <div id="lookBody"></div></dialog>
+
+<script src="olw-config.js"></script>
+<script src="olw-sync.js"></script>
+<script src="messages.js"></script>
+</body>
+</html>

@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
+  <title>Letters - Our Little World</title>
+  <meta name="theme-color" content="#3a0b18">
+  <script>
+    /* Runs before the page paints: if a password is set and not unlocked, go back to Home (lock screen). */
+    (function () { try { if (localStorage.getItem('olw_lock_v1') && !sessionStorage.getItem('olw_ok')) location.replace('index.html'); } catch (e) {} })();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500;1,600&family=Inter:wght@400;500;600&family=Allura&family=Mrs+Saint+Delafield&family=Great+Vibes&family=Parisienne&family=Sacramento&family=Kristi&family=Birthstone&family=Fleur+De+Leah&family=Pinyon+Script&family=Alex+Brush&family=Covered+By+Your+Grace&family=Caveat:wght@500;600&family=Homemade+Apple&family=Reenie+Beanie&family=Nothing+You+Could+Do&family=Zeyada&family=Kalam:wght@300;400&family=La+Belle+Aurore&family=Dancing+Script:wght@500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="letters.css">
+</head>
+<body class="lt" data-view="mail">
+<noscript><p style="padding:20px;color:#fff">Please turn on JavaScript to use this page.</p></noscript>
+
+<div class="lt-scene" id="scene" aria-hidden="true"></div>
+<div class="lt-fx" id="fx" aria-hidden="true"></div>
+
+<!-- ===== Top bar ===== -->
+<header class="lt-top">
+  <i class="or l" id="orL" aria-hidden="true"></i><i class="or r" id="orR" aria-hidden="true"></i>
+  <button class="lt-fab" id="back" type="button" aria-label="Back"><span data-ico="back"></span></button>
+  <div class="lt-cap"><h1>Our Story <span class="hrt">♡</span></h1><p id="hdSub">Letters</p><i class="orDiv" id="orDiv" aria-hidden="true"></i></div>
+  <div class="lt-tr">
+    <button class="lt-fab fav" id="hdFav" type="button" aria-label="Favourite"><span data-ico="heart"></span></button>
+    <button class="lt-fab" id="menuBtn" type="button" aria-haspopup="menu" aria-expanded="false" aria-label="More options"><span data-ico="dots"></span></button>
+    <div class="lt-menu" id="menu" role="menu" hidden>
+      <button type="button" role="menuitem" data-act="brush"><span data-ico="brush"></span>Customize design</button>
+      <button type="button" role="menuitem" data-act="list"><span data-ico="list"></span>All letters</button>
+      <button type="button" role="menuitem" data-act="new"><span data-ico="plus"></span>Write a new letter</button>
+      <button type="button" role="menuitem" data-act="edit"><span data-ico="edit"></span>Edit this letter</button>
+      <button type="button" role="menuitem" data-act="print"><span data-ico="print"></span>Print this letter</button>
+      <button type="button" role="menuitem" data-act="sync"><span data-ico="cloud"></span><span class="lbl">Sync with Google</span></button>
+      <button type="button" role="menuitem" data-act="backup"><span data-ico="download"></span>Export all (backup)</button>
+      <button type="button" role="menuitem" data-act="import" data-owner><span data-ico="upload"></span>Import backup</button>
+      <button type="button" role="menuitem" data-act="del" class="danger"><span data-ico="trash"></span>Delete this letter</button>
+    </div>
+  </div>
+</header>
+
+<main class="lt-stage">
+  <!-- ===== Envelope screen ===== -->
+  <section class="lt-mail" id="mail" aria-label="Envelope">
+    <div class="ev-zone">
+      <button class="lt-nav l" id="navL" type="button" aria-label="Previous letter"><span data-ico="left"></span></button>
+      <div class="ev-host" id="evHost"></div>
+      <button class="lt-nav r" id="navR" type="button" aria-label="Next letter"><span data-ico="right"></span></button>
+    </div>
+    <div class="arrows"><span id="cnt"></span></div>
+    <button class="lt-chipbtn" id="brush" type="button"><span data-ico="brush"></span>Customize design</button>
+    <p class="tagline" id="tagline"></p><i class="tagDiv" id="tagDiv" aria-hidden="true"></i>
+    <div class="pill-wrap"><i class="pf l" id="flL" aria-hidden="true"></i>
+      <button class="lt-pill" id="goBtn" type="button"><span class="gi" id="goIco"></span><span class="t">Special for You</span><span class="ga" id="goArr"></span></button>
+    <i class="pf r" id="flR" aria-hidden="true"></i></div>
+  </section>
+
+  <!-- ===== Letter screen ===== -->
+  <section class="lt-read" id="read" hidden aria-label="Letter">
+    <div class="lt-desk">
+      <i class="under a"></i><i class="under b"></i>
+      <div class="deck-seal" id="deskSeal" aria-hidden="true"></div>
+      <div id="paperHost"></div>
+    </div>
+  </section>
+</main>
+
+<nav class="lt-bar" id="bar" hidden aria-label="Letter actions">
+  <button type="button" id="bReply"><span data-ico="reply"></span><span class="lb">Reply</span></button>
+  <button type="button" id="bFav" class="fav"><span data-ico="heart"></span><span class="lb">Favourite</span></button>
+  <button type="button" id="bPrint"><span data-ico="print"></span><span class="lb">Print</span></button>
+  <button type="button" id="bExport"><span data-ico="share"></span><span class="lb">Export</span></button>
+</nav>
+
+<!-- ===== Editor (owner / reply) ===== -->
+<aside class="lt-editor" id="editor" hidden aria-label="Write a letter">
+  <button class="ed-fold" id="edFold" type="button" aria-label="Show or hide the form"><span data-ico="down"></span></button>
+  <div class="ed-scroll">
+    <h2 id="edTitle">Write a letter</h2>
+    <fieldset><legend>The letter</legend>
+      <label>From<input id="fFrom" data-f="from" maxlength="40" placeholder="Your name" autocomplete="off"></label>
+      <div class="row2"><label>Date<input type="date" data-f="date"></label><label>Chapter label<input data-f="chapter" maxlength="30" placeholder="Chapter 1"></label></div>
+      <label>Greeting<input data-f="greet" maxlength="80" placeholder="e.g. Meri Pyari,"></label>
+      <label>Your letter <small>(Roman Urdu is fine. Press Enter for a new paragraph)</small><textarea data-f="body" rows="9" placeholder="Write your letter here..."></textarea></label>
+      <div class="row2"><label>Closing<input data-f="closing" maxlength="60" placeholder="Always yours,"></label><label>Signature<input data-f="sign" maxlength="40" placeholder="Your name"></label></div>
+      <label>Small side note<input data-f="note" maxlength="120" placeholder="Thanks for being a part of my story..."></label>
+    </fieldset>
+    <fieldset><legend>Envelope</legend>
+      <label>Words under the envelope<input data-f="tag" maxlength="70" placeholder="A letter from my heart..."></label>
+      <div class="row2"><label>Button text<input data-f="btn" maxlength="30" placeholder="Special for You"></label><label>Seal letters<input data-f="mono" maxlength="2" placeholder="A"></label></div>
+    </fieldset>
+    <fieldset><legend>Photo</legend>
+      <div class="btnrow"><button type="button" class="btn" id="phAdd"><span data-ico="img"></span> Add a photo</button><button type="button" class="btn ghost" id="phRm" hidden>Remove</button></div>
+      <label>Photo caption<input data-f="cap" maxlength="40" placeholder="You &amp; Me"></label>
+    </fieldset>
+    <fieldset><legend>Look</legend><p class="hint">Flowers, page design, colours, fonts and text size.</p><div class="btnrow"><button type="button" class="btn" id="edLook" onclick="document.querySelector('[data-act=brush]').click()"><span data-ico="brush"></span> Design &amp; colours</button></div></fieldset>
+    <div class="ed-actions"><button type="button" class="btn primary" id="edSave">Save letter</button><button type="button" class="btn ghost" id="edCancel">Cancel</button><button type="button" class="btn ghost danger" id="edDel">Delete</button></div>
+  </div>
+</aside>
+
+<!-- ===== Styler: background, show/hide, envelope, page design ===== -->
+<aside class="lt-styler lt-editor" id="styler" hidden aria-label="Customize design">
+  <button class="ed-fold" id="stFold" type="button" aria-label="Show or hide the panel"><span data-ico="down"></span></button>
+  <div class="st-head"><h2>Customize design</h2><button type="button" class="x" id="stClose" aria-label="Close"><span data-ico="close"></span></button></div>
+  <div class="st-tabs" role="tablist"><button type="button" data-t="bg" class="on">Background</button><button type="button" data-t="show">Show / hide</button><button type="button" data-t="env">Envelope</button><button type="button" data-t="paper">Letter page</button></div>
+  <div class="ed-scroll">
+    <section data-p="bg">
+      <div class="fld"><span>Background type</span><div class="chips" id="sBgType"></div></div>
+      <div class="fld" data-for="scene"><span>Velvet colour</span><div class="chips" id="sScene"></div></div>
+      <div class="row2" data-for="solid gradient photo"><label>Colour<input type="color" id="sC1"></label><label data-for="gradient">Second colour<input type="color" id="sC2"></label></div>
+      <label data-for="gradient">Angle<input type="range" id="sAngle" min="0" max="360" step="5"></label>
+      <div class="fld" data-for="photo"><div class="btnrow"><button type="button" class="btn" id="sBgPhoto"><span data-ico="img"></span> Choose a photo</button><button type="button" class="btn ghost" id="sBgPhotoRm">Remove photo</button></div></div>
+      <label>Blur <output id="sBlurO">0 px</output><input type="range" id="sBlur" min="0" max="24" step="1"></label>
+      <label>Darken <output id="sDimO">0%</output><input type="range" id="sDim" min="0" max="70" step="1"></label>
+      <div class="btnrow"><button type="button" class="btn ghost" id="sBgReset">Reset background</button></div>
+    </section>
+    <section data-p="show" hidden>
+      <p class="hint">Switch things off or on. This is for the whole diary.</p>
+      <div class="tgs" id="sShowG"></div>
+      <div class="btnrow"><button type="button" class="btn ghost" id="sShowAll">Show everything</button></div>
+    </section>
+    <section data-p="env" hidden>
+      <p class="hint" id="sHint"></p>
+      <div class="fld"><span>Envelope colour</span><div class="chips" id="sEnv"></div></div>
+      <div class="fld"><span>Flowers</span><div class="chips" id="sFloral"></div></div>
+      <div class="fld"><span>Wax seal</span><div class="chips" id="sSeal"></div></div>
+      <label>Seal letters<input id="sMono" maxlength="2" placeholder="A" autocomplete="off"></label>
+      <div class="tgs" id="sShowE"></div>
+    </section>
+    <section data-p="paper" hidden>
+      <div class="fld"><span>Page design</span><div class="chips" id="sDesign"></div></div>
+      <div class="fld"><span>Design colour</span><div class="chips" id="sDcol"></div><label class="cust">Custom <input type="color" id="sDcolC"></label></div>
+      <div class="fld"><span>Paper</span><div class="chips" id="sPaper"></div></div>
+      <div class="fld"><span>Ink colour</span><div class="chips" id="sInk"></div><label class="cust">Custom <input type="color" id="sInkC"></label></div>
+      <label>Writing font<select id="sBodyFont"></select></label>
+      <label>Heading &amp; signature font<select id="sHeadFont"></select></label>
+      <label>Text size <output id="sSizeO">100%</output><input type="range" id="sSize" min="80" max="130" step="2"></label>
+      <label>Photo size <output id="sPsO">100%</output><input type="range" id="sPs" min="40" max="180" step="2"></label>
+      <div class="chips" id="sPsPre" aria-label="Photo size presets"></div>
+      <label>Page length <output id="sPlO">100%</output><input type="range" id="sPl" min="40" max="240" step="2"></label>
+      <div class="chips" id="sPlPre" aria-label="Page length presets"></div>
+      <label class="tg"><input type="checkbox" id="sTape"><span>Tape on the photo</span></label>
+      <div class="tgs" id="sShowP"></div>
+      <div class="btnrow"><button type="button" class="btn" id="sPrev">See the open letter</button></div>
+    </section>
+    <p class="hint note" id="sSaveNote"></p>
+  </div>
+</aside>
+
+<!-- ===== Dialogs ===== -->
+<dialog id="dlgList" aria-label="All letters"><div class="dl"><header><h3>All letters</h3><button type="button" class="x" data-close aria-label="Close"><span data-ico="close"></span></button></header>
+  <div class="li-tools"><input id="liQ" type="search" placeholder="Search your letters" autocomplete="off"><div class="li-chips"><button type="button" class="li-chip on" data-f="all">All</button><button type="button" class="li-chip" data-f="fav">Favourites</button></div></div>
+  <div class="li-body" id="liBody"></div></div></dialog>
+<dialog id="dlgExport" aria-label="Export"><div class="dl small"><header><h3>Export this letter</h3><button type="button" class="x" data-close aria-label="Close"><span data-ico="close"></span></button></header>
+  <div class="xlist"><button type="button" id="xShare"><span data-ico="share"></span>Share</button><button type="button" id="xTxt"><span data-ico="download"></span>Download as text (.txt)</button><button type="button" id="xJson"><span data-ico="download"></span>Backup file (.json)</button><button type="button" onclick="document.getElementById('bPrint').click()"><span data-ico="print"></span>Print / Save as PDF</button></div></div></dialog>
+<dialog id="dlgSync" aria-label="Google sync"><div class="dl small"><header><h3>Sync with Google</h3><button type="button" class="x" data-close aria-label="Close"><span data-ico="close"></span></button></header><div id="syncBody"></div></div></dialog>
+<dialog id="dlgAsk" aria-labelledby="askT"><div class="dl small"><h3 id="askT"></h3><p id="askM"></p><div class="btnrow end"><button type="button" class="btn ghost" id="askNo">Cancel</button><button type="button" class="btn primary" id="askOk">OK</button></div></div></dialog>
+
+<input type="file" id="fileImp" accept="application/json,.json" hidden>
+<input type="file" id="fileBg" accept="image/jpeg,image/png,image/webp" hidden>
+<input type="file" id="fileImg" accept="image/jpeg,image/png,image/webp" hidden>
+<div class="lt-toast" id="toast" role="status" aria-live="polite" hidden></div>
+<div id="printArea" aria-hidden="true"></div>
+
+<script src="olw-config.js"></script>
+<script src="letters.js" defer></script>
+</body>
+</html>
+
