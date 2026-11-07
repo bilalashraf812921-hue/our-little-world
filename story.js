@@ -13,7 +13,10 @@
   /* ---------------------------------------------------------------
      0. CONFIG  (dusre pages se connect karne ke liye yahi do jagah badlein)
      --------------------------------------------------------------- */
-  const ROLE = 'owner';                       // TEMP: login ke baad server se aayega ('owner' | 'partner'). Home ke home.js mein bhi yahi.
+  let ROLE = 'owner';                         // Google login se aata hai (OLW.role): 'owner' | 'partner'. Login na ho to 'owner' (sirf local).
+  let VIEW = 'me';                            // 'me' = meri diary (edit ho sakti hai), 'other' = doosre ki diary (sirf parhna)
+  const mine = () => VIEW === 'me';
+  let MINE = null, OTHER = null;              // meri published diary / doosre ki diary (cloud se)
   const TZ = 'Asia/Karachi';
   const BUILT_PAGES = { home: true, story: true, gallery: true, letters: true, chat: true };   // jaise pages ban jayen: gallery:true, letters:true, questions:true
   const PAGE_URL = { home: 'index.html', story: 'story.html', gallery: 'gallery.html', letters: 'letters.html', chat: 'messages.html' };
@@ -263,7 +266,7 @@
      5. STORAGE  (IndexedDB; agar browser na de to sirf memory, aur saaf bata diya jata hai)
      Backend connect karte waqt: kvGet/kvSet/kvPublish/imgPut/imgGet ko server calls se badal dein.
      --------------------------------------------------------------- */
-  const DB_NAME = 'olw_story_v1';
+  let DB_NAME = 'olw_story_v1';               // partner ke liye 'olw_story_v1_partner' (boot mein set hota hai)
   let dbPromise = null, persistent = true;
   const memKV = new Map(), memImg = new Map(), IMG = new Map();     // IMG = in-memory cache of dataURLs
   function openDB() {
@@ -317,7 +320,7 @@
   async function loadImages(st) { await Promise.all([...imageIds(st)].filter(id => !id.startsWith('demo:')).map(id => imgGet(id).catch(() => null))); }
   async function gcImages() {                  // jo photos kisi version mein use nahi hotin unhein hata do
     try {
-      const keep = new Set([...imageIds(S.pub), ...imageIds(E.draft), ...imageIds(await kvGet('draft')), ...imageIds(await kvGet('prev'))]);
+      const keep = new Set([...imageIds(S.pub), ...imageIds(MINE), ...imageIds(OTHER), ...imageIds(E.draft), ...imageIds(await kvGet('draft')), ...imageIds(await kvGet('prev'))]);
       for (const k of await imgKeys()) if (!keep.has(k)) await imgDel(k);
     } catch { /* gc fail hona koi masla nahi */ }
   }
@@ -1053,6 +1056,7 @@
   const B = {};
   const setVars = (el, str) => str.split(';').forEach(p => { const i = p.indexOf(':'); if (i > 0) el.style.setProperty(p.slice(0, i).trim(), p.slice(i + 1).trim()); });
   const POS_KEY = 'olw_story_pos';
+  const posKey = () => POS_KEY + (VIEW === 'other' ? '_o' : '');
   const lsGet = (k, d) => { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch { return d; } };
   const lsSet = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch { /* ignore */ } };
   const rad = d => d * Math.PI / 180;
@@ -1164,7 +1168,7 @@
     const fav = $('#stFav'), isFav = !!(fp && lsGet('olw_story_fav', []).includes(fp.p.id));
     fav.setAttribute('aria-pressed', String(isFav)); fav.disabled = !fp;
     const fl = fav.querySelector('.st-fl'); if (fl) fl.textContent = isFav ? 'Remove bookmark' : 'Bookmark this page';
-    if (fp && S.mode !== 'edit') lsSet(POS_KEY, fp.p.id);
+    if (fp && S.mode !== 'edit') lsSet(posKey(), fp.p.id);
     book.classList.toggle('closed', !S.open);
   }
   const it_ = pos => firstReal(pos);
@@ -1446,7 +1450,7 @@
     const f = { contents: openContents, search: openSearch, cover: () => (S.open ? closeBook() : toast('You are already on the cover')), print: printStory, export: exportBackup, import: () => $('#fileJson').click() }[b.dataset.act];
     if (f) f();
   });
-  function applyRole() { $$('.st-owner').forEach(el => (el.hidden = ROLE !== 'owner')); }
+  function applyRole() { $$('.st-owner').forEach(el => (el.hidden = !mine())); }
   $('#stEdit').addEventListener('click', () => enterEdit());
 
   /* bookmarks (abhi is device mein; backend ke baad har user ke saath) */
@@ -1538,7 +1542,7 @@
   }
   let pendingImport = null;
   $('#fileJson').addEventListener('change', async e => {
-    const f = e.target.files[0]; e.target.value = ''; if (!f || ROLE !== 'owner') return;
+    const f = e.target.files[0]; e.target.value = ''; if (!f || !mine()) return;
     const body = $('#imBody'), err = $('#imError'), go = $('#imGo'); body.replaceChildren(); err.hidden = true; go.hidden = true; pendingImport = null;
     $('#dlgImport').showModal();
     try {
@@ -1632,7 +1636,7 @@
   async function flushSave() {
     clearTimeout(E.saveT); if (!E.dirty || !E.draft || E.saving) return;
     E.saving = true;
-    try { await kvSet('draft', E.draft); E.dirty = false; E.saveErr = false; setStatus(`Draft saved • ${timeNow()}`); }
+    try { await kvSet('draft', E.draft); E.dirty = false; E.saveErr = false; setStatus(`Draft saved • ${timeNow()}`); if (LIVE) cloudPushSoon(); }
     catch { E.saveErr = true; setStatus('Draft NOT saved!'); toast('Could not save the draft (storage may be full). Please download a backup.', 4500); }
     finally { E.saving = false; if (E.dirty && !E.saveErr) E.saveT = setTimeout(flushSave, 400); }
   }
@@ -1662,7 +1666,8 @@
     const b = $('#stBanner'); b.replaceChildren();
     if (S.mode === 'edit') b.append('You are editing a draft. The reader keeps seeing the old diary until you press Publish.');
     else if (S.mode === 'preview') b.append('Preview: the reader will see the diary exactly like this. It is not published yet.');
-    else if (ROLE === 'owner' && E.hasDraft) b.append('You have an unpublished draft. ', h('button', { type: 'button', class: 'link', onclick: () => enterEdit() }, 'Continue editing'));
+    else if (VIEW === 'other') b.append(`You are reading ${otherWord().toLowerCase()} diary. Only ${ROLE === 'owner' ? 'she' : 'he'} can change it. Changes show up here live ♡`);
+    else if (mine() && E.hasDraft) b.append('You have an unpublished draft. ', h('button', { type: 'button', class: 'link', onclick: () => enterEdit() }, 'Continue editing'));
     b.hidden = !b.childNodes.length;
   }
   function setMode(m) {
@@ -1673,7 +1678,7 @@
   }
   const starterStory = () => { const s = blankStory(); s.pages.push(blankPage(s.chapters[0].id)); return s; };
   async function enterEdit(fromImport = false) {
-    if (ROLE !== 'owner') return;
+    if (!mine()) return;
     if (S.mode === 'preview') { setMode('edit'); return; }
     if (S.mode === 'edit') return;
     let d = E.draft, raw = null;
@@ -2073,7 +2078,7 @@
   $('#dfSave').addEventListener('click', async () => { pushHist(); E.dirty = true; await flushSave(); if (!E.saveErr) toast('Draft saved'); });
   $('#dfDiscard').addEventListener('click', async () => {
     if (!(await ask('Discard the draft?', 'All unpublished changes will be removed. The published diary stays as it is.', 'Discard', 'No'))) return;
-    clearTimeout(E.saveT); await kvDel('draft'); E.draft = null; E.dirty = false; E.hasDraft = false; E.hist = []; E.hi = -1; setMode('read'); gcImages(); toast('Draft discarded');
+    clearTimeout(E.saveT); await kvDel('draft'); E.draft = null; E.dirty = false; E.hasDraft = false; E.hist = []; E.hi = -1; setMode('read'); gcImages(); toast('Draft discarded'); cloudPushNow();
   });
   $('#dfRestore').addEventListener('click', async () => {
     const prev = await kvGet('prev'); if (!prev) return toast('There is no previous published version yet');
@@ -2117,10 +2122,128 @@
       const nw = normalizeStory(clone(E.draft)); nw.rev = (cur ? cur.rev : 0) + 1; nw.demo = false;
       await kvPublish(nw, S.pub.demo ? null : clone(S.pub));
       S.pub = nw; E.draft = null; E.dirty = false; E.hasDraft = false; E.hist = []; E.hi = -1; E.selPhoto = E.selDeco = null; clearTimeout(E.saveT);
-      $('#dlgPublish').close(); setMode('read'); toast('Published ♡ The reader now sees the new diary.', 4000); gcImages();
+      MINE = nw; $('#dlgPublish').close(); setMode('read'); toast('Published ♡ The reader now sees the new diary.', 4000); gcImages(); cloudPushNow();
     } catch (ex) { err.textContent = (ex && ex.message) || 'Could not publish. Your old published diary is safe.'; err.hidden = false; }
     finally { btn.disabled = false; }
   });
+
+
+  /* ---------------------------------------------------------------
+     14b. CLOUD SYNC  (olw-sync.js ka OLW use hota hai)
+     - Meri diary: 'story-<role>' blob (text/design) + 'simg-<role>-<id>' blobs (photos). Dusra banda sirf padh sakta hai.
+     - LIVE on ho to draft ke changes bhi ~2.5 second mein dusre ko dikhte hain; off ho to sirf Publish par.
+     - Doosre ki diary 'story-<otherRole>' watch hoti hai aur foran screen par badal jati hai.
+     --------------------------------------------------------------- */
+  const LIVE_KEY = 'olw_story_live';
+  let LIVE = lsGet(LIVE_KEY, true) !== false;
+  const CLOUD = { t: null, busy: false, again: false, lastJson: '', chain: Promise.resolve(), wasIn: false };
+  const otherRole = () => (ROLE === 'owner' ? 'partner' : 'owner');
+  const otherWord = () => (ROLE === 'owner' ? 'Her' : 'His');
+  const sid = (r, id) => 'simg-' + r + '-' + String(id).replace(/[^\w-]/g, '_');
+  const upKey = () => 'olw_story_up_' + ROLE;
+  const cloudOK = () => !!(window.OLW && OLW.configured && OLW.signedIn && OLW.db);
+  const mySource = () => (LIVE && E.draft ? E.draft : (VIEW === 'me' ? S.pub : MINE));
+  const setLiveInfo = t => { const el = $('#liveInfo'); if (el) el.textContent = t; };
+
+  function paintWho(flag) {
+    const w = $('#stWho'); if (!w) return;
+    w.hidden = !cloudOK();
+    const o = $('#stWhoO'); o.textContent = otherWord(); o.title = otherWord() + ' diary';
+    $$('[data-who]', w).forEach(b => b.setAttribute('aria-pressed', String(b.dataset.who === VIEW)));
+    if (flag && VIEW === 'me') o.classList.add('new'); if (VIEW === 'other') o.classList.remove('new');
+    const row = $('#liveRow'); if (row) row.hidden = !cloudOK();
+    const lw = $('#liveWho'); if (lw) lw.textContent = otherWord().toLowerCase();
+  }
+
+  async function cloudPush() {
+    if (!cloudOK()) return;
+    if (CLOUD.busy) { CLOUD.again = true; return; }
+    CLOUD.busy = true;
+    try {
+      do {
+        CLOUD.again = false;
+        const st = mySource(); if (!st || st.demo) break;
+        const up = lsGet(upKey(), {});
+        for (const id of imageIds(st)) {
+          if (id.startsWith('demo:') || up[id]) continue;
+          const d = await imgGet(id).catch(() => null); if (!d) continue;
+          await OLW.putBlob(sid(ROLE, id), d); up[id] = 1; lsSet(upKey(), up);
+        }
+        const json = JSON.stringify({ v: 1, story: st });
+        if (json === CLOUD.lastJson) continue;
+        await OLW.putBlob('story-' + ROLE, json);
+        CLOUD.lastJson = json; setLiveInfo(`Synced • ${timeNow()}`);
+      } while (CLOUD.again);
+    } catch (e) { OLW.err(e); setLiveInfo('Sync failed. It will retry on the next change.'); }
+    finally { CLOUD.busy = false; }
+  }
+  function cloudPushSoon() { if (!cloudOK()) return; clearTimeout(CLOUD.t); CLOUD.t = setTimeout(cloudPush, 2500); }
+  function cloudPushNow() { if (!cloudOK()) return; clearTimeout(CLOUD.t); cloudPush(); }
+
+  async function fetchImgs(st, role) {
+    for (const id of imageIds(st)) {
+      if (id.startsWith('demo:')) continue;
+      if (await imgGet(id).catch(() => null)) continue;
+      try { const d = await OLW.getBlob(sid(role, id)); if (okDataUrl(d)) await imgPut(id, d); } catch { /* photo baad mein aa jayegi */ }
+    }
+  }
+  async function readCloudStory(meta, role) {
+    const raw = await OLW.getBlob('story-' + role, meta); if (!raw) return null;
+    let data; try { data = JSON.parse(raw); } catch { return null; }
+    if (!data || !data.story) return null;
+    const st = normalizeStory(data.story); st.demo = false; await fetchImgs(st, role); return st;
+  }
+
+  function showOtherLive() {
+    if (S.busy) { setTimeout(showOtherLive, 600); return; }
+    S.pub = S.story = OTHER; refresh(); layout(); updateStacks(); setBanner();
+    toast(`${otherWord()} diary just updated ♡`, 2200);
+  }
+  async function onOtherMeta(meta) {
+    const seen = lsGet('olw_story_oseen', 0);
+    if (OTHER && seen >= (meta.updated || 0)) return;
+    const st = await readCloudStory(meta, otherRole()); if (!st) return;
+    const had = !!OTHER, changed = !had || !same(OTHER, st);
+    OTHER = st; lsSet('olw_story_oseen', meta.updated || 0); kvSet('other_pub', st).catch(() => { });
+    if (!changed) return;
+    if (VIEW === 'other') showOtherLive();
+    else { paintWho(true); if (had) toast(`${otherWord()} diary has new writing ♡`, 3200); }
+  }
+
+  async function switchView(v) {
+    if (v === VIEW || S.busy) return;
+    if (v === 'other' && !OTHER) return toast(`${otherWord()} diary is empty. Nothing written yet.`, 3200);
+    if (S.mode !== 'read') { await exitEdit(); if (S.mode !== 'read') return; }
+    if (v === 'other') { MINE = S.pub; VIEW = 'other'; S.pub = OTHER; await loadImages(OTHER); }
+    else { VIEW = 'me'; S.pub = MINE || S.pub; }
+    S.story = S.pub; const i = posOfPage(lsGet(posKey(), '')); S.pos = i > 0 ? (S.two ? i & ~1 : i) : 0;
+    applyRole(); refresh(); layout(); updateStacks(); setBanner(); paintWho();
+  }
+  $$('[data-who]').forEach(b => b.addEventListener('click', () => switchView(b.dataset.who)));
+  $('#liveToggle').checked = LIVE;
+  $('#liveToggle').addEventListener('change', e => {
+    LIVE = e.target.checked; lsSet(LIVE_KEY, LIVE); CLOUD.lastJson = '';
+    toast(LIVE ? 'Live is on: your changes show up for them while you write' : 'Live is off: they see only what you publish', 3200); cloudPushNow();
+  });
+
+  function cloudStart() {
+    CLOUD.wasIn = cloudOK();
+    if (window.OLW && OLW.configured) OLW.onAuth(u => { if (!!u !== CLOUD.wasIn) location.reload(); });
+    paintWho(); if (!cloudOK()) return;
+    OLW.watch('story-' + otherRole(), (id, meta, type) => {
+      if (type === 'removed' || id !== 'story-' + otherRole()) return;
+      CLOUD.chain = CLOUD.chain.then(() => onOtherMeta(meta)).catch(e => OLW.err(e));
+    });
+    (async () => {
+      const m = await OLW.space().collection('bmeta').doc('story-' + ROLE).get();
+      if (!m.exists) { if (!S.pub.demo) cloudPushNow(); return; }
+      if (S.pub.demo && !E.hasDraft) {                       // naya device: apni cloud wali diary utha lo
+        const st = await readCloudStory(m.data(), ROLE); if (!st) return;
+        const up = lsGet(upKey(), {}); imageIds(st).forEach(id => (up[id] = 1)); lsSet(upKey(), up);
+        await kvSet('published', st); MINE = st; if (VIEW === 'me') { S.pub = st; refresh(); layout(); updateStacks(); }
+      }
+    })().catch(e => OLW.err(e));
+  }
 
 
   /* ---------------------------------------------------------------
@@ -2131,19 +2254,24 @@
     let pub = null, raw = null;
     try { raw = await kvGet('published'); if (raw) pub = normalizeStory(raw); } catch { pub = null; }
     if (!pub) pub = demoStory();
-    S.pub = S.story = pub; S.mode = 'read';
-    try { E.hasDraft = ROLE === 'owner' && !!(await kvGet('draft')); } catch { E.hasDraft = false; }
+    S.pub = S.story = pub; S.mode = 'read'; MINE = pub;
+    try { const o = await kvGet('other_pub'); if (o) OTHER = normalizeStory(o); } catch { OTHER = null; }
+    try { E.hasDraft = !!(await kvGet('draft')); } catch { E.hasDraft = false; }
     await loadImages(pub);
     S.vp = buildVP(pub);
-    const sp = lsGet(POS_KEY, ''), i = posOfPage(sp); S.pos = i > 0 ? (S.two ? i & ~1 : i) : 0;
+    const sp = lsGet(posKey(), ''), i = posOfPage(sp); S.pos = i > 0 ? (S.two ? i & ~1 : i) : 0;
     applyLook(); renderCoverFace(); updateChrome(); setBanner(); layout(); updateStacks(); updateChrome();
     book.classList.add('ready');
     if (!persistent) toast('Saving is blocked in this browser. Changes last only for this session. Please download a backup.', 6000);
     document.fonts && document.fonts.ready.then(() => { if (S.open && S.mode === 'read') showSpread(); });
     window.__story = { S, E, beginTurn, setTurn, endTurn };
+    try { cloudStart(); } catch (ex) { console.warn('cloud', ex); }
   }
   $('#stPrev').addEventListener('click', () => go_(-1)); $('#stNext').addEventListener('click', () => go_(1));
   book.addEventListener('click', e => { if (!S.open && !S.busy && !e.target.closest('[contenteditable="true"]')) openBook(); });
-  init().catch(err => { console.error(err); toast('The story could not load. Please reload the page.', 6000); });
+  (async () => {
+    try { if (window.OLW && OLW.configured) { await OLW.whenAuth(3500); if (OLW.signedIn) { ROLE = OLW.role; if (ROLE === 'partner') DB_NAME = 'olw_story_v1_partner'; } } } catch { /* local-only */ }
+    init().catch(err => { console.error(err); toast('The story could not load. Please reload the page.', 6000); });
+  })();
 
 })();
