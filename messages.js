@@ -50,35 +50,44 @@
   const DOODLES = { hearts: 'Hearts', flowers: 'Flowers', stars: 'Stars', dots: 'Dots', sprigs: 'Lavender', waves: 'Waves', none: 'Plain' };
   const FONTS = [['Inter', 'Clean'], ['Caveat', 'Handwritten'], ['Kalam', 'Kalam'], ['Dancing Script', 'Dancing'], ['Cormorant Garamond', 'Classic']];
   const HIDE = [['avatar', 'Profile photos'], ['status', 'Online / last seen'], ['dates', 'Day labels (Today, Yesterday)'], ['time', 'Time under messages'], ['ticks', 'Sent / seen ticks'], ['tails', 'Bubble tails'], ['emoji', 'Emoji button'], ['attach', 'Photo button'], ['kbtoggle', 'Keyboard switch button'], ['search', 'Search button'], ['react', 'Reactions'], ['names', 'Sender name above messages'], ['stamp', 'Date next to the time'], ['asks', '"Ask something" card'], ['deco', 'Page decoration (flowers, banner)']];
+  /* tick / status display styles */
+  const TICK_STYLES = [
+    { k: 'tick', n: 'Tick System', ex: '✓ / ✓✓ / ✓✓(blue)', desc: 'Classic double tick like WhatsApp' },
+    { k: 'text', n: 'Text System', ex: 'Sent / Delivered / Seen', desc: 'Written status below message' },
+    { k: 'min',  n: 'Minimal',    ex: '· ·· ··(coloured)', desc: 'Subtle dots, no extra text' },
+    { k: 'el',   n: 'Elegant',    ex: '✓ with colour pulse', desc: 'Animated colour change on seen' },
+    { k: 'ts',   n: 'Time + Status', ex: '8:42 PM ✓✓',    desc: 'Time with compact status badge' }
+  ];
   const P = (n, dark, bg, me, meT, them, themT, head, headT, comp, acc, kb) => ({ n, dark, bg, me, meT, them, themT, head, headT, comp, acc, kb });
   const PRESETS = {
-    love: Object.assign(P('Love letter', 0, { type: 'gradient', c1: '#fbe9f1', c2: '#efe3f7', angle: 150, doodle: 'hearts', ink: '#b58ad0' }, '#e4d2f4', '#4a1d70', '#fde8ef', '#4a1d70', '#fdf1f5', '#4a1259', '#fbeaf2', '#7b3fa6', { bg: '#f3e6f2', key: '#ffffff', keyT: '#4a1d70', acc: '#7b3fa6', shape: 'round' }), { font: 'Cormorant Garamond', size: 18, radius: 20 }),
-    lavender: P('Lavender dream', 0, { type: 'doodle', doodle: 'sprigs', c1: '#efe6f6', c2: '#f7ecef', ink: '#8a64a3' }, '#8a64a3', '#ffffff', '#ffffff', '#4c3b58', '#7a5a95', '#ffffff', '#f6eef6', '#8a64a3', { bg: '#efe4f4', key: '#ffffff', keyT: '#4c3b58', acc: '#8a64a3', shape: 'round' }),
-    rose: P('Rose garden', 0, { type: 'doodle', doodle: 'hearts', c1: '#fde8ee', c2: '#fbd9e3', ink: '#c2456f' }, '#d9577f', '#ffffff', '#ffffff', '#4a2b36', '#c2456f', '#ffffff', '#fff1f4', '#d9577f', { bg: '#fbdde6', key: '#ffffff', keyT: '#4a2b36', acc: '#d9577f', shape: 'round' }),
-    classic: P('Classic green', 0, { type: 'doodle', doodle: 'dots', c1: '#efe7dc', c2: '#e8dfd1', ink: '#6b8f71' }, '#d9fdd3', '#1f2c34', '#ffffff', '#1f2c34', '#008069', '#ffffff', '#f0f2f5', '#00a884', { bg: '#d3d6db', key: '#ffffff', keyT: '#1f2c34', acc: '#00a884', shape: 'square' }),
-    midnight: P('Midnight', 1, { type: 'doodle', doodle: 'stars', c1: '#17142b', c2: '#241d44', ink: '#b9a5f5' }, '#6d54c9', '#ffffff', '#2a2547', '#ece8fb', '#1d1936', '#ffffff', '#1d1936', '#8a72e8', { bg: '#1a1630', key: '#322c58', keyT: '#ece8fb', acc: '#8a72e8', shape: 'round' }),
-    sunset: P('Golden sunset', 0, { type: 'gradient', c1: '#ffe2c6', c2: '#f4b6c2', angle: 160, doodle: 'waves', ink: '#d9794a' }, '#e5784f', '#ffffff', '#fff6ee', '#4a2f26', '#d9794a', '#ffffff', '#fff1e4', '#e5784f', { bg: '#f7d2b8', key: '#fff6ee', keyT: '#4a2f26', acc: '#e5784f', shape: 'pill' }),
-    ocean: P('Ocean', 0, { type: 'doodle', doodle: 'waves', c1: '#e3f3f7', c2: '#d5ebf3', ink: '#2f8fb0' }, '#2f8fb0', '#ffffff', '#ffffff', '#1f3a46', '#237a99', '#ffffff', '#eaf6fa', '#2f8fb0', { bg: '#cfe6ee', key: '#ffffff', keyT: '#1f3a46', acc: '#2f8fb0', shape: 'round' }),
-    sakura: P('Cherry blossom', 0, { type: 'doodle', doodle: 'flowers', c1: '#fff0f4', c2: '#ffe3ec', ink: '#e58fb1' }, '#e58fb1', '#ffffff', '#ffffff', '#5a3946', '#d9739a', '#ffffff', '#fff5f8', '#e58fb1', { bg: '#fddbe6', key: '#ffffff', keyT: '#5a3946', acc: '#e58fb1', shape: 'pill' }),
-    forest: P('Forest', 0, { type: 'doodle', doodle: 'sprigs', c1: '#e6efe2', c2: '#dbe8d6', ink: '#4f7a4a' }, '#4f7a4a', '#ffffff', '#ffffff', '#27382a', '#3f6a3b', '#ffffff', '#eef4ea', '#4f7a4a', { bg: '#d3e3cf', key: '#ffffff', keyT: '#27382a', acc: '#4f7a4a', shape: 'round' }),
-    noir: P('Black and gold', 1, { type: 'doodle', doodle: 'dots', c1: '#15131a', c2: '#1d1a24', ink: '#d4a84a' }, '#c9a24a', '#1a1710', '#2a2630', '#f1e8d2', '#0f0d13', '#e8c777', '#0f0d13', '#c9a24a', { bg: '#14121a', key: '#2a2630', keyT: '#f1e8d2', acc: '#c9a24a', shape: 'square' }),
-    cocoa: P('Cocoa', 0, { type: 'doodle', doodle: 'hearts', c1: '#efe2d6', c2: '#e6d3c3', ink: '#8a5a3c' }, '#8a5a3c', '#ffffff', '#fffaf5', '#3e2a1e', '#7a4e33', '#ffffff', '#f6ebe0', '#8a5a3c', { bg: '#e2cfbe', key: '#fffaf5', keyT: '#3e2a1e', acc: '#8a5a3c', shape: 'round' })
+    violet:   Object.assign(P('Pastel Purple Love', 0, { type: 'gradient', c1: '#c8b2e2', c2: '#f3c1d2', angle: 180, doodle: 'none', ink: '#b58ad0' }, '#e2c8f8', '#3b1a5c', '#ffffff', '#3b1a5c', '#e8d9f5', '#4a1259', '#efe3f8', '#5b2a9e', { bg: '#eadcf5', key: '#ffffff', keyT: '#3b1a5c', acc: '#5b2a9e', shape: 'round' }), { font: 'Inter', size: 16, radius: 20 }),
+    love:     Object.assign(P('Romantic Pink', 0, { type: 'gradient', c1: '#fbe9f1', c2: '#efe3f7', angle: 150, doodle: 'hearts', ink: '#b58ad0' }, '#e4d2f4', '#4a1d70', '#fde8ef', '#4a1d70', '#fdf1f5', '#4a1259', '#fbeaf2', '#7b3fa6', { bg: '#f3e6f2', key: '#ffffff', keyT: '#4a1d70', acc: '#7b3fa6', shape: 'round' }), { font: 'Cormorant Garamond', size: 18, radius: 20 }),
+    burgundy: Object.assign(P('Luxury Burgundy', 0, { type: 'gradient', c1: '#f5ede8', c2: '#ece0d8', angle: 140, doodle: 'hearts', ink: '#8b2252' }, '#7b1a3a', '#f5e8d4', '#f9f0e6', '#3a1a1a', '#8b2252', '#f5e8d4', '#faf4ee', '#8b2252', { bg: '#f0e0d4', key: '#f9f0e6', keyT: '#3a1a1a', acc: '#8b2252', shape: 'square' }), { font: 'Cormorant Garamond', size: 17, radius: 8 }),
+    white:    Object.assign(P('Minimal White', 0, { type: 'color', c1: '#f7f7f9', c2: '#efefef', angle: 180, doodle: 'dots', ink: '#cccccc' }, '#e8e8ea', '#1a1a2e', '#ffffff', '#1a1a2e', '#f0f0f2', '#1a1a2e', '#f8f8fa', '#5566aa', { bg: '#e8e8ea', key: '#ffffff', keyT: '#1a1a2e', acc: '#5566aa', shape: 'square' }), { font: 'Inter', size: 15, radius: 12 }),
+    lavender: Object.assign(P('Lavender Dream', 0, { type: 'doodle', doodle: 'sprigs', c1: '#efe6f6', c2: '#f7ecef', ink: '#8a64a3' }, '#8a64a3', '#ffffff', '#ffffff', '#4c3b58', '#7a5a95', '#ffffff', '#f6eef6', '#8a64a3', { bg: '#efe4f4', key: '#ffffff', keyT: '#4c3b58', acc: '#8a64a3', shape: 'round' }), { font: 'Inter', size: 16, radius: 20 }),
+    midnight: P('Midnight Romance', 1, { type: 'doodle', doodle: 'stars', c1: '#17142b', c2: '#241d44', ink: '#b9a5f5' }, '#6d54c9', '#ffffff', '#2a2547', '#ece8fb', '#1d1936', '#ffffff', '#1d1936', '#8a72e8', { bg: '#1a1630', key: '#322c58', keyT: '#ece8fb', acc: '#8a72e8', shape: 'round' }),
+    diary:    Object.assign(P('Diary Style', 0, { type: 'gradient', c1: '#fdf6e3', c2: '#f5edd0', angle: 160, doodle: 'hearts', ink: '#c9a96e' }, '#e8d5a3', '#3d2b1f', '#fff8f0', '#3d2b1f', '#c9a96e', '#3d2b1f', '#fdf8f0', '#8b6914', { bg: '#f0e8d4', key: '#fff8f0', keyT: '#3d2b1f', acc: '#8b6914', shape: 'round' }), { font: 'Caveat', size: 18, radius: 6 }),
+    glass:    Object.assign(P('Glass Effect', 0, { type: 'gradient', c1: '#c9d6df', c2: '#e2eafc', angle: 135, doodle: 'none', ink: '#8899bb' }, 'rgba(255,255,255,0.55)', '#1a2a4a', 'rgba(255,255,255,0.80)', '#1a2a4a', 'rgba(100,120,180,0.70)', '#ffffff', 'rgba(240,244,255,0.70)', '#5577cc', { bg: '#d6e0f0', key: 'rgba(255,255,255,0.7)', keyT: '#1a2a4a', acc: '#5577cc', shape: 'round' }), { font: 'Inter', size: 15, radius: 20 }),
+    pastel:   Object.assign(P('Cute Pastel', 0, { type: 'gradient', c1: '#ffdde1', c2: '#c5e8ff', angle: 150, doodle: 'flowers', ink: '#ffaabb' }, '#ffc4cf', '#5a2d4a', '#d4f1ff', '#1a3a5a', '#ff9bb0', '#ffffff', '#fff0f5', '#ff7a9a', { bg: '#ffe4ec', key: '#fff0f5', keyT: '#5a2d4a', acc: '#ff7a9a', shape: 'pill' }), { font: 'Kalam', size: 16, radius: 22 }),
+    classic:  P('Classic Messenger', 0, { type: 'doodle', doodle: 'dots', c1: '#efe7dc', c2: '#e8dfd1', ink: '#6b8f71' }, '#d9fdd3', '#1f2c34', '#ffffff', '#1f2c34', '#008069', '#ffffff', '#f0f2f5', '#00a884', { bg: '#d3d6db', key: '#ffffff', keyT: '#1f2c34', acc: '#00a884', shape: 'square' }),
+    noir:     P('Black and Gold', 1, { type: 'doodle', doodle: 'dots', c1: '#15131a', c2: '#1d1a24', ink: '#d4a84a' }, '#c9a24a', '#1a1710', '#2a2630', '#f1e8d2', '#0f0d13', '#e8c777', '#0f0d13', '#c9a24a', { bg: '#14121a', key: '#2a2630', keyT: '#f1e8d2', acc: '#c9a24a', shape: 'square' })
   };
   const KB_SHAPES = { round: 'Rounded', square: 'Square', pill: 'Pill' };
   function lookFrom(key) {
     const p = PRESETS[key] || PRESETS.love;
     return { preset: key, bg: Object.assign({ type: 'doodle', doodle: 'hearts', c1: '#efe6f6', c2: '#f7ecef', ink: '#8a64a3', angle: 160, blur: 0, dim: 0, img: '' }, p.bg),
-      me: p.me, meT: p.meT, them: p.them, themT: p.themT, head: p.head, headT: p.headT, comp: p.comp, acc: p.acc, dark: !!p.dark, radius: p.radius || 16, font: p.font || 'Inter', size: p.size || 16, hide: [],
+      me: p.me, meT: p.meT, them: p.them, themT: p.themT, head: p.head, headT: p.headT, comp: p.comp, acc: p.acc, dark: !!p.dark, radius: p.radius || 16, font: p.font || 'Inter', size: p.size || 16, hide: [], tickStyle: 'tick',
       kb: { on: true, bg: p.kb.bg, key: p.kb.key, keyT: p.kb.keyT, acc: p.kb.acc, shape: p.kb.shape, h: 'normal', font: 'Inter', numrow: true, vibrate: true, sound: false, layout: 'abc' }, updated: 0 };
   }
   function normLook(x) {
-    const d = lookFrom(x && PRESETS[x.preset] ? x.preset : 'love'); x = x && typeof x === 'object' ? x : {}; const b = x.bg || {}, k = x.kb || {};
+    const d = lookFrom(x && PRESETS[x.preset] ? x.preset : 'violet'); x = x && typeof x === 'object' ? x : {}; const b = x.bg || {}, k = x.kb || {};
     const col = (v, def) => (isHex(v) ? v : def);
     const img = typeof b.img === 'string' && /^data:image\/(jpeg|png|webp);/.test(b.img) && b.img.length < 900000 ? b.img : '';
     return { preset: d.preset, dark: x.dark != null ? !!x.dark : d.dark,
       bg: { type: pick(b.type, ['doodle', 'color', 'gradient', 'photo'], d.bg.type), doodle: pick(b.doodle, Object.keys(DOODLES), d.bg.doodle), c1: col(b.c1, d.bg.c1), c2: col(b.c2, d.bg.c2), ink: col(b.ink, d.bg.ink), angle: clamp(Math.round(+b.angle || 160), 0, 360), blur: clamp(Math.round(+b.blur || 0), 0, 24), dim: clamp(Math.round(+b.dim || 0), 0, 70), img },
       me: col(x.me, d.me), meT: col(x.meT, d.meT), them: col(x.them, d.them), themT: col(x.themT, d.themT), head: col(x.head, d.head), headT: col(x.headT, d.headT), comp: col(x.comp, d.comp), acc: col(x.acc, d.acc),
       radius: clamp(Math.round(x.radius != null ? +x.radius : d.radius), 2, 26), font: FONTS.some(f => f[0] === x.font) ? x.font : d.font, size: clamp(Math.round(+x.size || d.size), 13, 22), hide: (Array.isArray(x.hide) ? x.hide : []).filter(k2 => HIDE.some(a => a[0] === k2)),
+      tickStyle: TICK_STYLES.some(t => t.k === x.tickStyle) ? x.tickStyle : 'tick',
       kb: { on: k.on !== false, bg: col(k.bg, d.kb.bg), key: col(k.key, d.kb.key), keyT: col(k.keyT, d.kb.keyT), acc: col(k.acc, d.kb.acc), shape: pick(k.shape, Object.keys(KB_SHAPES), d.kb.shape), h: pick(k.h, ['compact', 'normal', 'tall'], 'normal'), font: FONTS.some(f => f[0] === k.font) ? k.font : 'Inter', numrow: k.numrow !== false, vibrate: k.vibrate !== false, sound: !!k.sound, layout: pick(k.layout, ['abc', 'urdu'], 'abc') },
       updated: +x.updated || 0 };
   }
@@ -92,7 +101,7 @@
   }
 
   /* ---------- state ---------- */
-  const S = { me: 'owner', msgs: [], look: lookFrom('love'), prof: { owner: normProfile(), partner: normProfile() }, pres: { owner: 0, partner: 0 }, synced: false, q: '', reply: null, kbOpen: false, sys: false };
+  const S = { me: 'owner', msgs: [], look: lookFrom('violet'), prof: { owner: normProfile(), partner: normProfile() }, pres: { owner: 0, partner: 0 }, synced: false, q: '', reply: null, kbOpen: false, sys: false, starred: new Set(), pinned: [], sharedBg: null };
   const other = () => (S.me === 'owner' ? 'partner' : 'owner');
   const nameOf = r => S.prof[r].name || (r === S.me ? 'Me' : 'My Love');
   const byId = id => S.msgs.find(m => m.id === id);
@@ -126,18 +135,44 @@
     return `<svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 96 96">${shapes[kind] || ''}</svg>`;
   }
   function applyLook() {
-    const L = S.look, a = $('#app'), b = L.bg, st = document.documentElement.style;
+    const L = S.look, a = $('#app'), st = document.documentElement.style;
+    /* use shared background if set, else personal look bg */
+    const b = (S.sharedBg && S.sharedBg.img) ? S.sharedBg : L.bg;
     const v = { '--me': L.me, '--meT': L.meT, '--them': L.them, '--themT': L.themT, '--head': L.head, '--headT': L.headT, '--comp': L.comp, '--acc': L.acc, '--rad': L.radius + 'px', '--fs': L.size + 'px', '--mf': `"${L.font}", "Inter", system-ui, sans-serif`, '--kbBg': L.kb.bg, '--kbKey': L.kb.key, '--kbT': L.kb.keyT, '--kbAcc': L.kb.acc, '--kbF': `"${L.kb.font}", "Inter", sans-serif` };
-    Object.entries(v).forEach(([k, x]) => st.setProperty(k, x)); a.dataset.dark = L.dark ? '1' : ''; a.dataset.shape = L.kb.shape; a.dataset.kh = L.kb.h; a.dataset.hide = L.hide.join(' ');
+    Object.entries(v).forEach(([k, x]) => st.setProperty(k, x));
+    a.dataset.dark = L.dark ? '1' : ''; a.dataset.shape = L.kb.shape; a.dataset.kh = L.kb.h; a.dataset.hide = L.hide.join(' ');
+    a.dataset.tick = L.tickStyle || 'tick';
+    /* background */
     const bg = $('#bg'); bg.replaceChildren();
     const base = h('i', { class: 'bgb' });
-    if (b.type === 'color') base.style.background = b.c1; else if (b.type === 'gradient' || b.type === 'doodle') base.style.background = `linear-gradient(${b.angle}deg,${b.c1},${b.c2})`; else if (b.type === 'photo' && b.img) { base.style.background = `#222 url(${JSON.stringify(b.img)}) center/cover`; if (b.blur) base.style.filter = `blur(${b.blur}px)`; base.style.transform = b.blur ? 'scale(1.08)' : ''; } else base.style.background = b.c1;
+    if (b.type === 'color') base.style.background = b.c1;
+    else if (b.type === 'gradient' || b.type === 'doodle') base.style.background = `linear-gradient(${b.angle}deg,${b.c1},${b.c2})`;
+    else if (b.type === 'photo' && b.img) { base.style.background = `#222 url(${JSON.stringify(b.img)}) center/cover`; if (b.blur) base.style.filter = `blur(${b.blur}px)`; base.style.transform = b.blur ? 'scale(1.08)' : ''; }
+    else base.style.background = b.c1;
     bg.append(base);
     if (b.type === 'doodle' && b.doodle !== 'none') bg.append(h('i', { class: 'bgd', style: `background-image:${enc(doodleTile(b.doodle, b.ink))};opacity:${L.dark ? .1 : .16}` }));
     if (b.dim) bg.append(h('i', { class: 'bgdim', style: `background:rgba(0,0,0,${b.dim / 100})` }));
+    /* update live preview in customize dialog */
+    updateLookPreview();
     const meta = $('meta[name=theme-color]'); if (meta) meta.content = L.head;
     renderHead(); if (typeof renderKb === 'function') renderKb();
     $('#inp').setAttribute('inputmode', L.kb.on && !S.sys ? 'none' : 'text');
+  }
+  function updateLookPreview() {
+    const pv = $('#lkpvBg'); if (!pv) return;
+    const L = S.look, b = (S.sharedBg && S.sharedBg.img) ? S.sharedBg : L.bg;
+    let bgStr = '';
+    if (b.type === 'photo' && b.img) bgStr = `#222 url(${JSON.stringify(b.img)}) center/cover`;
+    else if (b.type === 'color') bgStr = b.c1;
+    else bgStr = `linear-gradient(${b.angle || 160}deg,${b.c1},${b.c2})`;
+    pv.style.background = bgStr;
+    pv.style.setProperty('--lkpv-bg', bgStr);
+    /* bubble colours in preview */
+    $$('.lkpv-me-bub', pv).forEach(el => { el.style.background = L.me; el.style.color = L.meT; el.style.borderRadius = L.radius + 'px'; });
+    $$('.lkpv-them-bub', pv).forEach(el => { el.style.background = L.them; el.style.color = L.themT; el.style.borderRadius = L.radius + 'px'; });
+    $$('.me-av', pv).forEach(el => el.style.background = L.me);
+    $$('.them-av', pv).forEach(el => el.style.background = L.them);
+    const tick = $('#lkpvBg .lkpv-tick'); if (tick) tick.style.color = L.acc;
   }
 
   /* ---------- top bar ---------- */
@@ -148,21 +183,33 @@
   }
   function renderHead() {
     const o = other(), box = $('#peerBtn'); const st = statusText();
-    box.replaceChildren(hides('avatar') ? null : avatarEl(o, 'hd'), h('span', { class: 'pn' }, h('b', { text: nameOf(o) }), st ? h('small', { text: st }) : null));
+    box.replaceChildren(hides('avatar') ? null : avatarEl(o, 'hd'), h('span', { class: 'pn' }, h('b', { text: nameOf(o) }), st ? h('small', { class: st === 'online' ? 'ons' : '', text: st === 'online' ? 'Online' : st }) : null));
     $('#btnSearch').hidden = hides('search'); renderSide();
   }
 
   /* ---------- messages ---------- */
   const pend = new Set();
   function tickEl(m) {
-    if (hides('ticks') || m.by !== S.me) return null; const seen = m.seen > 0, ok = S.synced && !pend.has(m.id);
-    const s = h('span', { class: 'tk' + (seen ? ' seen' : '') }); s.innerHTML = svgI(!S.synced ? 'tick' : pend.has(m.id) ? 'clock' : 'tick2'); if (!ok && S.synced) s.classList.add('pend'); return s;
+    if (hides('ticks') || m.by !== S.me) return null;
+    const seen = m.seen > 0, pending = pend.has(m.id), ok = S.synced && !pending;
+    const ts = S.look.tickStyle || 'tick';
+    const s = h('span', { class: 'tk' + (seen ? ' seen' : '') + (pending ? ' pend' : '') });
+    if (ts === 'text') {
+      const label = !S.synced ? '' : pending ? 'Sent' : seen ? 'Seen' : 'Delivered';
+      s.dataset.st = label; s.innerHTML = svgI(pending ? 'clock' : seen ? 'tick2' : 'tick');
+    } else if (ts === 'min') {
+      s.innerHTML = seen ? '·· ' : ok ? '·· ' : '·'; if (seen) s.classList.add('seen');
+    } else {
+      /* tick, el, ts — all use svg ticks */
+      s.innerHTML = svgI(!S.synced ? 'tick' : pending ? 'clock' : 'tick2');
+    }
+    return s;
   }
   function esc(t, q) { if (!q) return document.createTextNode(t); const f = document.createDocumentFragment(), l = t.toLowerCase(), qq = q.toLowerCase(); let i = 0, j; while ((j = l.indexOf(qq, i)) >= 0) { f.append(t.slice(i, j), h('mark', { text: t.slice(j, j + q.length) })); i = j + q.length; } f.append(t.slice(i)); return f; }
   const dateTxt = t => new Date(t).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'Asia/Karachi' });
   function bubble(m, head) {
     const mine = m.by === S.me, row = h('div', { class: 'row ' + (mine ? 'me' : 'them') + (head ? ' hd' : ''), 'data-id': m.id });
-    const b = h('div', { class: 'bub' });
+    const b = h('div', { class: 'bub' + (S.starred.has(m.id) ? ' starred' : '') });
     if (m.reply) b.append(h('button', { type: 'button', class: 'rq', onclick: e => { e.stopPropagation(); jumpTo(m.reply.id); } }, h('b', { text: m.reply.by === S.me ? 'You' : nameOf(m.reply.by) }), h('span', { text: m.reply.img && !m.reply.text ? 'Photo' : m.reply.text })));
     if (m.img) b.append(h('img', { class: 'mimg', src: m.img, alt: 'Photo', loading: 'lazy', onclick: e => { e.stopPropagation(); openLightbox(m.img); } }));
     if (m.text) b.append(h('span', { class: 'tx' }, esc(m.text, S.q)));
@@ -216,13 +263,24 @@
     const m = byId(id); if (!m) return; const sh = $('#sheet'); if (navigator.vibrate) try { navigator.vibrate(12); } catch (e) { }
     const emo = hides('react') ? null : h('div', { class: 'em' }, ...['❤️', '😂', '😮', '😢', '👍', '🙏'].map(e => h('button', { type: 'button', text: e, onclick: () => { setReact(id, e); closeSheet(); } })));
     const act = (ic, label, fn, cls) => h('button', { type: 'button', class: cls || '', onclick: () => { closeSheet(); fn(); } }, ico(ic), label);
-    sh.replaceChildren(emo, act('reply', 'Reply', () => { S.reply = { id: m.id, by: m.by, text: m.text.slice(0, 120), img: !!m.img }; drawBar(); $('#inp').focus(); }), m.text ? act('copy', 'Copy', () => { try { navigator.clipboard.writeText(m.text); toast('Copied'); } catch (e) { toast('Could not copy'); } }) : null,
+    const isStarred = S.starred.has(id), isPinned = S.pinned.includes(id);
+    sh.replaceChildren(emo,
+      act('reply', 'Reply', () => { S.reply = { id: m.id, by: m.by, text: m.text.slice(0, 120), img: !!m.img }; drawBar(); $('#inp').focus(); }),
+      act('heart', isStarred ? 'Unstar' : 'Star Message', () => toggleStar(id)),
+      act('plus', isPinned ? 'Unpin' : 'Pin Message', () => togglePin(id)),
+      m.text ? act('copy', 'Copy', () => { try { navigator.clipboard.writeText(m.text); toast('Copied'); } catch (e) { toast('Could not copy'); } }) : null,
       m.by === S.me ? act('trash', 'Delete for both of us', () => delMsg(id), 'danger') : null);
     $('#sheetWrap').hidden = false;
   }
   function closeSheet() { $('#sheetWrap').hidden = true; $('#sheet').classList.remove('qs'); }
   async function setReact(id, e) { const m = byId(id); if (!m) return; const cur = m.react[S.me]; m.react[S.me] = cur === e ? '' : e; m.u = Date.now(); await saveMsgs(); renderMsgs(); cloudReact(m); }
   async function delMsg(id) { if (!(await ask('Delete this message?', 'It will disappear from the other phone too.', 'Delete'))) return; S.msgs = S.msgs.filter(m => m.id !== id); await saveMsgs(); renderMsgs(); cloudDel(id); }
+  function toggleStar(id) { if (S.starred.has(id)) S.starred.delete(id); else S.starred.add(id); try { localStorage.setItem('olw_starred', JSON.stringify([...S.starred])); } catch(e){} renderMsgs(true); updateCounts(); toast(S.starred.has(id) ? '★ Starred' : 'Unstarred'); }
+  function togglePin(id) { const i = S.pinned.indexOf(id); if (i >= 0) S.pinned.splice(i, 1); else { S.pinned.unshift(id); if (S.pinned.length > 5) S.pinned.pop(); } try { localStorage.setItem('olw_pinned', JSON.stringify(S.pinned)); } catch(e){} renderMsgs(true); updateCounts(); toast(S.pinned.includes(id) ? '📌 Pinned' : 'Unpinned'); }
+  function updateCounts() { const sc = $('#starCnt'), pc = $('#pinCnt'); if (sc) sc.textContent = S.starred.size; if (pc) pc.textContent = S.pinned.length; }
+  function showStarred() { const list = S.msgs.filter(m => S.starred.has(m.id)); const sh = $('#sheet'); sh.replaceChildren(h('p', { class: 'sh-t', text: '★ Starred Messages' }), ...list.map(m => h('button', { type: 'button', class: 'q', text: (m.text || 'Photo') + ' — ' + fmtTime(m.t), onclick: () => { closeSheet(); jumpTo(m.id); } }))); if (!list.length) sh.append(h('p', { class: 'hint', text: 'No starred messages yet. Long-press a message to star it.' })); sh.classList.add('qs'); $('#sheetWrap').hidden = false; }
+  function showPinned() { const list = S.msgs.filter(m => S.pinned.includes(m.id)); const sh = $('#sheet'); sh.replaceChildren(h('p', { class: 'sh-t', text: '📌 Pinned Messages' }), ...list.map(m => h('button', { type: 'button', class: 'q', text: (m.text || 'Photo') + ' — ' + fmtTime(m.t), onclick: () => { closeSheet(); jumpTo(m.id); } }))); if (!list.length) sh.append(h('p', { class: 'hint', text: 'No pinned messages yet. Long-press a message to pin it.' })); sh.classList.add('qs'); $('#sheetWrap').hidden = false; }
+  function showRemoved() { toast('Removed messages feature coming soon.'); }
 
   /* ---------- big photo ---------- */
   function openLightbox(src) { const l = $('#lightbox'); l.replaceChildren(h('img', { src, alt: 'Photo' })); l.hidden = false; }
@@ -377,7 +435,7 @@
   }
 
   /* ---------- customize: designs, bubbles, background, keyboard, show / hide ---------- */
-  const LK = { tab: 'designs' };
+  const LK = { tab: 'themes' };
   function chg(patch, soft) { const L = S.look; Object.keys(patch).forEach(k => { if (k === 'bg' || k === 'kb') L[k] = Object.assign({}, L[k], patch[k]); else L[k] = patch[k]; }); applyLook(); saveLookSoft(); if (!soft) drawLook(); }
   const cl = {
     color: (label, get, set) => h('label', { class: 'cr' }, h('span', { text: label }), h('input', { type: 'color', value: get(), 'aria-label': label, oninput: e => set(e.target.value) })),
@@ -387,36 +445,117 @@
     sec: (t, ...k) => h('section', { class: 'lk-sec' }, h('h4', { text: t }), ...k)
   };
   function drawLook() {
-    const L = S.look, B = L.bg, K = L.kb, box = $('#lookBody'), top = box.scrollTop; $$('#lookTabs [data-t]').forEach(b => b.classList.toggle('on', b.dataset.t === LK.tab));
+    const L = S.look, B = L.bg, K = L.kb, box = $('#lookBody'), top = box.scrollTop;
+    $$('#lookTabs [data-t]').forEach(b => b.classList.toggle('on', b.dataset.t === LK.tab));
+    updateLookPreview();
     const kids = [];
-    if (LK.tab === 'designs') {
-      kids.push(h('p', { class: 'hint', text: 'One tap changes everything: background, bubbles, top bar and keyboard.' }), h('div', { class: 'pgrid' }, ...Object.entries(PRESETS).map(([k, p]) => {
-        const bgs = p.bg.type === 'gradient' ? `linear-gradient(${p.bg.angle || 160}deg,${p.bg.c1},${p.bg.c2})` : `linear-gradient(160deg,${p.bg.c1},${p.bg.c2})`;
-        return h('button', { type: 'button', class: 'pc' + (L.preset === k ? ' on' : ''), style: `--pbg:${bgs};--pme:${p.me};--pth:${p.them};--phd:${p.head}`, onclick: () => { const keep = L.hide.slice(); S.look = Object.assign(lookFrom(k), { hide: keep, updated: Date.now() }); S.look.kb.layout = L.kb.layout; applyLook(); saveLookSoft(); drawLook(); } }, h('i', { class: 'ph' }), h('i', { class: 'pa' }), h('i', { class: 'pb' }), h('span', { text: p.n }));
-      })));
-    } else if (LK.tab === 'chat') {
-      kids.push(cl.sec('Bubbles', cl.color('My bubble', () => L.me, v => chg({ me: v }, 1)), cl.color('My text', () => L.meT, v => chg({ meT: v }, 1)), cl.color('Their bubble', () => L.them, v => chg({ them: v }, 1)), cl.color('Their text', () => L.themT, v => chg({ themT: v }, 1)), cl.slider('Roundness', 2, 26, () => L.radius, v => chg({ radius: v }, 1), v => v + 'px')),
-        cl.sec('Text', cl.chips(FONTS, () => L.font, k => chg({ font: k })), cl.slider('Text size', 13, 22, () => L.size, v => chg({ size: v }, 1), v => v + 'px')),
-        cl.sec('Top bar and typing bar', cl.color('Top bar', () => L.head, v => chg({ head: v }, 1)), cl.color('Top bar text', () => L.headT, v => chg({ headT: v }, 1)), cl.color('Typing bar', () => L.comp, v => chg({ comp: v }, 1)), cl.color('Accent (buttons)', () => L.acc, v => chg({ acc: v }, 1)), cl.tg('Dark style (light text)', () => L.dark, v => chg({ dark: v }))));
+
+    if (LK.tab === 'themes') {
+      kids.push(
+        h('p', { class: 'hint', text: 'One tap changes everything — bubbles, background, header and keyboard.' }),
+        h('div', { class: 'pgrid' }, ...Object.entries(PRESETS).map(([k, p]) => {
+          const bgStr = p.bg.type === 'gradient' ? `linear-gradient(${p.bg.angle||160}deg,${p.bg.c1},${p.bg.c2})` : `linear-gradient(160deg,${p.bg.c1},${p.bg.c2})`;
+          const card = h('button', { type: 'button', class: 'pc' + (L.preset === k ? ' on' : ''), onclick: () => {
+            const keep = { hide: L.hide.slice(), tickStyle: L.tickStyle, kb: { layout: L.kb.layout } };
+            S.look = Object.assign(lookFrom(k), { hide: keep.hide, tickStyle: keep.tickStyle, updated: Date.now() });
+            S.look.kb.layout = keep.kb.layout; applyLook(); saveLookSoft(); drawLook();
+          }});
+          const thumb = h('div', { class: 'pc-thumb', style: `background:${bgStr}` });
+          thumb.append(
+            h('div', { class: 'pc-them', style: `background:${p.them};color:${p.themT};border-radius:10px 10px 10px 2px` }, 'Hello! ♡'),
+            h('div', { class: 'pc-me', style: `background:${p.me};color:${p.meT};border-radius:10px 10px 2px 10px` }, 'I miss you')
+          );
+          const foot = h('div', { class: 'pc-foot' }, h('b', { text: p.n }), h('div', { class: 'pc-check' }, L.preset === k ? '✓' : ''));
+          card.append(thumb, foot); return card;
+        }))
+      );
+
     } else if (LK.tab === 'bg') {
-      kids.push(cl.sec('Background', cl.chips([['doodle', 'Pattern'], ['color', 'Colour'], ['gradient', 'Gradient'], ['photo', 'Photo']], () => B.type, k => chg({ bg: { type: k } }))));
+      /* shared background note */
+      kids.push(h('div', { class: 'lk-sec', style: 'border:2px solid #e4b8f0' },
+        h('h4', { text: '🌟 Shared Background' }),
+        h('p', { class: 'hint', text: 'This background shows on BOTH phones — yours and your partner\'s. Set it once, both see it.' }),
+        h('div', { class: 'bg-upload-row' },
+          h('button', { type: 'button', class: 'btn soft', onclick: async () => {
+            const v = await pickPhoto({ title: 'Shared chat background', px: 1280, bytes: 560000 });
+            if (v) { S.sharedBg = { type: 'photo', img: v, blur: S.sharedBg ? (S.sharedBg.blur||0) : 0, dim: S.sharedBg ? (S.sharedBg.dim||0) : 0 }; applyLook(); cloudPutSharedBg(); drawLook(); }
+          }}, ico('image'), 'Upload Shared Photo'),
+          S.sharedBg && S.sharedBg.img ? h('button', { type: 'button', class: 'btn ghost', onclick: () => { S.sharedBg = null; applyLook(); cloudPutSharedBg(); drawLook(); } }, 'Remove') : null
+        ),
+        S.sharedBg && S.sharedBg.img ? [
+          cl.slider('Blur', 0, 24, () => S.sharedBg.blur||0, v => { S.sharedBg.blur = v; applyLook(); cloudPutSharedBg(); }, v => v + ' px'),
+          cl.slider('Darken', 0, 70, () => S.sharedBg.dim||0, v => { S.sharedBg.dim = v; applyLook(); cloudPutSharedBg(); }, v => v + '%')
+        ] : h('p', { class: 'hint', text: 'No shared background set. Using your personal theme background.' })
+      ));
+      /* personal bg */
+      kids.push(cl.sec('My Personal Background (only I see this)',
+        cl.chips([['doodle','Pattern'],['color','Solid colour'],['gradient','Gradient'],['photo','My Photo']], () => B.type, k => chg({ bg: { type: k } }))
+      ));
       if (B.type === 'doodle') kids.push(cl.sec('Pattern', cl.chips(Object.entries(DOODLES), () => B.doodle, k => chg({ bg: { doodle: k } })), cl.color('Pattern colour', () => B.ink, v => chg({ bg: { ink: v } }, 1))));
       if (B.type !== 'photo') kids.push(cl.sec('Colours', cl.color(B.type === 'color' ? 'Colour' : 'Top colour', () => B.c1, v => chg({ bg: { c1: v } }, 1)), B.type === 'color' ? null : cl.color('Bottom colour', () => B.c2, v => chg({ bg: { c2: v } }, 1)), B.type === 'color' ? null : cl.slider('Angle', 0, 360, () => B.angle, v => chg({ bg: { angle: v } }, 1), v => v + '°')));
-      else kids.push(cl.sec('Photo', h('div', { class: 'row2' }, h('button', { type: 'button', class: 'btn soft', onclick: async () => { const v = await pickPhoto({ title: 'Chat background', px: 1280, bytes: 560000 }); if (v) chg({ bg: { type: 'photo', img: v } }); } }, ico('image'), 'From Gallery or phone'), B.img ? h('button', { type: 'button', class: 'btn ghost', onclick: () => chg({ bg: { img: '' } }) }, 'Remove') : null), cl.slider('Blur', 0, 24, () => B.blur, v => chg({ bg: { blur: v } }, 1), v => v + ' px'), cl.slider('Darken', 0, 70, () => B.dim, v => chg({ bg: { dim: v } }, 1), v => v + '%')));
-      if (B.type === 'photo' && !B.img) kids.push(h('p', { class: 'hint', text: 'Choose a photo for your chat background. Blur it so the messages stay easy to read.' }));
-    } else if (LK.tab === 'kb') {
-      const prev = h('div', { class: 'kprev' }), pin = h('textarea', { rows: 1, class: 'kin', placeholder: 'Try typing here...', inputmode: 'none' }), pk = h('div', { class: 'kb' }); prev.append(pin, pk); prev.dataset.shape = K.shape; prev.dataset.kh = K.h;
-      kids.push(cl.sec('Keyboard', cl.tg('Use my keyboard instead of the phone keyboard', () => K.on, v => { chg({ kb: { on: v } }); if (!v) setKb(false); }), cl.tg('Number row on top', () => K.numrow, v => chg({ kb: { numrow: v } })), cl.chips([['abc', 'English first'], ['urdu', 'Urdu first']], () => K.layout, k => chg({ kb: { layout: k } }))),
-        cl.sec('One-tap keyboard looks', h('div', { class: 'chips' }, ...Object.entries(PRESETS).map(([k, p]) => h('button', { type: 'button', class: 'chip', text: p.n, onclick: () => chg({ kb: { bg: p.kb.bg, key: p.kb.key, keyT: p.kb.keyT, acc: p.kb.acc, shape: p.kb.shape } }) })))),
-        cl.sec('Shape and size', cl.chips(Object.entries(KB_SHAPES), () => K.shape, k => chg({ kb: { shape: k } })), cl.chips([['compact', 'Small keys'], ['normal', 'Normal'], ['tall', 'Big keys']], () => K.h, k => chg({ kb: { h: k } })), cl.chips(FONTS, () => K.font, k => chg({ kb: { font: k } }))),
-        cl.sec('Colours', cl.color('Keyboard background', () => K.bg, v => chg({ kb: { bg: v } }, 1)), cl.color('Keys', () => K.key, v => chg({ kb: { key: v } }, 1)), cl.color('Letters', () => K.keyT, v => chg({ kb: { keyT: v } }, 1)), cl.color('Special keys', () => K.acc, v => chg({ kb: { acc: v } }, 1))),
-        cl.sec('Feel', cl.tg('Tiny vibration when typing', () => K.vibrate, v => chg({ kb: { vibrate: v } }, 1)), cl.tg('Click sound', () => K.sound, v => chg({ kb: { sound: v } }, 1))), cl.sec('Try it', prev));
-      setTimeout(() => { buildKb(pk, () => pin, { kb: () => S.look.kb }); }, 0);
-      const syncPrev = () => { prev.dataset.shape = S.look.kb.shape; prev.dataset.kh = S.look.kb.h; }; syncPrev();
-    } else {
-      kids.push(h('p', { class: 'hint', text: 'Turn off anything you do not want to see in the chat.' }), cl.sec('Show', ...HIDE.map(([k, n]) => cl.tg(n, () => !L.hide.includes(k), on => { const s = new Set(S.look.hide); on ? s.delete(k) : s.add(k); chg({ hide: [...s] }, 1); renderMsgs(true); }))));
+      else kids.push(cl.sec('My Photo',
+        h('div', { class: 'bg-upload-row' }, h('button', { type: 'button', class: 'btn soft', onclick: async () => { const v = await pickPhoto({ title: 'My chat background', px: 1280, bytes: 560000 }); if (v) chg({ bg: { type: 'photo', img: v } }); } }, ico('image'), 'From Gallery or phone'), B.img ? h('button', { type: 'button', class: 'btn ghost', onclick: () => chg({ bg: { img: '' } }) }, 'Remove') : null),
+        cl.slider('Blur', 0, 24, () => B.blur, v => chg({ bg: { blur: v } }, 1), v => v + ' px'),
+        cl.slider('Darken', 0, 70, () => B.dim, v => chg({ bg: { dim: v } }, 1), v => v + '%')
+      ));
+
+    } else if (LK.tab === 'msgs') {
+      kids.push(
+        cl.sec('Bubbles',
+          cl.color('My bubble colour', () => L.me, v => chg({ me: v }, 1)),
+          cl.color('My text colour', () => L.meT, v => chg({ meT: v }, 1)),
+          cl.color('Their bubble colour', () => L.them, v => chg({ them: v }, 1)),
+          cl.color('Their text colour', () => L.themT, v => chg({ themT: v }, 1)),
+          cl.slider('Bubble roundness', 2, 26, () => L.radius, v => chg({ radius: v }, 1), v => v + 'px')
+        ),
+        cl.sec('Header & Input bar',
+          cl.color('Top bar colour', () => L.head, v => chg({ head: v }, 1)),
+          cl.color('Top bar text', () => L.headT, v => chg({ headT: v }, 1)),
+          cl.color('Input bar colour', () => L.comp, v => chg({ comp: v }, 1)),
+          cl.color('Accent colour (buttons)', () => L.acc, v => chg({ acc: v }, 1)),
+          cl.tg('Dark mode (light text on dark)', () => L.dark, v => chg({ dark: v }))
+        ),
+        cl.sec('Keyboard',
+          cl.tg('Use custom keyboard', () => K.on, v => { chg({ kb: { on: v } }); if (!v) setKb(false); }),
+          cl.tg('Number row on top', () => K.numrow, v => chg({ kb: { numrow: v } })),
+          cl.chips([['abc','English'],['urdu','Urdu']], () => K.layout, k => chg({ kb: { layout: k } })),
+          cl.chips(Object.entries(KB_SHAPES), () => K.shape, k => chg({ kb: { shape: k } })),
+          cl.chips([['compact','Small'],['normal','Normal'],['tall','Large']], () => K.h, k => chg({ kb: { h: k } })),
+          cl.color('Keyboard background', () => K.bg, v => chg({ kb: { bg: v } }, 1)),
+          cl.color('Key colour', () => K.key, v => chg({ kb: { key: v } }, 1)),
+          cl.tg('Vibration on key press', () => K.vibrate, v => chg({ kb: { vibrate: v } }, 1))
+        )
+      );
+
+    } else if (LK.tab === 'status') {
+      kids.push(
+        h('p', { class: 'hint', text: 'Choose how "sent", "delivered" and "seen" appear under your messages.' }),
+        h('div', { class: 'sstyle-grid' }, ...TICK_STYLES.map(ts => {
+          const card = h('button', { type: 'button', class: 'sstyle-card' + (L.tickStyle === ts.k ? ' on' : ''), onclick: () => { chg({ tickStyle: ts.k }); } });
+          card.append(h('b', { text: ts.n }), h('div', { class: 'sstyle-ex' }, ts.ex), h('small', { class: 'hint', style: 'margin:0', text: ts.desc }));
+          return card;
+        }))
+      );
+
+    } else if (LK.tab === 'fonts') {
+      kids.push(
+        cl.sec('Message font',
+          h('div', { class: 'chips' }, ...FONTS.map(([k, n]) => h('button', { type: 'button', class: 'chip' + (L.font === k ? ' on' : ''), style: `font-family:"${k}",serif`, text: n + ' — Aa', onclick: () => chg({ font: k }) }))),
+          cl.slider('Text size', 13, 22, () => L.size, v => chg({ size: v }, 1), v => v + 'px')
+        ),
+        cl.sec('Keyboard font',
+          h('div', { class: 'chips' }, ...FONTS.map(([k, n]) => h('button', { type: 'button', class: 'chip' + (K.font === k ? ' on' : ''), style: `font-family:"${k}",serif`, text: n, onclick: () => chg({ kb: { font: k } }) })))
+        )
+      );
+
+    } else { /* adv */
+      kids.push(
+        h('p', { class: 'hint', text: 'Show or hide individual elements of the chat.' }),
+        cl.sec('Show / Hide', ...HIDE.map(([k, n]) => cl.tg(n, () => !L.hide.includes(k), on => { const s = new Set(S.look.hide); on ? s.delete(k) : s.add(k); chg({ hide: [...s] }, 1); renderMsgs(true); })))
+      );
     }
-    box.replaceChildren(...kids.filter(Boolean)); box.scrollTop = top;
+
+    box.replaceChildren(...kids.filter(Boolean).flat(2)); box.scrollTop = top;
   }
   function openLook(tab) { LK.tab = tab || LK.tab; drawLook(); openDlg($('#dlgLook')); }
 
@@ -491,9 +630,9 @@
     $('#qIn').oninput = e => { S.q = e.target.value; renderMsgs(); }; $('#qClose').onclick = () => { $('#searchBar').hidden = true; S.q = ''; $('#qIn').value = ''; renderMsgs(true); };
     $('#btnBrush').onclick = () => openLook(); $('#lookClose').onclick = () => closeDlg($('#dlgLook'));
     $$('#lookTabs [data-t]').forEach(b => (b.onclick = () => { LK.tab = b.dataset.t; drawLook(); }));
-    $('#lookReset').onclick = async () => { if (await ask('Reset the chat look?', 'Colours, background and keyboard go back to Love letter.', 'Reset')) { S.look = Object.assign(lookFrom('love'), { updated: Date.now() }); applyLook(); saveLookSoft(); drawLook(); } };
+    $('#lookReset').onclick = async () => { if (await ask('Reset the chat look?', 'Colours, background and keyboard go back to Pastel Purple Love.', 'Reset')) { S.look = Object.assign(lookFrom('violet'), { updated: Date.now() }); applyLook(); saveLookSoft(); drawLook(); } };
     $('#btnMenu').onclick = e => { e.stopPropagation(); toggleMenu(); };
-    $$('#menu [data-act]').forEach(b => (b.onclick = () => { toggleMenu(false); const a = b.dataset.act; if (a === 'me') openProfile(S.me); else if (a === 'look') openLook(); else if (a === 'search') $('#btnSearch').click(); else if (a === 'sync') { const c = document.getElementById('olwCloud'); if (c) c.click(); else toast('Sync is not set up yet. Fill olw-config.js first.'); } else if (a === 'ask') askNow(); else if (a === 'home') location.href = 'index.html'; }));
+    $$('#menu [data-act]').forEach(b => (b.onclick = () => { toggleMenu(false); const a = b.dataset.act; if (a === 'me') openProfile(S.me); else if (a === 'look') openLook(); else if (a === 'search') $('#btnSearch').click(); else if (a === 'sync') { const c = document.getElementById('olwCloud'); if (c) c.click(); else toast('Sync is not set up yet. Fill olw-config.js first.'); } else if (a === 'ask') askNow(); else if (a === 'starred') showStarred(); else if (a === 'pin') showPinned(); else if (a === 'wallpaper') openLook('bg'); else if (a === 'removed') showRemoved(); else if (a === 'home') location.href = 'index.html'; }));
     document.addEventListener('click', e => { if (!e.target.closest('#menu,#btnMenu')) toggleMenu(false); });
     $('#profClose').onclick = () => closeDlg($('#dlgProf'));
     inp.addEventListener('input', () => { autosize(); drawBar(); });
@@ -517,7 +656,8 @@
     const [ms, lk, pf] = await Promise.all([DB.get('msgs'), DB.get('look'), DB.get('prof')]);
     S.msgs = (Array.isArray(ms) ? ms : []).map(normMsg); S.look = normLook(lk || undefined); if (pf) S.prof = { owner: normProfile(pf.owner), partner: normProfile(pf.partner) };
     S.sys = !('ontouchstart' in window);
-    icons(); buildDeco(); bind(); applyLook(); renderMsgs.first = true; renderMsgs(); drawBar();
+    try { S.starred = new Set(JSON.parse(localStorage.getItem('olw_starred') || '[]')); S.pinned = JSON.parse(localStorage.getItem('olw_pinned') || '[]'); } catch (e) { }
+    icons(); buildDeco(); bind(); applyLook(); renderMsgs.first = true; renderMsgs(); drawBar(); updateCounts();
     window.__chat = { S, send, setKb, openLook, openProfile, applyLook, normMsg, renderMsgs, drawLook, LK, pickPhoto, saveMsgs };
     if (window.OLW) OLW.onAuth(u => { S.synced = !!u; if (u) { S.me = OLW.role; listen(); } else stopListen(); renderHead(); renderMsgs(true); });
   }
