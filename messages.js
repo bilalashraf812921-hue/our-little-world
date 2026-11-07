@@ -23,7 +23,7 @@
     image: '<rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-5-5L5 21"/>', close: '<path d="M6 6l12 12M18 6 6 18"/>', down: '<path d="m6 9 6 6 6-6"/>', reply: '<path d="M9 14 4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 6 6v3"/>',
     copy: '<rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h8"/>', trash: '<path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/>', check: '<path d="m5 12 5 5L20 7"/>', user: '<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
     back2: '<path d="M3 12h18M10 5l-7 7 7 7"/>', del: '<path d="M21 5H9l-6 7 6 7h12a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1z"/><path d="m13 9 4 6M17 9l-4 6"/>', shift: '<path d="M12 4 4 13h5v7h6v-7h5z"/>', globe: '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18"/>', cloud: '<path d="M7 18a4.5 4.5 0 0 1-.5-9A6 6 0 0 1 18 9.5 4 4 0 0 1 17.5 18z"/>',
-    heart: '<path d="M12 21s-8-5.2-8-11a4.5 4.5 0 0 1 8-2.8A4.5 4.5 0 0 1 20 10c0 5.8-8 11-8 11z"/>', pen: '<path d="M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16z"/>', plus: '<path d="M12 5v14M5 12h14"/>', tick: '<path d="m2 12 4 4 7-8"/>', tick2: '<path d="m2 12 4 4 7-8M10 15l1 1 8-9"/>', clock: '<circle cx="12" cy="12" r="8"/><path d="M12 8v4l2 2"/>'
+    heart: '<path d="M12 21s-8-5.2-8-11a4.5 4.5 0 0 1 8-2.8A4.5 4.5 0 0 1 20 10c0 5.8-8 11-8 11z"/>', pen: '<path d="M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16z"/>', plus: '<path d="M12 5v14M5 12h14"/>', tick: '<path d="m5 12.5 4.5 4.5L19 7"/>', tick2: '<path d="m1.5 12.5 4.5 4.5L16 7M9 16.5l1.5 1.5L22 7"/>', clock: '<circle cx="12" cy="12" r="8"/><path d="M12 8v4l2 2"/>'
   };
   const svgI = n => `<svg viewBox="0 0 24 24" aria-hidden="true">${ICONS[n] || ''}</svg>`;
   const ico = n => { const s = h('span', { class: 'ic' }); s.innerHTML = svgI(n); return s; };
@@ -101,7 +101,7 @@
   }
 
   /* ---------- state ---------- */
-  const S = { me: 'owner', msgs: [], look: lookFrom('violet'), prof: { owner: normProfile(), partner: normProfile() }, pres: { owner: 0, partner: 0 }, synced: false, q: '', reply: null, kbOpen: false, sys: false, starred: new Set(), pinned: [], sharedBg: null };
+  const S = { me: 'owner', msgs: [], look: lookFrom('violet'), prof: { owner: normProfile(), partner: normProfile() }, pres: { owner: 0, partner: 0 }, synced: false, q: '', reply: null, kbOpen: false, sys: false, starred: new Set(), pinned: [], hid: new Set(), sharedBg: null };
   const other = () => (S.me === 'owner' ? 'partner' : 'owner');
   const nameOf = r => S.prof[r].name || (r === S.me ? 'Me' : 'My Love');
   const byId = id => S.msgs.find(m => m.id === id);
@@ -195,19 +195,19 @@
     const ts = S.look.tickStyle || 'tick';
     const s = h('span', { class: 'tk' + (seen ? ' seen' : '') + (pending ? ' pend' : '') });
     if (ts === 'text') {
-      const label = !S.synced ? '' : pending ? 'Sent' : seen ? 'Seen' : 'Delivered';
+      const label = !S.synced ? '' : pending ? 'Sending' : seen ? 'Seen' : 'Sent';
       s.dataset.st = label; s.innerHTML = svgI(pending ? 'clock' : seen ? 'tick2' : 'tick');
     } else if (ts === 'min') {
-      s.innerHTML = seen ? '·· ' : ok ? '·· ' : '·'; if (seen) s.classList.add('seen');
+      s.innerHTML = seen ? '·· ' : ok ? '· ' : '·'; if (seen) s.classList.add('seen');
     } else {
       /* tick, el, ts — all use svg ticks */
-      s.innerHTML = svgI(!S.synced ? 'tick' : pending ? 'clock' : 'tick2');
+      s.innerHTML = svgI(pending ? 'clock' : seen ? 'tick2' : 'tick');
     }
     return s;
   }
   function esc(t, q) { if (!q) return document.createTextNode(t); const f = document.createDocumentFragment(), l = t.toLowerCase(), qq = q.toLowerCase(); let i = 0, j; while ((j = l.indexOf(qq, i)) >= 0) { f.append(t.slice(i, j), h('mark', { text: t.slice(j, j + q.length) })); i = j + q.length; } f.append(t.slice(i)); return f; }
   const dateTxt = t => new Date(t).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'Asia/Karachi' });
-  function bubble(m, head) {
+  function bubble(m, head, seenNote) {
     const mine = m.by === S.me, row = h('div', { class: 'row ' + (mine ? 'me' : 'them') + (head ? ' hd' : ''), 'data-id': m.id });
     const b = h('div', { class: 'bub' + (S.starred.has(m.id) ? ' starred' : '') });
     if (m.reply) b.append(h('button', { type: 'button', class: 'rq', onclick: e => { e.stopPropagation(); jumpTo(m.reply.id); } }, h('b', { text: m.reply.by === S.me ? 'You' : nameOf(m.reply.by) }), h('span', { text: m.reply.img && !m.reply.text ? 'Photo' : m.reply.text })));
@@ -217,7 +217,7 @@
     const rc = hides('react') ? [] : ['owner', 'partner'].map(r => m.react[r]).filter(Boolean); if (rc.length) b.append(h('span', { class: 'rc', text: [...new Set(rc)].join('') }));
     const av = hides('avatar') ? null : head ? avatarEl(m.by, 'mini') : h('span', { class: 'av mini sp' });
     const nm = head && !hides('names') ? h('span', { class: 'sn' }, h('b', { text: nameOf(m.by), style: S.prof[m.by].ncol ? 'color:' + S.prof[m.by].ncol : '' }), h('i', { text: m.by === S.me ? ' (you)' : '' }), isOn(m.by) ? h('em', { class: 'onl', text: 'online' }) : null) : null;
-    row.append(av, h('div', { class: 'col' }, nm, b)); bindPress(row, m.id); return row;
+    row.append(av, h('div', { class: 'col' }, nm, b, seenNote ? h('small', { class: 'seenl', text: 'Seen ' + fmtTime(m.seen) }) : null)); bindPress(row, m.id); return row;
   }
   let shown = 200;
   function renderMsgs(keep) {
@@ -225,7 +225,8 @@
     let list = S.msgs.slice().sort((a, b) => a.t - b.t); const q = S.q.trim(); if (q) list = list.filter(m => (m.text || '').toLowerCase().includes(q.toLowerCase()));
     const total = list.length; if (total > shown) list = list.slice(total - shown);
     const nodes = []; if (total > shown) nodes.push(h('button', { type: 'button', class: 'more', onclick: () => { shown += 200; renderMsgs(true); } }, 'Show earlier messages'));
-    let last = '', lastBy = ''; list.forEach(m => { const k = dayKey(m.t); const nd = k !== last; if (nd && !hides('dates')) nodes.push(h('div', { class: 'day' }, h('span', { text: dayLabel(m.t) }))); last = k; nodes.push(bubble(m, nd || m.by !== lastBy)); lastBy = m.by; });
+    let lastMine = null; for (let i = list.length - 1; i >= 0; i--) if (list[i].by === S.me) { lastMine = list[i]; break; }
+    let last = '', lastBy = ''; list.forEach(m => { const k = dayKey(m.t); const nd = k !== last; if (nd && !hides('dates')) nodes.push(h('div', { class: 'day' }, h('span', { text: dayLabel(m.t) }))); last = k; nodes.push(bubble(m, nd || m.by !== lastBy, m === lastMine && m.seen > 0 && !hides('ticks'))); lastBy = m.by; });
     if (!list.length) nodes.push(h('div', { class: 'empty' }, h('span', { class: 'big' }, '♡'), h('p', { text: q ? 'No messages found.' : 'Say hello to your person ♡' }), h('small', { text: 'Only the two of you can read this chat.' })));
     box.replaceChildren(...nodes);
     if (keep) box.scrollTop = box.scrollHeight - prev; else if (near || renderMsgs.first) { box.scrollTop = box.scrollHeight; renderMsgs.first = false; }
@@ -234,8 +235,14 @@
   function jumpTo(id) { const el = $(`.row[data-id="${CSS.escape(id)}"]`); if (el) { el.scrollIntoView({ block: 'center', behavior: 'smooth' }); el.classList.add('flash'); setTimeout(() => el.classList.remove('flash'), 1400); } else toast('That message is further up. Tap "Show earlier messages".'); }
   function markSeen() {
     if (!S.synced || document.hidden) return; const me = S.me, now = Date.now(), todo = S.msgs.filter(m => m.by !== me && !m.seen);
-    todo.forEach(m => { m.seen = now; m.u = now; cloudSeen(m.id, now); }); if (todo.length) saveMsgs();
+    todo.forEach(m => {
+      if (seenBusy.has(m.id)) return; seenBusy.add(m.id);
+      const done = () => { seenBusy.delete(m.id); m.seen = now; m.u = Math.max(now, m.u || 0); saveMsgs(); };
+      if (!ok()) { seenBusy.delete(m.id); return; }
+      col('chat').doc(m.id).update({ seen: now, u: Math.max(now, m.u || 0) }).then(done).catch(() => { seenBusy.delete(m.id); });
+    });
   }
+  const seenBusy = new Set();
 
   /* ---------- sending ---------- */
   async function send() {
@@ -269,18 +276,19 @@
       act('heart', isStarred ? 'Unstar' : 'Star Message', () => toggleStar(id)),
       act('plus', isPinned ? 'Unpin' : 'Pin Message', () => togglePin(id)),
       m.text ? act('copy', 'Copy', () => { try { navigator.clipboard.writeText(m.text); toast('Copied'); } catch (e) { toast('Could not copy'); } }) : null,
-      m.by === S.me ? act('trash', 'Delete for both of us', () => delMsg(id), 'danger') : null);
+      act('trash', 'Delete for me', () => delForMe(id), 'danger'),
+      m.by === S.me ? act('trash', 'Delete for everyone', () => delMsg(id), 'danger') : null);
     $('#sheetWrap').hidden = false;
   }
   function closeSheet() { $('#sheetWrap').hidden = true; $('#sheet').classList.remove('qs'); }
   async function setReact(id, e) { const m = byId(id); if (!m) return; const cur = m.react[S.me]; m.react[S.me] = cur === e ? '' : e; m.u = Date.now(); await saveMsgs(); renderMsgs(); cloudReact(m); }
-  async function delMsg(id) { if (!(await ask('Delete this message?', 'It will disappear from the other phone too.', 'Delete'))) return; S.msgs = S.msgs.filter(m => m.id !== id); await saveMsgs(); renderMsgs(); cloudDel(id); }
+  async function delMsg(id) { if (!(await ask('Delete for everyone?', 'This message will disappear from both phones.', 'Delete for everyone'))) return; S.msgs = S.msgs.filter(m => m.id !== id); S.starred.delete(id); S.pinned = S.pinned.filter(x => x !== id); await saveMsgs(); renderMsgs(); cloudDel(id); }
+  async function delForMe(id) { if (!(await ask('Delete for me?', 'It will be removed only on this phone. The other person still sees it.', 'Delete for me'))) return; S.hid.add(id); try { localStorage.setItem('olw_hidden_msgs', JSON.stringify([...S.hid].slice(-3000))); } catch (e) { } S.msgs = S.msgs.filter(m => m.id !== id); S.starred.delete(id); S.pinned = S.pinned.filter(x => x !== id); await saveMsgs(); renderMsgs(); updateCounts(); }
   function toggleStar(id) { if (S.starred.has(id)) S.starred.delete(id); else S.starred.add(id); try { localStorage.setItem('olw_starred', JSON.stringify([...S.starred])); } catch(e){} renderMsgs(true); updateCounts(); toast(S.starred.has(id) ? '★ Starred' : 'Unstarred'); }
   function togglePin(id) { const i = S.pinned.indexOf(id); if (i >= 0) S.pinned.splice(i, 1); else { S.pinned.unshift(id); if (S.pinned.length > 5) S.pinned.pop(); } try { localStorage.setItem('olw_pinned', JSON.stringify(S.pinned)); } catch(e){} renderMsgs(true); updateCounts(); toast(S.pinned.includes(id) ? '📌 Pinned' : 'Unpinned'); }
   function updateCounts() { const sc = $('#starCnt'), pc = $('#pinCnt'); if (sc) sc.textContent = S.starred.size; if (pc) pc.textContent = S.pinned.length; }
   function showStarred() { const list = S.msgs.filter(m => S.starred.has(m.id)); const sh = $('#sheet'); sh.replaceChildren(h('p', { class: 'sh-t', text: '★ Starred Messages' }), ...list.map(m => h('button', { type: 'button', class: 'q', text: (m.text || 'Photo') + ' — ' + fmtTime(m.t), onclick: () => { closeSheet(); jumpTo(m.id); } }))); if (!list.length) sh.append(h('p', { class: 'hint', text: 'No starred messages yet. Long-press a message to star it.' })); sh.classList.add('qs'); $('#sheetWrap').hidden = false; }
   function showPinned() { const list = S.msgs.filter(m => S.pinned.includes(m.id)); const sh = $('#sheet'); sh.replaceChildren(h('p', { class: 'sh-t', text: '📌 Pinned Messages' }), ...list.map(m => h('button', { type: 'button', class: 'q', text: (m.text || 'Photo') + ' — ' + fmtTime(m.t), onclick: () => { closeSheet(); jumpTo(m.id); } }))); if (!list.length) sh.append(h('p', { class: 'hint', text: 'No pinned messages yet. Long-press a message to pin it.' })); sh.classList.add('qs'); $('#sheetWrap').hidden = false; }
-  function showRemoved() { toast('Removed messages feature coming soon.'); }
 
   /* ---------- big photo ---------- */
   function openLightbox(src) { const l = $('#lightbox'); l.replaceChildren(h('img', { src, alt: 'Photo' })); l.hidden = false; }
@@ -581,8 +589,9 @@
       snap.docChanges().forEach(c => {
         const d = c.doc, i = S.msgs.findIndex(m => m.id === d.id);
         if (c.type === 'removed') { if (i >= 0) { S.msgs.splice(i, 1); ch = true; } return; }
+        if (S.hid.has(d.id)) return;
         if (d.metadata.hasPendingWrites) return; const r = normMsg(Object.assign({}, d.data(), { id: d.id }));
-        if (i < 0) { S.msgs.push(r); ch = true; if (r.by !== S.me && !first) incoming = true; pend.delete(r.id); } else if ((r.u || 0) >= (S.msgs[i].u || 0)) { S.msgs[i] = r; ch = true; pend.delete(r.id); }
+        if (i < 0) { S.msgs.push(r); ch = true; if (r.by !== S.me && !first) incoming = true; pend.delete(r.id); } else if ((r.u || 0) >= (S.msgs[i].u || 0) || (r.seen || 0) > (S.msgs[i].seen || 0)) { const keepSeen = Math.max(r.seen || 0, S.msgs[i].seen || 0); S.msgs[i] = r; S.msgs[i].seen = keepSeen; ch = true; pend.delete(r.id); }
       });
       if (first) { CL.first = true; const ids = new Set(snap.docs.map(d => d.id)); S.msgs.filter(m => !ids.has(m.id)).forEach(m => cloudPut(m)); }
       if (ch) { saveMsgs(); renderMsgs(); if (incoming && document.hidden) document.title = '(1) Chat'; }
@@ -632,7 +641,7 @@
     $$('#lookTabs [data-t]').forEach(b => (b.onclick = () => { LK.tab = b.dataset.t; drawLook(); }));
     $('#lookReset').onclick = async () => { if (await ask('Reset the chat look?', 'Colours, background and keyboard go back to Pastel Purple Love.', 'Reset')) { S.look = Object.assign(lookFrom('violet'), { updated: Date.now() }); applyLook(); saveLookSoft(); drawLook(); } };
     $('#btnMenu').onclick = e => { e.stopPropagation(); toggleMenu(); };
-    $$('#menu [data-act]').forEach(b => (b.onclick = () => { toggleMenu(false); const a = b.dataset.act; if (a === 'me') openProfile(S.me); else if (a === 'look') openLook(); else if (a === 'search') $('#btnSearch').click(); else if (a === 'sync') { const c = document.getElementById('olwCloud'); if (c) c.click(); else toast('Sync is not set up yet. Fill olw-config.js first.'); } else if (a === 'ask') askNow(); else if (a === 'starred') showStarred(); else if (a === 'pin') showPinned(); else if (a === 'wallpaper') openLook('bg'); else if (a === 'removed') showRemoved(); else if (a === 'home') location.href = 'index.html'; }));
+    $$('#menu [data-act]').forEach(b => (b.onclick = () => { toggleMenu(false); const a = b.dataset.act; if (a === 'me') openProfile(S.me); else if (a === 'look') openLook(); else if (a === 'search') $('#btnSearch').click(); else if (a === 'sync') { const c = document.getElementById('olwCloud'); if (c) c.click(); else toast('Sync is not set up yet. Fill olw-config.js first.'); } else if (a === 'ask') askNow(); else if (a === 'starred') showStarred(); else if (a === 'pin') showPinned(); else if (a === 'wallpaper') openLook('bg'); else if (a === 'home') location.href = 'index.html'; }));
     document.addEventListener('click', e => { if (!e.target.closest('#menu,#btnMenu')) toggleMenu(false); });
     $('#profClose').onclick = () => closeDlg($('#dlgProf'));
     inp.addEventListener('input', () => { autosize(); drawBar(); });
@@ -656,7 +665,7 @@
     const [ms, lk, pf] = await Promise.all([DB.get('msgs'), DB.get('look'), DB.get('prof')]);
     S.msgs = (Array.isArray(ms) ? ms : []).map(normMsg); S.look = normLook(lk || undefined); if (pf) S.prof = { owner: normProfile(pf.owner), partner: normProfile(pf.partner) };
     S.sys = !('ontouchstart' in window);
-    try { S.starred = new Set(JSON.parse(localStorage.getItem('olw_starred') || '[]')); S.pinned = JSON.parse(localStorage.getItem('olw_pinned') || '[]'); } catch (e) { }
+    try { S.starred = new Set(JSON.parse(localStorage.getItem('olw_starred') || '[]')); S.pinned = JSON.parse(localStorage.getItem('olw_pinned') || '[]'); S.hid = new Set(JSON.parse(localStorage.getItem('olw_hidden_msgs') || '[]')); S.msgs = S.msgs.filter(m => !S.hid.has(m.id)); } catch (e) { }
     icons(); buildDeco(); bind(); applyLook(); renderMsgs.first = true; renderMsgs(); drawBar(); updateCounts();
     window.__chat = { S, send, setKb, openLook, openProfile, applyLook, normMsg, renderMsgs, drawLook, LK, pickPhoto, saveMsgs };
     if (window.OLW) OLW.onAuth(u => { S.synced = !!u; if (u) { S.me = OLW.role; listen(); } else stopListen(); renderHead(); renderMsgs(true); });
