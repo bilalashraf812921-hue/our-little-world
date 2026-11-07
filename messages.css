@@ -434,3 +434,11 @@ dialog h3{margin:0 0 6px;font-weight:600;flex:1}
   #sheet .em{background:#f3e9fb;border-radius:18px;border-bottom:0;margin-bottom:6px}
   #toast{bottom:calc(var(--navh) + 20px);background:#4a1a8ce6}
 }
+
+/* seen label + clearer seen ticks */
+.seenl{font-size:.68em;color:var(--txt);opacity:.75;margin:3px 8px 0;align-self:flex-end}
+.tk.seen{color:#35c4ff!important;opacity:1;filter:drop-shadow(0 0 1px #fff)}
+.tk.seen svg{stroke-width:2.4}
+.tk svg{width:19px;height:15px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.tk.seen{color:#1e9bff!important}
+.tk:not(.seen):not(.pend){opacity:.6}
