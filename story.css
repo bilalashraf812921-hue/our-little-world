@@ -494,3 +494,10 @@ body.st-printing #stPrint{display:block;position:fixed;left:-300vw;top:0;width:1
 .st-page[data-ds=bow] .st-content{padding:14cqw 12cqw 14cqw}
 .st-page[data-ds=stars] .st-content{padding-top:15cqw}
 .st-add{min-width:0;font-size:.72rem;line-height:1.15}.st-add-ic svg{max-height:44px}
+
+/* ===== Mine / Her switcher (two diaries) ===== */
+.st-who{flex:none;display:flex;gap:2px;padding:3px;border-radius:999px;background:rgba(255,250,244,.88);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);box-shadow:0 4px 14px rgba(40,25,50,.25)}
+.st-who[hidden]{display:none}
+.st-who button{position:relative;border:0;background:transparent;padding:7px 12px;border-radius:999px;font:600 .76rem/1 system-ui,sans-serif;color:var(--plum-d);cursor:pointer}
+.st-who button[aria-pressed="true"]{background:var(--plum-d);color:#fff}
+.st-who button.new::after{content:"";position:absolute;top:2px;right:3px;width:8px;height:8px;border-radius:50%;background:#e0457b;box-shadow:0 0 0 2px rgba(255,250,244,.95)}
