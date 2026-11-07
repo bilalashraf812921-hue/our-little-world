@@ -108,23 +108,66 @@
   OLW.signOut = function () { if (OLW.auth) OLW.auth.signOut(); };
   OLW.watch('ls-', mirrorChange, mirrorInitial);
 
-  /* ---------- small cloud button (only when sync is set up) ---------- */
+  /* ---------- small cloud button (only when sync is set up) ----------
+     Drag it anywhere (position is remembered). Tap it for sign in / sign out and "Hide this button".
+     When hidden you stay signed in. Bring it back from Chat menu > Sync, or by signing out. */
+  var POSK = 'olw_cloud_pos', HIDK = 'olw_cloud_hide', SZ = 38, dragged = false;
+  var lsr = function (k) { try { return JSON.parse(LS.getItem(k)); } catch (e) { return null; } };
+  var lsw = function (k, v) { try { si.call(LS, k, JSON.stringify(v)); } catch (e) { } };
+  var isHidden = function () { return lsr(HIDK) === true && OLW.signedIn; };
+  var clampN = function (v, a, b) { return Math.min(b, Math.max(a, v)); };
+  function setXY(x, y) {
+    var b = document.getElementById('olwCloud'); if (!b) return;
+    var vw = window.innerWidth, vh = window.innerHeight;
+    b.style.left = clampN(x, 4, Math.max(4, vw - SZ - 4)) + 'px'; b.style.top = clampN(y, 4, Math.max(4, vh - SZ - 4)) + 'px'; b.style.bottom = 'auto'; b.style.right = 'auto';
+  }
+  function placeBtn() {
+    var b = document.getElementById('olwCloud'); if (!b) return; var pos = lsr(POSK), vw = window.innerWidth, vh = window.innerHeight;
+    if (pos && typeof pos.fx === 'number') setXY(pos.fx * (vw - SZ), pos.fy * (vh - SZ));
+    else setXY(12, vh - SZ - (document.body.classList.contains('chat') ? 150 : 96));
+  }
+  function savePos() { var b = document.getElementById('olwCloud'); if (!b) return; var r = b.getBoundingClientRect(), vw = window.innerWidth, vh = window.innerHeight; lsw(POSK, { fx: r.left / Math.max(1, vw - SZ), fy: r.top / Math.max(1, vh - SZ) }); }
+  function placePop() {
+    var b = document.getElementById('olwCloud'), p = document.getElementById('olwPop'); if (!b || !p) return;
+    var vw = window.innerWidth, vh = window.innerHeight, r = b.hidden ? { left: 12, top: vh - 150, bottom: vh - 112 } : b.getBoundingClientRect(), pw = p.offsetWidth || 260;
+    p.style.left = clampN(r.left, 8, Math.max(8, vw - pw - 8)) + 'px'; p.style.right = 'auto';
+    if (r.top > vh / 2) { p.style.bottom = (vh - r.top + 8) + 'px'; p.style.top = 'auto'; } else { p.style.top = (r.bottom + 8) + 'px'; p.style.bottom = 'auto'; }
+  }
   function paintCloud() {
-    var b = document.getElementById('olwCloud'); if (!b) return; b.className = OLW.signedIn ? 'on' : ''; b.title = OLW.signedIn ? 'Synced as ' + OLW.user.email : 'Sign in to sync';
+    var b = document.getElementById('olwCloud'); if (!b) return; b.className = OLW.signedIn ? 'on' : ''; b.title = OLW.signedIn ? 'Synced as ' + OLW.user.email : 'Sign in to sync'; b.hidden = isHidden();
     var p = document.getElementById('olwPop'); if (p) fillPop(p);
   }
+  OLW.showCloud = function () { lsw(HIDK, false); paintCloud(); placeBtn(); };
+  OLW.hideCloud = function () { lsw(HIDK, true); paintCloud(); };
   function fillPop(p) {
     p.replaceChildren(); var t = document.createElement('p'); t.style.cssText = 'margin:0 0 10px;font-size:.9rem';
     if (OLW.signedIn) { t.innerHTML = 'Synced as <b></b>'; t.querySelector('b').textContent = OLW.user.email; } else t.textContent = 'Sign in with Google to see the same app on both phones.';
     var btn = document.createElement('button'); btn.type = 'button'; btn.textContent = OLW.signedIn ? 'Sign out' : 'Sign in with Google'; btn.onclick = function () { p.hidden = true; OLW.signedIn ? OLW.signOut() : OLW.signIn(); };
     btn.style.cssText = 'padding:9px 16px;border-radius:999px;border:0;background:var(--plum,#8a64a3);color:#fff;font:500 14px system-ui,sans-serif;cursor:pointer'; p.append(t, btn);
+    if (OLW.signedIn) {
+      var row = document.createElement('div'); row.style.cssText = 'display:flex;gap:8px;flex-wrap:wrap;margin-top:10px';
+      var mk = function (label, fn) { var x = document.createElement('button'); x.type = 'button'; x.textContent = label; x.onclick = fn; x.style.cssText = 'padding:7px 12px;border-radius:999px;border:1px solid #d9c3e6;background:#fff;color:#5b3f8a;font:500 12.5px system-ui,sans-serif;cursor:pointer'; return x; };
+      if (isHidden()) row.append(mk('Show the button', function () { p.hidden = true; OLW.showCloud(); }));
+      else row.append(mk('Hide this button', function () { p.hidden = true; OLW.hideCloud(); toastMsg('Button hidden. You stay signed in. Chat menu > Sync brings it back.'); }));
+      row.append(mk('Reset position', function () { try { ri.call(LS, POSK); } catch (e) { } placeBtn(); placePop(); }));
+      var hint = document.createElement('p'); hint.textContent = 'Tip: drag the cloud button to move it anywhere.'; hint.style.cssText = 'margin:8px 0 0;font-size:.76rem;opacity:.7';
+      p.append(row, hint);
+    }
   }
   function mountCloud() {
     if (!OLW.configured || document.getElementById('olwCloud') || document.documentElement.dataset.locked) return;
-    var st = document.createElement('style'); st.textContent = '#olwCloud{position:fixed;left:12px;bottom:96px;z-index:70;width:38px;height:38px;border-radius:50%;border:1px solid rgba(120,90,140,.35);background:rgba(255,255,255,.88);color:#8a64a3;display:grid;place-items:center;box-shadow:0 4px 12px rgba(60,30,80,.2);cursor:pointer;padding:0}#olwCloud svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}#olwCloud.on{background:#8a64a3;color:#fff}#olwPop{position:fixed;left:12px;bottom:142px;z-index:71;background:#fffaf8;color:#4c3b58;border:1px solid #eadcec;border-radius:16px;padding:14px;box-shadow:0 14px 30px rgba(60,30,80,.28);max-width:min(280px,86vw)}[hidden]{display:none!important}';
+    var st = document.createElement('style'); st.textContent = '#olwCloud{position:fixed;left:12px;bottom:96px;z-index:70;width:38px;height:38px;border-radius:50%;border:1px solid rgba(120,90,140,.35);background:rgba(255,255,255,.88);color:#8a64a3;display:grid;place-items:center;box-shadow:0 4px 12px rgba(60,30,80,.2);cursor:grab;padding:0;touch-action:none;user-select:none;-webkit-user-select:none}#olwCloud:active{cursor:grabbing}#olwCloud svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;pointer-events:none}#olwCloud.on{background:#8a64a3;color:#fff}#olwPop{position:fixed;left:12px;bottom:142px;z-index:71;background:#fffaf8;color:#4c3b58;border:1px solid #eadcec;border-radius:16px;padding:14px;box-shadow:0 14px 30px rgba(60,30,80,.28);max-width:min(280px,86vw)}[hidden]{display:none!important}';
     document.head.append(st); var b = document.createElement('button'); b.id = 'olwCloud'; b.type = 'button'; b.setAttribute('aria-label', 'Sync with Google');
     b.innerHTML = '<svg viewBox="0 0 24 24"><path d="M7 18a4.5 4.5 0 0 1-.5-9A6 6 0 0 1 18 9.5 4 4 0 0 1 17.5 18z"/></svg>'; var p = document.createElement('div'); p.id = 'olwPop'; p.hidden = true;
-    b.onclick = function () { p.hidden = !p.hidden; if (!p.hidden) fillPop(p); }; document.body.append(b, p); paintCloud();
+    b.onclick = function () { if (dragged) { dragged = false; return; } p.hidden = !p.hidden; if (!p.hidden) { fillPop(p); placePop(); } };
+    var drag = null;
+    b.addEventListener('pointerdown', function (e) { if (e.button > 0) return; var r = b.getBoundingClientRect(); drag = { sx: e.clientX, sy: e.clientY, ox: r.left, oy: r.top, moved: false }; try { b.setPointerCapture(e.pointerId); } catch (_) { } });
+    b.addEventListener('pointermove', function (e) { if (!drag) return; var dx = e.clientX - drag.sx, dy = e.clientY - drag.sy; if (!drag.moved && Math.hypot(dx, dy) < 6) return; drag.moved = true; p.hidden = true; setXY(drag.ox + dx, drag.oy + dy); });
+    var end = function () { if (!drag) return; if (drag.moved) { dragged = true; savePos(); setTimeout(function () { dragged = false; }, 80); } drag = null; };
+    b.addEventListener('pointerup', end); b.addEventListener('pointercancel', end);
+    document.body.append(b, p); placeBtn(); paintCloud();
+    window.addEventListener('resize', function () { placeBtn(); if (!p.hidden) placePop(); });
+    document.addEventListener('pointerdown', function (e) { if (!p.hidden && !e.target.closest('#olwPop,#olwCloud')) p.hidden = true; });
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', mountCloud); else mountCloud();
   OLW.init();
