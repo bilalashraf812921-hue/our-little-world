@@ -11,7 +11,7 @@
   </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500;1,600&family=Inter:wght@400;500;600&family=Allura&family=Mrs+Saint+Delafield&family=Great+Vibes&family=Parisienne&family=Sacramento&family=Kristi&family=Birthstone&family=Fleur+De+Leah&family=Pinyon+Script&family=Alex+Brush&family=Covered+By+Your+Grace&family=Caveat:wght@500;600&family=Homemade+Apple&family=Reenie+Beanie&family=Nothing+You+Could+Do&family=Zeyada&family=Kalam:wght@300;400&family=La+Belle+Aurore&family=Dancing+Script:wght@500;600&family=Shadows+Into+Light&family=Indie+Flower&family=Patrick+Hand&family=Gaegu:wght@400;700&family=Satisfy&family=Cookie&family=Handlee&family=Gloria+Hallelujah&family=Playfair+Display:ital@0;1&family=Lora:ital@0;1&family=Tangerine:wght@400;700&family=Italianno&family=Rouge+Script&family=Monsieur+La+Doulaise&family=Herr+Von+Muellerhoff&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500;1,600&family=Inter:wght@400;500;600&family=Allura&family=Mrs+Saint+Delafield&family=Great+Vibes&family=Parisienne&family=Sacramento&family=Kristi&family=Birthstone&family=Fleur+De+Leah&family=Pinyon+Script&family=Alex+Brush&family=Covered+By+Your+Grace&family=Caveat:wght@500;600&family=Homemade+Apple&family=Reenie+Beanie&family=Nothing+You+Could+Do&family=Zeyada&family=Kalam:wght@300;400&family=La+Belle+Aurore&family=Poppins:wght@400;500&family=Nunito:wght@400;600&family=Lato:wght@400;700&family=Open+Sans:wght@400;600&family=Quicksand:wght@400;600&family=Montserrat:wght@400;500&family=Merriweather:wght@400;700&family=EB+Garamond&family=Libre+Baskerville&family=Courier+Prime&family=Special+Elite&family=Dancing+Script:wght@500;600&family=Shadows+Into+Light&family=Indie+Flower&family=Patrick+Hand&family=Gaegu:wght@400;700&family=Satisfy&family=Cookie&family=Handlee&family=Gloria+Hallelujah&family=Playfair+Display:ital@0;1&family=Lora:ital@0;1&family=Tangerine:wght@400;700&family=Italianno&family=Rouge+Script&family=Monsieur+La+Doulaise&family=Herr+Von+Muellerhoff&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="letters.css">
 </head>
 <body class="lt" data-view="mail">
@@ -96,6 +96,7 @@
       <div class="btnrow"><button type="button" class="btn" id="phAdd"><span data-ico="img"></span> Add a photo</button><button type="button" class="btn ghost" id="phRm" hidden>Remove</button></div>
       <label>Photo caption<input data-f="cap" maxlength="40" placeholder="You &amp; Me"></label>
     </fieldset>
+    <fieldset><legend>Text on the page</legend><p class="hint">Tap any text on the page to type there with the letter keyboard and pick its font. Add a text box to put words anywhere, then drag, resize or delete it.</p><div class="btnrow"><button type="button" class="btn" id="tbAdd">+ Add text box</button></div></fieldset>
     <fieldset><legend>Look</legend><p class="hint">Flowers, page design, colours, fonts and text size.</p><div class="btnrow"><button type="button" class="btn" id="edLook" onclick="document.querySelector('[data-act=brush]').click()"><span data-ico="brush"></span> Design &amp; colours</button></div></fieldset>
     <div class="ed-actions"><button type="button" class="btn primary" id="edSave">Save letter</button><button type="button" class="btn ghost" id="edCancel">Cancel</button><button type="button" class="btn ghost danger" id="edDel">Delete</button></div>
   </div>
@@ -137,7 +138,7 @@
       <div class="fld"><span>Ink colour</span><div class="chips" id="sInk"></div><label class="cust">Custom <input type="color" id="sInkC"></label></div>
       <label>Writing font<select id="sBodyFont"></select></label>
       <label>Heading &amp; signature font<select id="sHeadFont"></select></label>
-      <label>Text size <output id="sSizeO">100%</output><input type="range" id="sSize" min="80" max="130" step="2"></label>
+      <label>Text size <output id="sSizeO">100%</output><input type="range" id="sSize" min="60" max="170" step="2"></label>
       <label>Photo size <output id="sPsO">100%</output><input type="range" id="sPs" min="40" max="180" step="2"></label>
       <div class="chips" id="sPsPre" aria-label="Photo size presets"></div>
       <label>Page length <output id="sPlO">100%</output><input type="range" id="sPl" min="40" max="240" step="2"></label>
