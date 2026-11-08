@@ -72,16 +72,19 @@
     rosegold: { n: 'Rose gold', bg: '#4a1e26', v: ['#c47a7a', '#8f4a52', '#4a1e28'], hi: '#e0a0a0', cloth: ['#fff5ee', '#f8e4d7', '#ebd1c1'] },
     charcoal: { n: 'Charcoal', bg: '#16161a', v: ['#4a4a54', '#2c2c34', '#121216'], hi: '#6a6a78', cloth: ['#f7f5f1', '#e9e6e0', '#d7d3cb'] }
   };
-  const BODY_FONTS = ['Covered By Your Grace', 'Caveat', 'Homemade Apple', 'Reenie Beanie', 'Nothing You Could Do', 'Zeyada', 'Kalam', 'La Belle Aurore', 'Dancing Script', 'Shadows Into Light', 'Indie Flower', 'Patrick Hand', 'Gaegu', 'Satisfy', 'Cookie', 'Handlee', 'Gloria Hallelujah', 'Cormorant Garamond', 'Playfair Display', 'Lora'];
-  const HEAD_FONTS = ['Mrs Saint Delafield', 'Allura', 'Great Vibes', 'Parisienne', 'Sacramento', 'Kristi', 'Birthstone', 'Fleur De Leah', 'Pinyon Script', 'Alex Brush', 'Tangerine', 'Italianno', 'Rouge Script', 'Monsieur La Doulaise', 'Herr Von Muellerhoff', 'Cookie', 'Playfair Display'];
+  const FONT_SIMPLE = ['Inter', 'Poppins', 'Nunito', 'Lato', 'Open Sans', 'Quicksand', 'Montserrat', 'Merriweather', 'Lora', 'Playfair Display', 'Cormorant Garamond', 'EB Garamond', 'Libre Baskerville', 'Courier Prime', 'Special Elite'];
+  const FONT_HAND = ['Covered By Your Grace', 'Caveat', 'Homemade Apple', 'Reenie Beanie', 'Nothing You Could Do', 'Zeyada', 'Kalam', 'La Belle Aurore', 'Dancing Script', 'Shadows Into Light', 'Indie Flower', 'Patrick Hand', 'Gaegu', 'Satisfy', 'Cookie', 'Handlee', 'Gloria Hallelujah'];
+  const FONT_SCRIPT = ['Mrs Saint Delafield', 'Allura', 'Great Vibes', 'Parisienne', 'Sacramento', 'Kristi', 'Birthstone', 'Fleur De Leah', 'Pinyon Script', 'Alex Brush', 'Tangerine', 'Italianno', 'Rouge Script', 'Monsieur La Doulaise', 'Herr Von Muellerhoff'];
+  const BODY_FONTS = [...FONT_SIMPLE, ...FONT_HAND, ...FONT_SCRIPT], HEAD_FONTS = BODY_FONTS;
   const INKS = ['#4a2342', '#2b2430', '#2a3a63', '#7a1f3d', '#2f5a45', '#5b3a29'];
   const SEALS = { gold: 'Gold', wine: 'Wine', rose: 'Rose' };
 
   const blank = () => ({
     id: uid(), design: 'florals', dcol: '', env: 'cream', hide: [], by: '', updated: 0, from: '', date: todayISO(), chapter: 'Chapter 1', tag: 'A letter from my heart...', btn: 'Special for You',
     greet: '', body: [''], closing: '', sign: '', note: '', photo: '', cap: 'You & Me', floral: 'plum', paper: 'cream', ink: INKS[0],
-    bodyFont: 'Covered By Your Grace', headFont: 'Mrs Saint Delafield', size: 100, psize: 100, plen: 100, ptape: true, px: null, py: null, prot: null, pover: false, seal: 'gold', mono: '', fav: false, replyTo: '', created: Date.now(), demo: false
+    bodyFont: 'Covered By Your Grace', headFont: 'Mrs Saint Delafield', size: 100, psize: 100, plen: 100, ptape: true, tbs: [], px: null, py: null, prot: null, pover: false, seal: 'gold', mono: '', fav: false, replyTo: '', created: Date.now(), demo: false
   });
+  const normTb = t => { t = t && typeof t === 'object' ? t : {}; return { id: /^[\w-]{3,24}$/.test(t.id || '') ? t.id : uid(), t: txt(t.t, 600), x: clamp(+t.x || 10, 0, 96), y: clamp(+t.y || 10, 0, 500), w: clamp(+t.w || 50, 12, 100), fs: clamp(Math.round(+t.fs || 100), 40, 300), f: pick(t.f, BODY_FONTS, 'Covered By Your Grace') }; };
   function normLetter(x) {
     const d = blank(); x = x && typeof x === 'object' ? x : {};
     const photo = typeof x.photo === 'string' && /^data:image\/(jpeg|png|webp|svg\+xml)[;,]/.test(x.photo) && x.photo.length < LIM.photoBytes * 1.4 ? x.photo : '';
@@ -90,7 +93,7 @@
       id: /^[\w-]{3,40}$/.test(x.id || '') ? x.id : d.id, from: txt(x.from, 40), date: parseISO(x.date) ? x.date : d.date, chapter: txt(x.chapter, 30) || 'Chapter 1',
       tag: txt(x.tag, 70), btn: txt(x.btn, 30) || 'Special for You', greet: txt(x.greet, 80), body: body.length ? body : [''], closing: txt(x.closing, 60), sign: txt(x.sign, 40), note: txt(x.note, 120),
       photo, cap: txt(x.cap, 40), floral: pick(x.floral, Object.keys(FLORALS), 'plum'), paper: pick(x.paper, Object.keys(PAPERS), 'cream'), ink: isHex(x.ink) ? x.ink : d.ink,
-      bodyFont: pick(x.bodyFont, BODY_FONTS, d.bodyFont), headFont: pick(x.headFont, HEAD_FONTS, d.headFont), size: clamp(Math.round(+x.size || 100), 80, 130), psize: clamp(Math.round(+x.psize || 100), 40, 180), plen: clamp(Math.round(+x.plen || 100), 40, 240), ptape: x.ptape !== false, px: x.px == null || !isFinite(+x.px) ? null : clamp(+x.px, -20, 110), py: x.py == null || !isFinite(+x.py) ? null : clamp(+x.py, -20, 400), prot: x.prot == null || !isFinite(+x.prot) ? null : clamp(+x.prot, -45, 45), pover: !!x.pover,
+      bodyFont: pick(x.bodyFont, BODY_FONTS, d.bodyFont), headFont: pick(x.headFont, HEAD_FONTS, d.headFont), size: clamp(Math.round(+x.size || 100), 60, 170), psize: clamp(Math.round(+x.psize || 100), 40, 180), plen: clamp(Math.round(+x.plen || 100), 40, 240), ptape: x.ptape !== false, tbs: (Array.isArray(x.tbs) ? x.tbs : []).slice(0, 12).map(normTb), px: x.px == null || !isFinite(+x.px) ? null : clamp(+x.px, -20, 110), py: x.py == null || !isFinite(+x.py) ? null : clamp(+x.py, -20, 400), prot: x.prot == null || !isFinite(+x.prot) ? null : clamp(+x.prot, -45, 45), pover: !!x.pover,
       design: pick(x.design, Object.keys(LDESIGNS), 'florals'), dcol: isHex(x.dcol) ? x.dcol : '', env: pick(x.env, Object.keys(ENVS), 'cream'), hide: (Array.isArray(x.hide) ? x.hide : []).filter(k => LHIDE.some(a => a[0] === k)), by: txt(x.by, 80), updated: +x.updated || 0,
       seal: pick(x.seal, Object.keys(SEALS), 'gold'), mono: txt(x.mono, 2), fav: !!x.fav, replyTo: txt(x.replyTo, 40), created: +x.created || d.created, demo: !!x.demo
     };
@@ -483,6 +486,17 @@
     return `polygon(${p.join(',')})`;
   }
   const fmtDay = iso => fmtDate(iso);
+  const CE = (() => { try { const e = document.createElement('div'); e.contentEditable = 'plaintext-only'; return e.contentEditable === 'plaintext-only' ? 'plaintext-only' : 'true'; } catch (er) { return 'true'; } })();
+  const NATIVE_KEY = 'olw_letter_native_kb';
+  const nativeKb = () => { try { return localStorage.getItem(NATIVE_KEY) === '1'; } catch (er) { return false; } };
+  const isPhone = () => window.matchMedia('(max-width:899px)').matches;
+  const ownKb = () => isPhone() && !nativeKb();
+  const ced = (tag, k, text, ph, extra) => h(tag, Object.assign({ class: 'ced', 'data-k': k, 'data-ph': ph || '', contenteditable: CE, inputmode: ownKb() ? 'none' : 'text', spellcheck: 'false', autocomplete: 'off', autocorrect: 'off', text: text || '' }, extra || {}));
+  function tbEl(tb, edit) {
+    const inner = edit ? ced('div', 'tb', tb.t, 'Type here...', { class: 'ced tbt', 'data-id': tb.id }) : h('div', { class: 'tbt', text: tb.t });
+    return h('div', { class: 'p-tb', 'data-id': tb.id, style: `left:${f1(tb.x)}cqw;top:${f1(tb.y)}cqw;width:${f1(tb.w)}cqw;--tf:${tb.fs / 100};font-family:"${tb.f}",cursive` }, inner,
+      edit ? [h('i', { class: 'tmv', title: 'Move' }), h('i', { class: 'trs', title: 'Resize' }), h('i', { class: 'tdl', title: 'Delete', text: '×' })] : null);
+  }
   function renderPaper(L, o = {}) {
     const pp = PAPERS[L.paper] || PAPERS.cream, seed = hashStr(L.id), R = rng(seed + 5), empty = ED.open && o.live;
     const stains = Array.from({ length: 6 }, () => `radial-gradient(circle at ${f1(R() * 100)}% ${f1(R() * 100)}%,rgba(140,92,48,${f1(.04 + R() * .08)}) 0,transparent ${f1(6 + R() * 16)}%)`).join(',');
@@ -499,15 +513,17 @@
       const fig = h('figure', { class: 'p-photo' + (free ? ' free' : '') + (free && L.pover ? ' over' : ''), style: (free ? `left:${f1(L.px)}cqw;top:${f1(L.py)}cqw;` : '') + (typeof L.prot === 'number' ? `transform:rotate(${f1(L.prot)}deg);` : '') }, L.ptape === false ? null : h('i', { class: 'tape' }), h('img', { src: L.photo, alt: L.cap || 'Photo', draggable: 'false' }), L.cap ? h('figcaption', { text: L.cap }) : null, o.live ? h('i', { class: 'p-rs', title: 'Drag to resize' }) : null);
       if (free) paper.append(fig); else body.append(fig);
     }
-    if (L.greet || empty) body.append(h('h2', { class: 'p-greet' + (L.greet ? '' : ' ph') }, L.greet || 'Dear ...', h('span', { html: underline() })));
-    const paras = L.body.filter(x => x.trim());
-    if (!paras.length && empty) body.append(h('p', { class: 'ph', text: 'Write your letter here...' }));
-    paras.forEach(t => body.append(h('p', { text: t })));
+    if (empty) body.append(h('h2', { class: 'p-greet' }, ced('b', 'greet', L.greet, 'Dear ...'), h('span', { html: underline() })));
+    else if (L.greet) body.append(h('h2', { class: 'p-greet' }, L.greet, h('span', { html: underline() })));
+    if (empty) { const arr = L.body.length ? L.body : ['']; arr.forEach((t, i) => body.append(ced('p', 'body', t, arr.length === 1 ? 'Write your letter here...' : '', { 'data-bi': i }))); }
+    else L.body.forEach((t, i) => { if (t.trim()) body.append(h('p', { text: t, 'data-bi': i })); });
     const foot = h('div', { class: 'p-foot' });
-    const left = h('div', { class: 'p-left' }, L.closing ? h('p', { class: 'p-close', text: L.closing }) : null, L.sign ? h('div', { class: 'p-sign' }, L.sign, h('span', { class: 'p-hrt', html: tinyHeart }), h('span', { html: underline() })) : null);
-    foot.append(left, L.note ? h('p', { class: 'p-note', text: L.note }) : null);
+    const left = h('div', { class: 'p-left' }, empty ? ced('p', 'closing', L.closing, 'Always yours,', { class: 'ced p-close' }) : L.closing ? h('p', { class: 'p-close', text: L.closing }) : null, (L.sign || empty) ? h('div', { class: 'p-sign' }, empty ? ced('b', 'sign', L.sign, 'Your name') : L.sign, h('span', { class: 'p-hrt', html: tinyHeart }), h('span', { html: underline() })) : null);
+    foot.append(left, empty ? ced('p', 'note', L.note, 'Side note...', { class: 'ced p-note' }) : L.note ? h('p', { class: 'p-note', text: L.note }) : null);
     const box = h('div', { class: 'p-in' }, h('div', { class: 'p-top' }, from, date), body, foot);
-    paper.append(box); wrap.append(paper);
+    paper.append(box);
+    (L.tbs || []).forEach(tb => paper.append(tbEl(tb, empty)));
+    wrap.append(paper);
     return wrap;
   }
 
@@ -638,7 +654,7 @@
     if (ED.dirty && !(await ask('Discard your changes?', 'This letter has changes that are not saved yet.', 'Discard', true))) return false;
     closeEditor(); return true;
   }
-  function closeEditor() { ED.open = false; ED.L = null; document.body.classList.remove('lt-editing'); F('editor').hidden = true; if (S.view === 'read') drawRead(false, true); drawTop(); }
+  function closeEditor() { hideKb(); ED.open = false; ED.L = null; document.body.classList.remove('lt-editing'); F('editor').hidden = true; if (S.view === 'read') drawRead(false, true); drawTop(); }
   async function saveEditor() {
     const L = normLetter(ED.L); if (!L.body.some(x => x.trim()) && !L.greet.trim()) return toast('Please write something first.');
     if (!L.from.trim()) { toast('Please add who the letter is from.'); F('fFrom').focus(); return; }
@@ -696,7 +712,7 @@
     $$('dialog').forEach(d => { d.addEventListener('click', e => { if (e.target === d) closeDlg(d); }); $$('[data-close]', d).forEach(b => b.addEventListener('click', () => closeDlg(d))); });
     $('#fileImp').addEventListener('change', e => { const f = e.target.files[0]; e.target.value = ''; if (f) importFile(f); });
     $('#fileImg').addEventListener('change', e => { const f = e.target.files[0]; e.target.value = ''; if (f) readPhoto(f); });
-    initPhotoDrag(); F('phAdd').addEventListener('click', () => $('#fileImg').click()); F('phRm').addEventListener('click', () => setField('photo', ''));
+    initPhotoDrag(); initPageEdit(); F('phAdd').addEventListener('click', () => $('#fileImg').click()); F('phRm').addEventListener('click', () => setField('photo', ''));
     F('edSave').addEventListener('click', saveEditor); F('edCancel').addEventListener('click', leaveEditor); F('edDel').addEventListener('click', deleteLetter);
     F('edFold').addEventListener('click', () => F('editor').classList.toggle('folded'));
     document.addEventListener('keydown', e => {
@@ -828,6 +844,175 @@
     });
     const end = () => { if (!d) return; const L = d.L; d = null; if (ED.open) ED.dirty = true; else { touch(L); pushSoon(L); } drawRead(false, true); syncStyler(); };
     document.addEventListener('pointerup', end); document.addEventListener('pointercancel', end);
+  }
+  /* ---------- on-page typing, own keyboard, font bar, free text boxes ---------- */
+  const KB = { el: null, act: null, shift: 'off', mode: 'abc', saved: null, tShift: 0, rep: null };
+  const EMOJI = ['❤️', '💕', '💖', '💗', '💘', '💝', '😍', '🥰', '😘', '😊', '😉', '😌', '🥺', '😢', '😭', '😂', '🤗', '🙈', '😇', '🌹', '🌸', '🌷', '💐', '✨', '🌙', '⭐', '🔥', '🎁', '💍', '💋', '🫶', '🙏', '👫', '🏡', '☕', '🍫', '🎶', '📖', '✉️', '🕊️'];
+  const FOR_LBL = { tb: 'Text box', greet: 'Greeting', body: 'Letter text', closing: 'Closing', sign: 'Signature', note: 'Side note' };
+  const HEADK = ['greet', 'sign', 'note'];
+  const kbHost = () => $('#paperHost');
+  const curTb = id => (ED.L && ED.L.tbs || []).find(t => t.id === id);
+  function caretInfo(el) {
+    const s = window.getSelection(); if (!s || !s.rangeCount) return null; const r = s.getRangeAt(0); if (!el.contains(r.startContainer)) return null;
+    const pre = r.cloneRange(); pre.selectNodeContents(el); pre.setEnd(r.startContainer, r.startOffset); return { off: pre.toString().length, collapsed: r.collapsed, before: pre.toString() };
+  }
+  function focusCed(sel, off) {
+    const el = kbHost().querySelector(sel); if (!el) return; el.focus({ preventScroll: true });
+    const r = document.createRange(), tn = el.firstChild, n = off === 'end' ? (tn ? tn.length : 0) : off;
+    if (tn && tn.nodeType === 3) r.setStart(tn, Math.min(n, tn.length)); else r.setStart(el, 0); r.collapse(true);
+    const s = window.getSelection(); s.removeAllRanges(); s.addRange(r);
+  }
+  const cedValue = el => { let v = (el.innerText || '').replace(/​/g, ''); if (el.dataset.k !== 'tb') v = v.replace(/\s*\n+\s*/g, ' '); return v.trim() ? v : ''; };
+  function onCedInput(el) {
+    if (!ED.open) return; const k = el.dataset.k, v = cedValue(el), L = ED.L;
+    if (k === 'body') { const i = +el.dataset.bi; if (i >= 0 && i < L.body.length) L.body[i] = v.slice(0, LIM.paraLen); }
+    else if (k === 'tb') { const tb = curTb(el.dataset.id); if (tb) tb.t = v.slice(0, 600); }
+    else L[k] = v;
+    ED.dirty = true; syncEditor(); keepVisible();
+  }
+  function redrawKeep(sel, off) { drawRead(false, true); if (sel) focusCed(sel, off); }
+  function splitPara(el) {
+    const L = ED.L, i = +el.dataset.bi, ci = caretInfo(el), v = cedValue(el); if (L.body.length >= LIM.paras) return;
+    const off = ci ? ci.off : v.length; L.body.splice(i, 1, v.slice(0, off), v.slice(off)); ED.dirty = true; syncEditor(); redrawKeep(`.ced[data-k=body][data-bi="${i + 1}"]`, 0);
+  }
+  function mergePara(el) {
+    const L = ED.L, i = +el.dataset.bi, prev = L.body[i - 1] || '', cur2 = cedValue(el); L.body.splice(i - 1, 2, prev + cur2); ED.dirty = true; syncEditor(); redrawKeep(`.ced[data-k=body][data-bi="${i - 1}"]`, prev.length);
+  }
+  function fontOfAct() { const a = KB.act, L = ED.L; if (!a || !L) return ''; if (a.k === 'tb') { const t = curTb(a.id); return t ? t.f : L.bodyFont; } return HEADK.includes(a.k) ? L.headFont : L.bodyFont; }
+  function updateBar() {
+    if (!KB.el) return; const a = KB.act, L = ED.L; if (!a || !L) return; let pct;
+    if (a.k === 'tb') { const t = curTb(a.id); pct = t ? t.fs : 100; } else pct = L.size;
+    KB.el.querySelector('.kb-for').textContent = (FOR_LBL[a.k] || 'Text') + ' · ' + pct + '%';
+    const f = fontOfAct(); $$('.kb-fonts .f', KB.el).forEach(b => b.classList.toggle('on', b.dataset.f === f));
+  }
+  function applyFont(f) {
+    const a = KB.act, L = ED.L; if (!a || !L || !BODY_FONTS.includes(f)) return; const pw = kbHost().querySelector('.pw');
+    if (a.k === 'tb') { const t = curTb(a.id); if (!t) return; t.f = f; const b = kbHost().querySelector(`.p-tb[data-id="${a.id}"]`); if (b) b.style.fontFamily = `"${f}",cursive`; }
+    else if (HEADK.includes(a.k)) { L.headFont = f; if (pw) pw.style.setProperty('--hf', `"${f}"`); }
+    else { L.bodyFont = f; if (pw) pw.style.setProperty('--bf', `"${f}"`); }
+    ED.dirty = true; updateBar(); syncStyler(); keepVisible();
+  }
+  function bump(d) {
+    const a = KB.act, L = ED.L; if (!a || !L) return; const pw = kbHost().querySelector('.pw');
+    if (a.k === 'tb') { const t = curTb(a.id); if (!t) return; t.fs = clamp(t.fs + d * 2, 40, 300); const b = kbHost().querySelector(`.p-tb[data-id="${a.id}"]`); if (b) b.style.setProperty('--tf', t.fs / 100); }
+    else { L.size = clamp(L.size + d, 60, 170); if (pw) pw.style.setProperty('--fs', L.size / 100); }
+    ED.dirty = true; updateBar(); syncStyler(); keepVisible();
+  }
+  function keepVisible() {
+    const a = KB.act; if (!a || !a.el.isConnected || !KB.el || KB.el.hidden) return; const s = window.getSelection(); let r = null;
+    if (s && s.rangeCount && a.el.contains(s.anchorNode)) { const rg = s.getRangeAt(0).cloneRange(); rg.collapse(false); const rs = rg.getClientRects(); if (rs.length) r = rs[rs.length - 1]; }
+    r = r || a.el.getBoundingClientRect(); const vb = innerHeight - KB.el.offsetHeight - 24, rd = READ();
+    if (r.bottom > vb) rd.scrollTop += r.bottom - vb; else if (r.top < 90) rd.scrollTop -= 90 - r.top;
+  }
+  function placeKb() {
+    if (!KB.el) return; const vv = window.visualViewport; KB.el.style.bottom = vv ? Math.max(0, innerHeight - (vv.height + vv.offsetTop)) + 'px' : '0';
+    document.documentElement.style.setProperty('--kbh', KB.el.offsetHeight + 'px');
+  }
+  function showKb() { buildKb(); KB.el.hidden = false; KB.el.dataset.keys = ownKb() ? '1' : '0'; document.body.classList.add('lt-kb'); placeKb(); }
+  function hideKb() { KB.act = null; if (KB.el) KB.el.hidden = true; document.body.classList.remove('lt-kb'); $$('.p-tb.sel', kbHost()).forEach(t => t.classList.remove('sel')); }
+  function selectTb(id) { $$('.p-tb', kbHost()).forEach(t => t.classList.toggle('sel', t.dataset.id === id)); }
+  function setActive(el) {
+    KB.act = { el, k: el.dataset.k, id: el.dataset.id }; showKb(); selectTb(el.dataset.k === 'tb' ? el.dataset.id : null); updateBar(); autoShift(); drawKeys(); placeKb(); setTimeout(keepVisible, 60);
+  }
+  function autoShift() { if (KB.shift === 'lock' || !KB.act) return; const ci = caretInfo(KB.act.el), pre = ci ? ci.before : (KB.act.el.innerText || ''); const want = !pre.trim() || /[.!?]\s+$/.test(pre) ? 'once' : 'off'; if (want !== KB.shift) { KB.shift = want; drawKeys(); } }
+  function ensureFocus() {
+    const a = KB.act; if (!a || !a.el.isConnected) return false;
+    if (document.activeElement !== a.el) { a.el.focus({ preventScroll: true }); if (KB.saved) { const s = window.getSelection(); s.removeAllRanges(); s.addRange(KB.saved); } } return true;
+  }
+  function typeCh(ch) {
+    if (!ensureFocus()) return; if (KB.shift === 'once') { KB.shift = 'off'; drawKeys(); }
+    document.execCommand('insertText', false, KB.shift !== 'off' ? ch.toUpperCase() : ch); autoShift(); keepVisible();
+  }
+  function keyAct(a, v) {
+    if (a === 'ch') typeCh(v); else if (a === 'space') typeCh(' ');
+    else if (a === 'back') { if (!ensureFocus()) return; const el = KB.act.el, ci = caretInfo(el); if (el.dataset.k === 'body' && +el.dataset.bi > 0 && ci && ci.collapsed && ci.off === 0) { mergePara(el); return; } document.execCommand('delete'); autoShift(); keepVisible(); }
+    else if (a === 'enter') { if (!ensureFocus()) return; const k = KB.act.k; if (k === 'body') splitPara(KB.act.el); else if (k === 'tb') document.execCommand('insertText', false, '\n'); else { document.activeElement.blur(); hideKb(); } autoShift(); keepVisible(); }
+    else if (a === 'shift') { const t = Date.now(); if (t - KB.tShift < 350) KB.shift = 'lock'; else KB.shift = KB.shift === 'off' ? 'once' : 'off'; KB.tShift = t; drawKeys(); }
+    else if (a === 'mode') { KB.mode = v; drawKeys(); placeKb(); setTimeout(keepVisible, 30); }
+  }
+  const KLAYOUT = {
+    abc: [['q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p'], ['a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l'], ['⇧', 'z', 'x', 'c', 'v', 'b', 'n', 'm', '⌫']],
+    sym: [['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'], ['-', '/', ':', ';', '(', ')', '&', '@', '"'], ['♥', '.', ',', '?', '!', "'", '~', '%', '⌫']]
+  };
+  function drawKeys() {
+    if (!KB.el) return; const box = KB.el.querySelector('.kb-keys'); box.replaceChildren();
+    const key = (label, a, v, cls = '') => h('button', { type: 'button', class: 'kb-key ' + cls, 'data-a': a, 'data-v': v == null ? '' : v, text: label });
+    if (KB.mode === 'emoji') {
+      const g = h('div', { class: 'kb-emo' }, EMOJI.map(e => h('button', { type: 'button', class: 'ek', text: e, onclick: () => { ensureFocus() && document.execCommand('insertText', false, e); keepVisible(); } })));
+      box.append(g, h('div', { class: 'kb-row' }, key('ABC', 'mode', 'abc', 'w'), key('123', 'mode', 'sym', 'w'), key('space', 'space', '', 'sp'), key('⌫', 'back', '', 'w'))); return;
+    }
+    KLAYOUT[KB.mode].forEach(row => box.append(h('div', { class: 'kb-row' }, row.map(c => {
+      if (c === '⇧') return key('⇧', 'shift', '', 'w' + (KB.shift === 'off' ? '' : ' on') + (KB.shift === 'lock' ? ' lock' : ''));
+      if (c === '⌫') return key('⌫', 'back', '', 'w');
+      return key(KB.mode === 'abc' && KB.shift !== 'off' ? c.toUpperCase() : c, 'ch', c);
+    }))));
+    box.append(h('div', { class: 'kb-row' }, key(KB.mode === 'abc' ? '123' : 'ABC', 'mode', KB.mode === 'abc' ? 'sym' : 'abc', 'w'), key('😊', 'mode', 'emoji', 'w'), key(',', 'ch', ','), key('space', 'space', '', 'sp'), key('.', 'ch', '.'), key('↵', 'enter', '', 'w')));
+  }
+  function buildKb() {
+    if (KB.el) return; const el = h('div', { id: 'olwKb', hidden: true, 'data-keys': '1' });
+    const top = h('div', { class: 'kb-top' }, h('span', { class: 'kb-for' }),
+      h('button', { type: 'button', class: 'kb-btn', title: 'Smaller text', text: 'A−', onclick: () => bump(-5) }), h('button', { type: 'button', class: 'kb-btn', title: 'Bigger text', text: 'A+', onclick: () => bump(5) }),
+      h('button', { type: 'button', class: 'kb-btn', text: '+ Text', title: 'Add a text box', onclick: addTb }),
+      h('button', { type: 'button', class: 'kb-btn kb-nat', title: 'Use the phone keyboard instead', text: '⌨', onclick: toggleNative }),
+      h('button', { type: 'button', class: 'kb-btn pri', text: 'Done', onclick: () => { if (document.activeElement && document.activeElement.blur) document.activeElement.blur(); hideKb(); } }));
+    const fonts = h('div', { class: 'kb-fonts' }); [['Simple', FONT_SIMPLE], ['Handwriting', FONT_HAND], ['Script', FONT_SCRIPT]].forEach(([n, list]) => { fonts.append(h('span', { class: 'g', text: n })); list.forEach(f => fonts.append(h('button', { type: 'button', class: 'f', 'data-f': f, style: `font-family:"${f}",cursive`, text: f, onclick: () => applyFont(f) }))); });
+    el.append(top, fonts, h('div', { class: 'kb-keys' }));
+    el.addEventListener('mousedown', e => e.preventDefault());
+    el.addEventListener('pointerdown', e => {
+      const b = e.target.closest('.kb-key'); if (!b) return; e.preventDefault(); const a = b.dataset.a, v = b.dataset.v; keyAct(a, v);
+      if (a === 'back') { clearTimeout(KB.rep); let n = 0; const go = () => { keyAct('back'); KB.rep = setTimeout(go, n++ > 6 ? 40 : 70); }; KB.rep = setTimeout(go, 380); }
+    });
+    const stop = () => clearTimeout(KB.rep); document.addEventListener('pointerup', stop); document.addEventListener('pointercancel', stop);
+    document.body.append(el); KB.el = el;
+    if (window.visualViewport) { window.visualViewport.addEventListener('resize', placeKb); window.visualViewport.addEventListener('scroll', placeKb); }
+    window.addEventListener('resize', () => { if (KB.el && !KB.el.hidden) { KB.el.dataset.keys = ownKb() ? '1' : '0'; placeKb(); } });
+  }
+  function toggleNative() {
+    try { localStorage.setItem(NATIVE_KEY, nativeKb() ? '0' : '1'); } catch (er) { }
+    toast(nativeKb() ? 'Phone keyboard on' : 'Letter keyboard on'); const a = KB.act; if (!a) return;
+    $$('.ced', kbHost()).forEach(c => (c.inputMode = ownKb() ? 'none' : 'text')); KB.el.dataset.keys = ownKb() ? '1' : '0'; a.el.blur(); setTimeout(() => { a.el.focus({ preventScroll: true }); placeKb(); }, 60);
+  }
+  function addTb() {
+    if (!ED.open) return; const L = ED.L; L.tbs = L.tbs || []; if (L.tbs.length >= 12) return toast('You can add up to 12 text boxes.');
+    const pw = kbHost().querySelector('.pw'), pe = kbHost().querySelector('.paper'); if (!pw || !pe) return;
+    const u = pw.getBoundingClientRect().width / 100, pr = pe.getBoundingClientRect(), vy = isPhone() ? innerHeight * .3 : innerHeight * .4;
+    const tb = normTb({ id: uid(), t: '', x: 16 + (L.tbs.length % 3) * 5, y: clamp((vy - pr.top) / u, 6, Math.max(6, pr.height / u - 26)), w: 56, fs: 110, f: L.bodyFont }); L.tbs.push(tb); ED.dirty = true; drawRead(false, true); focusCed(`.p-tb[data-id="${tb.id}"] .ced`, 0);
+  }
+  function initPageEdit() {
+    const host = kbHost(); let td = null, lastTap = { t: 0, x: 0, y: 0 };
+    host.addEventListener('focusin', e => { const el = e.target.closest && e.target.closest('.ced'); if (el && ED.open) setActive(el); });
+    host.addEventListener('focusout', () => setTimeout(() => { if (!KB.act) return; const a = document.activeElement; if (a && a.closest && (a.closest('.ced') || a.closest('#olwKb'))) return; hideKb(); }, 220));
+    host.addEventListener('input', e => { const el = e.target.closest && e.target.closest('.ced'); if (el) onCedInput(el); });
+    host.addEventListener('beforeinput', e => {
+      const el = e.target.closest && e.target.closest('.ced'); if (!el || !ED.open) return; const k = el.dataset.k, t = e.inputType;
+      if (t === 'insertParagraph' || t === 'insertLineBreak') { if (k === 'tb') return; e.preventDefault(); if (k === 'body') splitPara(el); return; }
+      if (t === 'deleteContentBackward' && k === 'body' && +el.dataset.bi > 0) { const ci = caretInfo(el); if (ci && ci.collapsed && ci.off === 0) { e.preventDefault(); mergePara(el); } }
+    });
+    host.addEventListener('paste', e => { const el = e.target.closest && e.target.closest('.ced'); if (!el) return; e.preventDefault(); let t = (e.clipboardData || window.clipboardData).getData('text/plain') || ''; if (el.dataset.k !== 'tb') t = t.replace(/\s*\n+\s*/g, ' '); document.execCommand('insertText', false, t); });
+    document.addEventListener('selectionchange', () => { const a = KB.act; if (!a) return; const s = window.getSelection(); if (s && s.rangeCount && a.el.contains(s.anchorNode)) KB.saved = s.getRangeAt(0).cloneRange(); });
+    /* text box handles */
+    host.addEventListener('pointerdown', e => {
+      const t = e.target.closest && e.target.closest('.tmv,.trs,.tdl'); if (!t || !ED.open) return; const box = t.closest('.p-tb'), tb = curTb(box.dataset.id); if (!tb) return; e.preventDefault(); selectTb(tb.id);
+      if (t.classList.contains('tdl')) { ED.L.tbs = ED.L.tbs.filter(x => x !== tb); ED.dirty = true; hideKb(); drawRead(false, true); return; }
+      td = { tb, box, u: box.closest('.pw').getBoundingClientRect().width / 100 || 3.5, mv: t.classList.contains('tmv'), x0: e.clientX, y0: e.clientY, x: tb.x, y: tb.y, w: tb.w };
+    });
+    document.addEventListener('pointermove', e => {
+      if (!td) return; const dx = (e.clientX - td.x0) / td.u, dy = (e.clientY - td.y0) / td.u;
+      if (td.mv) { td.tb.x = clamp(td.x + dx, 4, 96 - Math.min(td.tb.w, 90)); td.tb.y = clamp(td.y + dy, 4, 500); td.box.style.left = f1(td.tb.x) + 'cqw'; td.box.style.top = f1(td.tb.y) + 'cqw'; }
+      else { td.tb.w = clamp(td.w + dx, 12, 96 - td.tb.x); td.box.style.width = f1(td.tb.w) + 'cqw'; }
+    });
+    const tdEnd = () => { if (!td) return; td = null; ED.dirty = true; };
+    document.addEventListener('pointerup', tdEnd); document.addEventListener('pointercancel', tdEnd);
+    /* double tap / double click a letter (when not editing) opens the editor right at that text */
+    const openAt = e => {
+      if (ED.open || ST.open || S.view !== 'read') return; const L = cur(); if (!L) return; const t = e.target; let sel = '.ced[data-k=body]';
+      const tbx = t.closest('.p-tb'), pp = t.closest('.p-body p[data-bi]');
+      if (tbx) sel = `.p-tb[data-id="${tbx.dataset.id}"] .ced`; else if (pp) sel = `.ced[data-k=body][data-bi="${pp.dataset.bi}"]`; else if (t.closest('.p-greet')) sel = '.ced[data-k=greet]'; else if (t.closest('.p-close')) sel = '.ced[data-k=closing]'; else if (t.closest('.p-sign')) sel = '.ced[data-k=sign]'; else if (t.closest('.p-note')) sel = '.ced[data-k=note]'; else if (!t.closest('.paper')) return;
+      openEditor(L, false); setTimeout(() => focusCed(sel, 'end'), 120);
+    };
+    host.addEventListener('dblclick', openAt);
+    host.addEventListener('pointerup', e => { if (e.pointerType !== 'touch') return; const n = Date.now(); if (n - lastTap.t < 360 && Math.hypot(e.clientX - lastTap.x, e.clientY - lastTap.y) < 30) { lastTap.t = 0; openAt(e); } else lastTap = { t: n, x: e.clientX, y: e.clientY }; });
+    F('tbAdd').addEventListener('click', addTb);
   }
   const photoFree = L => typeof L.px === 'number' && typeof L.py === 'number';
   function setLHide(k, show) { const L = cur(); if (!L) return; const set = new Set(L.hide || []); show ? set.delete(k) : set.add(k); setL('hide', [...set]); }
