@@ -36,6 +36,10 @@
     <h1 id="stHead">Our Story</h1>
     <p><span id="stSub">Cover</span><span class="st-cnt"> • <b id="stNow">--</b>/<span id="stTot">00</span></span></p>
   </div>
+  <div class="st-who" id="stWho" role="tablist" aria-label="Whose diary" hidden>
+    <button type="button" role="tab" id="whoMine" data-who="mine" aria-selected="true">Mine</button>
+    <button type="button" role="tab" id="whoHer" data-who="her" aria-selected="false">Her</button>
+  </div>
   <div class="st-menu-wrap">
     <button class="st-fab" id="stMenuBtn" type="button" aria-haspopup="menu" aria-expanded="false" aria-label="More options"><span class="ico" data-icon="dots"></span></button>
     <div class="st-menu" id="stMenu" role="menu" hidden>
@@ -403,6 +407,8 @@
 <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 <div id="stPrint" aria-hidden="true"></div>
 
+<script src="olw-config.js"></script>
+<script src="olw-sync.js"></script>
 <script src="story.js"></script>
 </body>
 </html>
