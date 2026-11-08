@@ -36,10 +36,6 @@
     <h1 id="stHead">Our Story</h1>
     <p><span id="stSub">Cover</span><span class="st-cnt"> • <b id="stNow">--</b>/<span id="stTot">00</span></span></p>
   </div>
-  <div class="st-who" id="stWho" role="group" aria-label="Which diary" hidden>
-    <button type="button" data-who="me" aria-pressed="true" title="My diary">Mine</button>
-    <button type="button" data-who="other" id="stWhoO" aria-pressed="false">Her</button>
-  </div>
   <div class="st-menu-wrap">
     <button class="st-fab" id="stMenuBtn" type="button" aria-haspopup="menu" aria-expanded="false" aria-label="More options"><span class="ico" data-icon="dots"></span></button>
     <div class="st-menu" id="stMenu" role="menu" hidden>
@@ -65,12 +61,12 @@
     <i class="st-sep"></i>
     <button type="button" class="st-tb" id="edUndo" aria-label="Undo" title="Undo (Ctrl+Z)"><span class="ico" data-icon="undo"></span></button>
     <button type="button" class="st-tb" id="edRedo" aria-label="Redo" title="Redo (Ctrl+Y)"><span class="ico" data-icon="redo"></span></button>
-    <i class="st-sep"></i>
-    <button type="button" class="st-tb" data-cmd="bold" aria-label="Bold" title="Bold (Ctrl+B)"><b>B</b></button>
-    <button type="button" class="st-tb" data-cmd="italic" aria-label="Italic" title="Italic (Ctrl+I)"><i>I</i></button>
-    <button type="button" class="st-tb" data-cmd="underline" aria-label="Underline" title="Underline (Ctrl+U)"><u>U</u></button>
-    <button type="button" class="st-tb" data-cmd="mark" aria-label="Highlight" title="Highlight"><span class="st-hl">H</span></button>
-    <button type="button" class="st-tb" data-cmd="clear" aria-label="Clear formatting" title="Clear formatting"><span class="ico" data-icon="eraser"></span></button>
+    <i class="st-sep st-fmt"></i>
+    <button type="button" class="st-tb st-fmt" data-cmd="bold" aria-label="Bold" title="Bold (Ctrl+B)"><b>B</b></button>
+    <button type="button" class="st-tb st-fmt" data-cmd="italic" aria-label="Italic" title="Italic (Ctrl+I)"><i>I</i></button>
+    <button type="button" class="st-tb st-fmt" data-cmd="underline" aria-label="Underline" title="Underline (Ctrl+U)"><u>U</u></button>
+    <button type="button" class="st-tb st-fmt" data-cmd="mark" aria-label="Highlight" title="Highlight"><span class="st-hl">H</span></button>
+    <button type="button" class="st-tb st-fmt" data-cmd="clear" aria-label="Clear formatting" title="Clear formatting"><span class="ico" data-icon="eraser"></span></button>
   </div>
   <span class="st-status" id="edStatus" role="status" aria-live="polite">Draft</span>
   <div class="st-eactions">
@@ -88,13 +84,15 @@
 
   <aside class="st-studio" id="stStudio" hidden aria-label="Diary editor">
     <button type="button" class="st-collapse" id="stCollapse" aria-expanded="true" aria-label="Show or hide the editor panel"><span class="ico" data-icon="chev"></span></button>
-    <div class="st-tabs" role="tablist">
-      <button type="button" role="tab" data-tab="page" aria-selected="true">Page</button>
-      <button type="button" role="tab" data-tab="design" aria-selected="false">Design</button>
-      <button type="button" role="tab" data-tab="photos" aria-selected="false">Photos</button>
-      <button type="button" role="tab" data-tab="decor" aria-selected="false">Decor</button>
-      <button type="button" role="tab" data-tab="pages" aria-selected="false">Pages</button>
-      <button type="button" role="tab" data-tab="book" aria-selected="false">Style</button>
+    <div class="st-tabs" role="tablist" id="stTabs">
+      <button type="button" role="tab" data-tab="page" aria-selected="true"><span class="ico" data-icon="page"></span><span class="tl">Page</span></button>
+      <button type="button" role="tab" data-tab="text" aria-selected="false"><span class="ico" data-icon="type"></span><span class="tl">Text</span></button>
+      <button type="button" role="tab" data-tab="design" aria-selected="false"><span class="ico" data-icon="brush"></span><span class="tl">Design</span></button>
+      <button type="button" role="tab" data-tab="photos" aria-selected="false"><span class="ico" data-icon="image"></span><span class="tl">Photos</span></button>
+      <button type="button" role="tab" data-tab="decor" aria-selected="false"><span class="ico" data-icon="smile"></span><span class="tl">Decor</span></button>
+      <button type="button" role="tab" data-tab="book" aria-selected="false"><span class="ico" data-icon="book"></span><span class="tl">Diary</span></button>
+      <button type="button" role="tab" data-tab="bg" aria-selected="false"><span class="ico" data-icon="wall"></span><span class="tl">Background</span></button>
+      <button type="button" role="tab" data-tab="pages" aria-selected="false"><span class="ico" data-icon="layers"></span><span class="tl">Pages</span></button>
     </div>
 
     <div class="st-panels">
@@ -108,11 +106,13 @@
           <button type="button" class="btn ghost small" id="pgDateClear">Clear date</button>
         </div>
         <label>Handwritten line at the bottom<input data-f="page.sign" maxlength="160" placeholder="e.g. Maybe that is where our story began... ♡"></label>
-        <label>Text size on this page <output id="pgScaleOut">100%</output><input type="range" data-f="page.scale" min="70" max="130" step="2"></label>
         <div class="st-warn" id="stOverflow" hidden>
           <b>The text is going outside the page.</b>
           <span>Make the text smaller, or send the extra text to a new next page.</span>
-          <button type="button" class="btn small" id="pgSpill">Move extra text to next page</button>
+          <div class="st-btnrow">
+            <button type="button" class="btn small" id="pgShrink">Make text smaller</button>
+            <button type="button" class="btn small" id="pgSpill">Move extra text to next page</button>
+          </div>
         </div>
         <div class="st-btnrow">
           <button type="button" class="btn small" id="pgAdd"><span class="ico" data-icon="plus"></span>New page (after this)</button>
@@ -124,9 +124,13 @@
         <p class="hint">Write directly on the page. Press Enter for a new paragraph. You can write in Roman Urdu or any language.</p>
       </section>
 
-      <!-- DESIGN (heading, page design, lines) -->
-      <section class="st-panel" data-panel="design" hidden>
-        <h3>Heading</h3>
+      <!-- TEXT (writing, heading, fonts, ink) -->
+      <section class="st-panel" data-panel="text" hidden>
+        <h3>Writing on this page</h3>
+        <label>Writing font on this page<select data-f="page.bf" id="pgBf"></select></label>
+        <label>Text size on this page <output id="pgScaleOut">100%</output><input type="range" data-f="page.scale" min="70" max="130" step="2"></label>
+
+        <h3>Heading (page title)</h3>
         <label>Heading font<select data-f="page.hf" id="pgHf"></select></label>
         <label>Heading size <output id="pgHsOut"></output><input type="range" data-f="page.hs" min="60" max="160" step="2"></label>
         <div class="st-row2">
@@ -134,8 +138,21 @@
           <label>Decoration<select data-f="page.hd" id="pgHd"></select></label>
         </div>
         <div class="st-field"><span>Heading colour</span><div class="st-swatches" id="swHc"></div></div>
-        <label>Writing font on this page<select data-f="page.bf" id="pgBf"></select></label>
 
+        <h3>Whole diary writing</h3>
+        <div class="st-row2">
+          <label>Text font<select data-f="look.bodyFont" id="fBody"></select></label>
+          <label>Title font<select data-f="look.headFont" id="fHead"></select></label>
+        </div>
+        <label>Text size <output id="lkSizeOut"></output><input type="range" data-f="look.size" min="80" max="125" step="1"></label>
+        <label>Line spacing <output id="lkLeadOut"></output><input type="range" data-f="look.leading" min="85" max="125" step="1"></label>
+        <div class="st-field"><span>Ink colour</span><div class="st-swatches" id="swInk"></div>
+          <label class="st-custom">Custom colour <input type="color" data-f="look.ink"></label></div>
+        <p class="hint">Bold, italic, underline, highlight: select some words on the page, then use the buttons at the top (or above the keyboard).</p>
+      </section>
+
+      <!-- DESIGN (page design, lines, areas) -->
+      <section class="st-panel" data-panel="design" hidden>
         <h3>Page design</h3>
         <div class="st-designs" id="dsGrid"></div>
         <div class="st-field"><span>Design colour</span><div class="st-swatches" id="swDc"></div>
@@ -227,15 +244,7 @@
         </div>
       </section>
 
-      <!-- PAGES / CHAPTERS -->
-      <section class="st-panel" data-panel="pages" hidden>
-        <div class="st-btnrow">
-          <button type="button" class="btn small" id="chAdd"><span class="ico" data-icon="plus"></span>New chapter</button>
-        </div>
-        <div id="stOutline" class="st-outline"></div>
-      </section>
-
-      <!-- STYLE -->
+      <!-- DIARY (cover, paper, quick styles, draft) -->
       <section class="st-panel" data-panel="book" hidden>
         <h3>Quick styles</h3>
         <div class="st-presets" id="stPresets"></div>
@@ -257,40 +266,11 @@
           <button type="button" class="btn ghost small" id="cvPhotoDel">Remove cover photo</button>
         </div>
 
-        <h3>Paper &amp; writing</h3>
+        <h3>Paper</h3>
         <div class="st-field"><span>Paper colour</span><div class="st-swatches" id="swPaper"></div>
           <label class="st-custom">Custom colour <input type="color" data-f="look.paper"></label></div>
-        <div class="st-field"><span>Ink colour</span><div class="st-swatches" id="swInk"></div>
-          <label class="st-custom">Custom colour <input type="color" data-f="look.ink"></label></div>
-        <div class="st-row2">
-          <label>Title font<select data-f="look.headFont" id="fHead"></select></label>
-          <label>Text font<select data-f="look.bodyFont" id="fBody"></select></label>
-        </div>
-        <label>Text size <output id="lkSizeOut"></output><input type="range" data-f="look.size" min="80" max="125" step="1"></label>
-        <label>Line spacing <output id="lkLeadOut"></output><input type="range" data-f="look.leading" min="85" max="125" step="1"></label>
-        <p class="hint">Lines, headings and page designs are set per page in the Design tab.</p>
         <label>Aged paper <output id="lkAgedOut"></output><input type="range" data-f="look.aged" min="0" max="100" step="2"></label>
-
-        <h3>Background behind the diary</h3>
-        <label>Background<select data-f="bg.type" id="fBgType"></select></label>
-        <div class="st-row2">
-          <label>Colour<input type="color" data-f="bg.color"></label>
-          <label id="bgC2Row">Second colour<input type="color" data-f="bg.color2"></label>
-        </div>
-        <label>Blur <output id="bgBlurOut"></output><input type="range" data-f="bg.blur" min="0" max="24" step="1"></label>
-        <label>Darken <output id="bgDimOut"></output><input type="range" data-f="bg.dim" min="0" max="60" step="1"></label>
-        <label class="chk"><input type="checkbox" data-f="bg.flowers"> Flowers &amp; decorations</label>
-        <label class="chk"><input type="checkbox" data-f="bg.glow"> Soft light</label>
-        <div class="st-btnrow">
-          <button type="button" class="btn ghost small" id="bgPhoto">Upload background photo</button>
-          <button type="button" class="btn ghost small" id="bgPhotoDel">Remove photo</button>
-        </div>
-
-        <h3>Live sync</h3>
-        <div id="liveRow" hidden>
-          <label class="chk"><input type="checkbox" id="liveToggle" checked> Live: show my changes to <span id="liveWho">her</span> while I write</label>
-          <p class="hint" id="liveInfo">If Live is off, she sees only what you Publish.</p>
-        </div>
+        <p class="hint">Fonts, text size and ink are in the Text tab. Lines, headings and page designs are set per page in the Text and Design tabs.</p>
 
         <h3>Draft</h3>
         <div class="st-btnrow">
@@ -300,8 +280,50 @@
           <button type="button" class="btn ghost small st-danger" id="dfBlank">Clear whole diary</button>
         </div>
       </section>
+
+      <!-- BACKGROUND (behind the diary) -->
+      <section class="st-panel" data-panel="bg" hidden>
+        <h3>Background behind the diary</h3>
+        <p class="st-hint">Diary ke peechay ka design. Ek style tap karein, phir rang chunein.</p>
+        <div class="st-bgtypes" id="bgTypes" role="group" aria-label="Background style"></div>
+        <label class="st-lbl">Quick colours</label>
+        <div class="st-swatches" id="swBg"></div>
+        <div id="bgGradRow">
+          <label class="st-lbl">Gradient pairs</label>
+          <div class="st-swatches" id="swBgPair"></div>
+          <label class="st-lbl">Second colour</label>
+          <div class="st-swatches" id="swBg2"></div>
+        </div>
+        <div class="st-row2">
+          <label>Custom colour<input type="color" data-f="bg.color"></label>
+          <label id="bgC2Row">Second colour<input type="color" data-f="bg.color2"></label>
+        </div>
+        <label hidden>Background<select data-f="bg.type" id="fBgType"></select></label>
+        <label>Blur <output id="bgBlurOut"></output><input type="range" data-f="bg.blur" min="0" max="24" step="1"></label>
+        <label>Darken <output id="bgDimOut"></output><input type="range" data-f="bg.dim" min="0" max="60" step="1"></label>
+        <label class="chk"><input type="checkbox" data-f="bg.flowers"> Flowers &amp; decorations</label>
+        <label class="chk"><input type="checkbox" data-f="bg.glow"> Soft light</label>
+        <div class="st-btnrow">
+          <button type="button" class="btn ghost small" id="bgPhoto">Upload background photo</button>
+          <button type="button" class="btn ghost small" id="bgPhotoDel">Remove photo</button>
+        </div>
+      </section>
+
+      <!-- PAGES / CHAPTERS -->
+      <section class="st-panel" data-panel="pages" hidden>
+        <div class="st-btnrow">
+          <button type="button" class="btn small" id="chAdd"><span class="ico" data-icon="plus"></span>New chapter</button>
+        </div>
+        <div id="stOutline" class="st-outline"></div>
+      </section>
     </div>
   </aside>
+
+  <!-- Apna keyboard + writing tools (touch devices par likhte waqt) -->
+  <div class="st-kbdock" id="stKbDock" hidden aria-label="Keyboard and writing tools">
+    <div class="st-kbtools" id="stKbTools"></div>
+    <div class="st-kb" id="stKb"></div>
+  </div>
 </div>
 
 <!-- ===== Bottom: only Previous / Edit / Next ===== -->
@@ -381,8 +403,6 @@
 <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 <div id="stPrint" aria-hidden="true"></div>
 
-<script src="olw-config.js"></script>
-<script src="olw-sync.js"></script>
 <script src="story.js"></script>
 </body>
 </html>
