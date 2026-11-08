@@ -58,9 +58,9 @@
   /* ---------- 2. OPTIONS ---------- */
   const FLORALS = { plum: 'Plum roses', lavender: 'Lavender', rose: 'Blush pink', sage: 'Greenery', none: 'None' };
   const PAPERS = { cream: ['#f7ecdc', '#ead9c0', 'Cream'], white: ['#fffaf2', '#f1e6d6', 'Ivory'], rose: ['#f9e4e3', '#edcacd', 'Rose'], lilac: ['#f2e8f5', '#ddcce7', 'Lilac'], aged: ['#efdcb8', '#dcc193', 'Old paper'] };
-  const LDESIGNS = { florals: 'Classic florals', roses: 'Rose garden', gold: 'Golden frame', lace: 'Lace & bow', hearts: 'Heart border', watercolor: 'Watercolour', airmail: 'Airmail', stars: 'Starry night', vine: 'Garden vine', ribbon: 'Satin ribbon', notebook: 'Notebook', kraft: 'Kraft & stitches', cherry: 'Cherry blossom', navy: 'Navy & gold', chalk: 'Black board', sunset: 'Sunset sky', emerald: 'Emerald & gold' };
-  const DEF_INK = { navy: '#1d2a5b', emerald: '#14503a', chalk: '#f1e4c4', sunset: '#2d2a66' };   // pen colour that suits these designs (applied when the design is chosen)
-  const DEF_DCOL = { gold: '#c99a3a', lace: '#e8a0b8', hearts: '#e5809f', watercolor: '#e58fb1', airmail: '#d6455d', stars: '#d4a23c', vine: '#6f8a4d', ribbon: '#c2476f', notebook: '#c85a6a', kraft: '#b58a5a', cherry: '#f0a0b8', navy: '#1d2a5b', chalk: '#d4a84a', sunset: '#8a6bc0', emerald: '#14503a', roses: '#c0587f', florals: '#b8456f' };
+  const LDESIGNS = { florals: 'Classic florals', roses: 'Rose garden', gold: 'Golden frame', lace: 'Lace & bow', hearts: 'Heart border', watercolor: 'Watercolour', airmail: 'Airmail', stars: 'Starry night', vine: 'Garden vine', ribbon: 'Satin ribbon', notebook: 'Notebook', kraft: 'Kraft & stitches', cherry: 'Cherry blossom', navy: 'Navy & gold', chalk: 'Black board', sunset: 'Sunset sky', emerald: 'Emerald & gold', minimal: 'Clean lines', linen: 'Soft corners', pastel: 'Pastel dots', sprig: 'Green sprigs', modern: 'Modern bar', moon: 'Moonlight' };
+  const DEF_INK = { navy: '#1d2a5b', emerald: '#14503a', chalk: '#f1e4c4', sunset: '#2d2a66', moon: '#eadfc2' };   // pen colour that suits these designs (applied when the design is chosen)
+  const DEF_DCOL = { gold: '#c99a3a', lace: '#e8a0b8', hearts: '#e5809f', watercolor: '#e58fb1', airmail: '#d6455d', stars: '#d4a23c', vine: '#6f8a4d', ribbon: '#c2476f', notebook: '#c85a6a', kraft: '#b58a5a', cherry: '#f0a0b8', navy: '#1d2a5b', chalk: '#d4a84a', sunset: '#8a6bc0', emerald: '#14503a', minimal: '#b89a6a', linen: '#c9a27a', pastel: '#f0a6b8', sprig: '#5f8a5a', modern: '#b8456f', moon: '#d9b45a', roses: '#c0587f', florals: '#b8456f' };
   const ENVS = { cream: ['#f4e7d8', '#ecd9c6', '#ddc6b0', 'Cream'], blush: ['#f9e3e3', '#f0cfd2', '#e0b3b9', 'Blush'], lilac: ['#f1e8f6', '#e1d2ee', '#cbb6de', 'Lilac'], sage: ['#eaf0e0', '#d9e4cb', '#bccfa6', 'Sage'], kraft: ['#dcbf96', '#cfae80', '#b99060', 'Kraft'], wine: ['#8a2a45', '#701c35', '#4e1024', 'Wine'] };
   const LHIDE = [['photo', 'Photo'], ['from', '"From" line'], ['date', 'Date'], ['design', 'Page design / flowers'], ['underline', 'Underlines'], ['closing', 'Closing line'], ['note', 'Side note'], ['envflor', 'Flowers on envelope'], ['seal', 'Wax seal on envelope']];
   const GHIDE = [['gyp', "Baby's-breath flowers"], ['lantern', 'Lantern'], ['petals', 'Rose petals'], ['lights', 'Fairy lights'], ['laurel', 'Top corner ornaments'], ['divider', 'Divider lines'], ['tagline', 'Words under the envelope'], ['pillfl', 'Flowers beside the button'], ['cloth', 'Cream cloth'], ['under', 'Papers under the letter'], ['pen', 'Pen (letter screen)'], ['wseal', 'Wax seal (letter screen)']];
@@ -72,15 +72,15 @@
     rosegold: { n: 'Rose gold', bg: '#4a1e26', v: ['#c47a7a', '#8f4a52', '#4a1e28'], hi: '#e0a0a0', cloth: ['#fff5ee', '#f8e4d7', '#ebd1c1'] },
     charcoal: { n: 'Charcoal', bg: '#16161a', v: ['#4a4a54', '#2c2c34', '#121216'], hi: '#6a6a78', cloth: ['#f7f5f1', '#e9e6e0', '#d7d3cb'] }
   };
-  const BODY_FONTS = ['Covered By Your Grace', 'Caveat', 'Homemade Apple', 'Reenie Beanie', 'Nothing You Could Do', 'Zeyada', 'Kalam', 'La Belle Aurore', 'Dancing Script'];
-  const HEAD_FONTS = ['Mrs Saint Delafield', 'Allura', 'Great Vibes', 'Parisienne', 'Sacramento', 'Kristi', 'Birthstone', 'Fleur De Leah', 'Pinyon Script', 'Alex Brush'];
+  const BODY_FONTS = ['Covered By Your Grace', 'Caveat', 'Homemade Apple', 'Reenie Beanie', 'Nothing You Could Do', 'Zeyada', 'Kalam', 'La Belle Aurore', 'Dancing Script', 'Shadows Into Light', 'Indie Flower', 'Patrick Hand', 'Gaegu', 'Satisfy', 'Cookie', 'Handlee', 'Gloria Hallelujah', 'Cormorant Garamond', 'Playfair Display', 'Lora'];
+  const HEAD_FONTS = ['Mrs Saint Delafield', 'Allura', 'Great Vibes', 'Parisienne', 'Sacramento', 'Kristi', 'Birthstone', 'Fleur De Leah', 'Pinyon Script', 'Alex Brush', 'Tangerine', 'Italianno', 'Rouge Script', 'Monsieur La Doulaise', 'Herr Von Muellerhoff', 'Cookie', 'Playfair Display'];
   const INKS = ['#4a2342', '#2b2430', '#2a3a63', '#7a1f3d', '#2f5a45', '#5b3a29'];
   const SEALS = { gold: 'Gold', wine: 'Wine', rose: 'Rose' };
 
   const blank = () => ({
     id: uid(), design: 'florals', dcol: '', env: 'cream', hide: [], by: '', updated: 0, from: '', date: todayISO(), chapter: 'Chapter 1', tag: 'A letter from my heart...', btn: 'Special for You',
     greet: '', body: [''], closing: '', sign: '', note: '', photo: '', cap: 'You & Me', floral: 'plum', paper: 'cream', ink: INKS[0],
-    bodyFont: 'Covered By Your Grace', headFont: 'Mrs Saint Delafield', size: 100, psize: 100, plen: 100, ptape: true, seal: 'gold', mono: '', fav: false, replyTo: '', created: Date.now(), demo: false
+    bodyFont: 'Covered By Your Grace', headFont: 'Mrs Saint Delafield', size: 100, psize: 100, plen: 100, ptape: true, px: null, py: null, prot: null, pover: false, seal: 'gold', mono: '', fav: false, replyTo: '', created: Date.now(), demo: false
   });
   function normLetter(x) {
     const d = blank(); x = x && typeof x === 'object' ? x : {};
@@ -90,7 +90,7 @@
       id: /^[\w-]{3,40}$/.test(x.id || '') ? x.id : d.id, from: txt(x.from, 40), date: parseISO(x.date) ? x.date : d.date, chapter: txt(x.chapter, 30) || 'Chapter 1',
       tag: txt(x.tag, 70), btn: txt(x.btn, 30) || 'Special for You', greet: txt(x.greet, 80), body: body.length ? body : [''], closing: txt(x.closing, 60), sign: txt(x.sign, 40), note: txt(x.note, 120),
       photo, cap: txt(x.cap, 40), floral: pick(x.floral, Object.keys(FLORALS), 'plum'), paper: pick(x.paper, Object.keys(PAPERS), 'cream'), ink: isHex(x.ink) ? x.ink : d.ink,
-      bodyFont: pick(x.bodyFont, BODY_FONTS, d.bodyFont), headFont: pick(x.headFont, HEAD_FONTS, d.headFont), size: clamp(Math.round(+x.size || 100), 80, 130), psize: clamp(Math.round(+x.psize || 100), 40, 180), plen: clamp(Math.round(+x.plen || 100), 40, 240), ptape: x.ptape !== false,
+      bodyFont: pick(x.bodyFont, BODY_FONTS, d.bodyFont), headFont: pick(x.headFont, HEAD_FONTS, d.headFont), size: clamp(Math.round(+x.size || 100), 80, 130), psize: clamp(Math.round(+x.psize || 100), 40, 180), plen: clamp(Math.round(+x.plen || 100), 40, 240), ptape: x.ptape !== false, px: x.px == null || !isFinite(+x.px) ? null : clamp(+x.px, -20, 110), py: x.py == null || !isFinite(+x.py) ? null : clamp(+x.py, -20, 400), prot: x.prot == null || !isFinite(+x.prot) ? null : clamp(+x.prot, -45, 45), pover: !!x.pover,
       design: pick(x.design, Object.keys(LDESIGNS), 'florals'), dcol: isHex(x.dcol) ? x.dcol : '', env: pick(x.env, Object.keys(ENVS), 'cream'), hide: (Array.isArray(x.hide) ? x.hide : []).filter(k => LHIDE.some(a => a[0] === k)), by: txt(x.by, 80), updated: +x.updated || 0,
       seal: pick(x.seal, Object.keys(SEALS), 'gold'), mono: txt(x.mono, 2), fav: !!x.fav, replyTo: txt(x.replyTo, 40), created: +x.created || d.created, demo: !!x.demo
     };
@@ -295,6 +295,35 @@
     const A = accent(L), seed = hashStr(L.id + key), R = rng(seed), fp = L.floral === 'none' ? 'rose' : L.floral;
     const el = h('div', { class: 'ds ds-' + key, style: `--da:${A.a};--dl:${A.l};--dd:${A.d}` }); const add = (...c) => c.forEach(x => el.append(x));
     switch (key) {
+      case 'minimal':
+        add(h('i', { class: 'mn', style: `border-color:${A.a}` }), h('i', { class: 'mn m2', style: `border-color:${A.l}` }), dp(SVG('0 0 24 22', `<path d="M12 20C4 14 1 10 1 6.500A5 5 0 0 1 12 4.500A5 5 0 0 1 23 6.500C23 10 20 14 12 20Z" fill="${A.a}"/>`), 'left:50%;top:1.2cqw;width:5cqw;margin-left:-2.5cqw'));
+        break;
+      case 'linen': {
+        const cr = `<path d="M2 26V8Q2 2 8 2H26" fill="none" stroke="${A.a}" stroke-width="1.200" stroke-linecap="round"/><path d="M7 26V12Q7 7 12 7H26" fill="none" stroke="${A.l}" stroke-width=".8" stroke-linecap="round"/><circle cx="2" cy="2" r="1.400" fill="${A.a}"/>`;
+        add(dp(SVG('0 0 28 28', cr), 'left:3cqw;top:3cqw;width:15cqw'), dp(SVG('0 0 28 28', cr), 'right:3cqw;top:3cqw;width:15cqw;transform:scaleX(-1)'), dp(SVG('0 0 28 28', cr), 'left:3cqw;bottom:3cqw;width:15cqw;transform:scaleY(-1)'), dp(SVG('0 0 28 28', cr), 'right:3cqw;bottom:3cqw;width:15cqw;transform:scale(-1)'), h('i', { class: 'ln' }));
+        break;
+      }
+      case 'pastel': {
+        let dots = ''; for (let i = 0; i < 26; i++) dots += `<circle cx="${f1(R() * 100)}" cy="${f1(R() * 22)}" r="${f1(.5 + R() * 1.4)}" fill="${i % 2 ? A.a : '#fff'}" opacity="${f1(.35 + R() * .45)}"/>`;
+        add(dp(SVG('0 0 100 24', `<path d="M0 0H100V12C80 20 62 8 44 14S12 20 0 12Z" fill="${A.l}"/><path d="M0 0H100V6C76 14 56 3 38 8S10 14 0 7Z" fill="${A.a}" opacity=".5"/>${dots}`), 'left:0;top:0;width:100cqw'), dp(SVG('0 0 100 24', `<path d="M0 24H100V12C80 4 62 16 44 10S12 4 0 12Z" fill="${A.l}"/><path d="M0 24H100V18C76 10 56 21 38 16S10 10 0 17Z" fill="${A.a}" opacity=".5"/>${dots}`), 'left:0;bottom:0;width:100cqw'));
+        break;
+      }
+      case 'sprig': {
+        const lf = (x, y, r, k) => `<path transform="translate(${x} ${y}) rotate(${r}) scale(${k})" d="M0 0C6 -7 16 -7 22 0C16 7 6 7 0 0Z" fill="${A.a}" opacity=".85"/>`;
+        let g = `<path d="M4 4C20 20 34 38 46 62" stroke="${A.d}" stroke-width="1.100" fill="none" stroke-linecap="round"/>`;
+        [[10, 10, 20], [18, 20, 70], [20, 18, -10], [28, 32, 78], [30, 30, 5], [38, 46, 84], [38, 44, 18]].forEach(([x, y, r], i) => { g += lf(x, y, r, .55 + (i % 3) * .12); });
+        const S1 = SVG('0 0 60 70', g);
+        add(dp(S1, 'left:2cqw;top:2cqw;width:24cqw'), dp(S1, 'right:2cqw;bottom:2cqw;width:24cqw;transform:rotate(180deg)'), dp(SVG('0 0 60 70', g + `<circle cx="46" cy="62" r="2" fill="${A.m}"/>`), 'right:2cqw;top:2cqw;width:15cqw;transform:scaleX(-1);opacity:.6'), dp(S1, 'left:2cqw;bottom:2cqw;width:15cqw;transform:scaleY(-1);opacity:.6'));
+        break;
+      }
+      case 'modern':
+        add(h('i', { class: 'mb', style: `background:${A.a}` }), h('i', { class: 'mb t', style: `background:${A.l}` }), h('i', { class: 'mb h', style: `background:${A.a}` }));
+        break;
+      case 'moon': {
+        let s = ''; for (let i = 0; i < 14; i++) s += sparkle(f1(R() * 100), f1(R() * 128), f1(.18 + R() * .3), f1(.35 + R() * .5));
+        add(dp(SVG('0 0 100 130', s, 'sky'), 'left:0;top:0;width:100cqw;height:130cqw'), dp(SVG('0 0 60 50', `<path d="M36 4a22 22 0 1 0 18 34A18 18 0 1 1 36 4Z" fill="${A.a}"/>`), 'right:8cqw;top:6cqw;width:13cqw;transform:rotate(8deg)'), h('i', { class: 'mo' }));
+        break;
+      }
       case 'roses':
         add(h('i', { class: 'wc', style: `right:-10cqw;bottom:-6cqw;width:70cqw;height:70cqw;background:radial-gradient(closest-side,${A.l}aa,transparent)` }),
           dp(cornerFloral(fp, seed + 1, 1.25), 'left:-2cqw;top:-2cqw;width:52cqw'), dp(cornerFloral(fp, seed + 2, 1.35), 'right:-2cqw;bottom:-2cqw;width:64cqw;transform:scale(-1)'), dp(cornerFloral(fp, seed + 3, 1), 'left:-2cqw;bottom:-2cqw;width:36cqw;transform:scaleY(-1)'), dp(cornerFloral(fp, seed + 4, .9), 'right:-2cqw;top:-2cqw;width:30cqw;transform:scaleX(-1)'));
@@ -465,7 +494,11 @@
     const from = h('div', { class: 'p-from' }, h('span', { class: 'ic-w', html: ico('mail') }), h('span', { class: 'p-fromtxt' }, 'From: ' + (L.from || (empty ? '...' : ''))), h('span', { class: 'p-hrt', html: tinyHeart }));
     const date = h('div', { class: 'p-date' }, h('span', { class: 'ic-w', html: ico('cal') }), h('span', { text: fmtDay(L.date) }));
     const body = h('div', { class: 'p-body' });
-    if (L.photo) body.append(h('figure', { class: 'p-photo' }, L.ptape === false ? null : h('i', { class: 'tape' }), h('img', { src: L.photo, alt: L.cap || 'Photo', draggable: 'false' }), L.cap ? h('figcaption', { text: L.cap }) : null));
+    if (L.photo) {
+      const free = typeof L.px === 'number' && typeof L.py === 'number';
+      const fig = h('figure', { class: 'p-photo' + (free ? ' free' : '') + (free && L.pover ? ' over' : ''), style: (free ? `left:${f1(L.px)}cqw;top:${f1(L.py)}cqw;` : '') + (typeof L.prot === 'number' ? `transform:rotate(${f1(L.prot)}deg);` : '') }, L.ptape === false ? null : h('i', { class: 'tape' }), h('img', { src: L.photo, alt: L.cap || 'Photo', draggable: 'false' }), L.cap ? h('figcaption', { text: L.cap }) : null, o.live ? h('i', { class: 'p-rs', title: 'Drag to resize' }) : null);
+      if (free) paper.append(fig); else body.append(fig);
+    }
     if (L.greet || empty) body.append(h('h2', { class: 'p-greet' + (L.greet ? '' : ' ph') }, L.greet || 'Dear ...', h('span', { html: underline() })));
     const paras = L.body.filter(x => x.trim());
     if (!paras.length && empty) body.append(h('p', { class: 'ph', text: 'Write your letter here...' }));
@@ -663,7 +696,7 @@
     $$('dialog').forEach(d => { d.addEventListener('click', e => { if (e.target === d) closeDlg(d); }); $$('[data-close]', d).forEach(b => b.addEventListener('click', () => closeDlg(d))); });
     $('#fileImp').addEventListener('change', e => { const f = e.target.files[0]; e.target.value = ''; if (f) importFile(f); });
     $('#fileImg').addEventListener('change', e => { const f = e.target.files[0]; e.target.value = ''; if (f) readPhoto(f); });
-    F('phAdd').addEventListener('click', () => $('#fileImg').click()); F('phRm').addEventListener('click', () => setField('photo', ''));
+    initPhotoDrag(); F('phAdd').addEventListener('click', () => $('#fileImg').click()); F('phRm').addEventListener('click', () => setField('photo', ''));
     F('edSave').addEventListener('click', saveEditor); F('edCancel').addEventListener('click', leaveEditor); F('edDel').addEventListener('click', deleteLetter);
     F('edFold').addEventListener('click', () => F('editor').classList.toggle('folded'));
     document.addEventListener('keydown', e => {
@@ -775,6 +808,28 @@
     if (ED.open) { setField(k, v, soft); syncStyler(); return; }
     L[k] = v; touch(L); if (soft) { clearTimeout(setL.t); setL.t = setTimeout(redrawCur, 120); } else redrawCur(); pushSoon(L); syncStyler();
   }
+  /* photo: drag anywhere / resize (works while the editor or the styler is open) */
+  function initPhotoDrag() {
+    const host = $('#paperHost'); let d = null;
+    const fig = () => host.querySelector('.p-photo');
+    host.addEventListener('pointerdown', e => {
+      if (!(ED.open || ST.open)) return; const f0 = e.target.closest('.p-photo'); if (!f0 || !host.contains(f0)) return;
+      const L = cur(); if (!L || !L.photo) return; const pw = f0.closest('.pw'), pe = pw.querySelector('.paper'); const u = pw.getBoundingClientRect().width / 100; if (!u) return;
+      e.preventDefault();
+      const free = typeof L.px === 'number' && typeof L.py === 'number', fr = f0.getBoundingClientRect(), pr = pe.getBoundingClientRect();
+      if (!free) { L.px = clamp((fr.left - pr.left) / u, -20, 110); L.py = clamp((fr.top - pr.top) / u, -20, 400); drawRead(false, true); }
+      const f = fig(); if (!f) return; const r = f.getBoundingClientRect();
+      d = { rs: !!e.target.closest('.p-rs'), x0: e.clientX, y0: e.clientY, px: L.px, py: L.py, w0: r.width, ps: L.psize || 100, u, L }; f.classList.add('drag');
+    });
+    document.addEventListener('pointermove', e => {
+      if (!d) return; const f = fig(); if (!f) return; const dx = e.clientX - d.x0, dy = e.clientY - d.y0;
+      if (d.rs) { const ps = clamp(Math.round(d.ps * (d.w0 + dx) / d.w0), 40, 180); d.L.psize = ps; f.closest('.pw').style.setProperty('--ps', ps / 100); }
+      else { d.L.px = clamp(d.px + dx / d.u, -20, 110); d.L.py = clamp(d.py + dy / d.u, -20, 400); f.style.left = f1(d.L.px) + 'cqw'; f.style.top = f1(d.L.py) + 'cqw'; }
+    });
+    const end = () => { if (!d) return; const L = d.L; d = null; if (ED.open) ED.dirty = true; else { touch(L); pushSoon(L); } drawRead(false, true); syncStyler(); };
+    document.addEventListener('pointerup', end); document.addEventListener('pointercancel', end);
+  }
+  const photoFree = L => typeof L.px === 'number' && typeof L.py === 'number';
   function setLHide(k, show) { const L = cur(); if (!L) return; const set = new Set(L.hide || []); show ? set.delete(k) : set.add(k); setL('hide', [...set]); }
   function toggleRow(label, get, set) { const inp = h('input', { type: 'checkbox' }); inp.addEventListener('change', () => set(inp.checked)); const r = h('label', { class: 'tg' }, inp, h('span', { text: label })); ST.rows.push(() => (inp.checked = !!get())); return r; }
   const chipRow = (id, items, fn, cls = 'chip') => F(id).replaceChildren(...items.map(([k, n, css]) => h('button', { type: 'button', class: cls, 'data-v': k, title: n, style: css || '', text: cls === 'chip' ? n : '', onclick: () => fn(k) })));
@@ -800,6 +855,9 @@
     F('sBodyFont').replaceChildren(...BODY_FONTS.map(f => h('option', { value: f, text: f, style: `font-family:"${f}"` }))); F('sHeadFont').replaceChildren(...HEAD_FONTS.map(f => h('option', { value: f, text: f, style: `font-family:"${f}"` })));
     F('sBodyFont').addEventListener('change', e => setL('bodyFont', e.target.value)); F('sHeadFont').addEventListener('change', e => setL('headFont', e.target.value));
     F('sSize').addEventListener('input', e => setL('size', +e.target.value, true));
+    F('sPr').addEventListener('input', e => setL('prot', +e.target.value, true)); F('sPrReset').addEventListener('click', () => setL('prot', null));
+    F('sPover').addEventListener('change', e => { const L = cur(); if (!L) return; if (e.target.checked && !photoFree(L)) { setL('px', 52, true); setL('py', 14, true); } setL('pover', e.target.checked); });
+    F('sPfree').addEventListener('click', () => { const L = cur(); if (!L) return; if (photoFree(L)) { setL('px', null, true); setL('py', null, true); setL('pover', false); } else { setL('px', 52, true); setL('py', 14, true); setL('pover', false); } });
     F('sPs').addEventListener('input', e => setL('psize', +e.target.value, true)); F('sPl').addEventListener('input', e => setL('plen', +e.target.value, true)); F('sTape').addEventListener('change', e => setL('ptape', e.target.checked));
     const pre = (id, key, items) => F(id).replaceChildren(...items.map(([n, v]) => h('button', { type: 'button', class: 'chip', 'data-v': v, text: n, onclick: () => setL(key, v) })));
     pre('sPsPre', 'psize', [['Tiny', 60], ['Small', 80], ['Medium', 100], ['Big', 135], ['Huge', 170]]);
@@ -823,7 +881,7 @@
     if (!L) return; F('sHint').textContent = 'Changing: ' + (L.greet || L.tag || 'this letter');
     on('sEnv', L.env); on('sFloral', L.floral); on('sSeal', L.seal); on('sDesign', L.design); on('sDcol', L.dcol || ''); on('sPaper', L.paper); on('sInk', L.ink); on('sPsPre', L.psize); on('sPlPre', L.plen);
     if (document.activeElement !== F('sMono')) F('sMono').value = L.mono; F('sDcolC').value = isHex(L.dcol) ? L.dcol : (DEF_DCOL[L.design] || '#b8456f'); F('sInkC').value = L.ink;
-    F('sBodyFont').value = L.bodyFont; F('sHeadFont').value = L.headFont; F('sSize').value = L.size; F('sSizeO').textContent = L.size + '%'; F('sPs').value = L.psize; F('sPsO').textContent = L.psize + '%'; F('sPl').value = L.plen; F('sPlO').textContent = L.plen + '%'; F('sTape').checked = L.ptape !== false;
+    F('sBodyFont').value = L.bodyFont; F('sHeadFont').value = L.headFont; F('sSize').value = L.size; F('sSizeO').textContent = L.size + '%'; F('sPs').value = L.psize; F('sPsO').textContent = L.psize + '%'; F('sPl').value = L.plen; F('sPlO').textContent = L.plen + '%'; F('sTape').checked = L.ptape !== false; F('sPr').value = typeof L.prot === 'number' ? L.prot : 2; F('sPrO').textContent = (typeof L.prot === 'number' ? Math.round(L.prot) : 'auto') + (typeof L.prot === 'number' ? '°' : ''); F('sPover').checked = !!L.pover && photoFree(L); F('sPfree').textContent = photoFree(L) ? 'Put photo back beside the text' : 'Free move photo (drag it on the page)';
     F('sSaveNote').textContent = CLOUD.user ? 'Saved and shown on both Google accounts.' : 'Saved on this device. Turn on Google sync (menu) to show it on both accounts.';
   }
 
