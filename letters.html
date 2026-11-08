@@ -11,7 +11,7 @@
   </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500;1,600&family=Inter:wght@400;500;600&family=Allura&family=Mrs+Saint+Delafield&family=Great+Vibes&family=Parisienne&family=Sacramento&family=Kristi&family=Birthstone&family=Fleur+De+Leah&family=Pinyon+Script&family=Alex+Brush&family=Covered+By+Your+Grace&family=Caveat:wght@500;600&family=Homemade+Apple&family=Reenie+Beanie&family=Nothing+You+Could+Do&family=Zeyada&family=Kalam:wght@300;400&family=La+Belle+Aurore&family=Dancing+Script:wght@500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500;1,600&family=Inter:wght@400;500;600&family=Allura&family=Mrs+Saint+Delafield&family=Great+Vibes&family=Parisienne&family=Sacramento&family=Kristi&family=Birthstone&family=Fleur+De+Leah&family=Pinyon+Script&family=Alex+Brush&family=Covered+By+Your+Grace&family=Caveat:wght@500;600&family=Homemade+Apple&family=Reenie+Beanie&family=Nothing+You+Could+Do&family=Zeyada&family=Kalam:wght@300;400&family=La+Belle+Aurore&family=Dancing+Script:wght@500;600&family=Shadows+Into+Light&family=Indie+Flower&family=Patrick+Hand&family=Gaegu:wght@400;700&family=Satisfy&family=Cookie&family=Handlee&family=Gloria+Hallelujah&family=Playfair+Display:ital@0;1&family=Lora:ital@0;1&family=Tangerine:wght@400;700&family=Italianno&family=Rouge+Script&family=Monsieur+La+Doulaise&family=Herr+Von+Muellerhoff&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="letters.css">
 </head>
 <body class="lt" data-view="mail">
@@ -143,6 +143,11 @@
       <label>Page length <output id="sPlO">100%</output><input type="range" id="sPl" min="40" max="240" step="2"></label>
       <div class="chips" id="sPlPre" aria-label="Page length presets"></div>
       <label class="tg"><input type="checkbox" id="sTape"><span>Tape on the photo</span></label>
+      <button type="button" class="chip" id="sPfree">Free move photo (drag it on the page)</button>
+      <label class="tg"><input type="checkbox" id="sPover"><span>Photo on top of the text</span></label>
+      <label>Photo tilt <output id="sPrO">auto</output><input type="range" id="sPr" min="-30" max="30" step="1"></label>
+      <button type="button" class="chip" id="sPrReset">Auto tilt</button>
+      <p class="hint">Tip: with this panel or the editor open, drag the photo anywhere on the page; drag its bottom-right dot to resize.</p>
       <div class="tgs" id="sShowP"></div>
       <div class="btnrow"><button type="button" class="btn" id="sPrev">See the open letter</button></div>
     </section>
