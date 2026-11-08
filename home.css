@@ -1140,3 +1140,22 @@ html[data-view="overlay"] .hero-photo{display:block;position:absolute;inset:0;bo
 .v-card[aria-pressed="true"]{border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 28%,transparent)}
 .v-card b{font-size:.8rem}
 .v-card small{font-size:.7rem;color:var(--ink-soft);line-height:1.25}
+
+/* ===== Surprise: line by line letter ===== */
+.sur-dlg{max-height:84vh;overflow:auto;padding:28px 22px 22px}
+.sur-lines{display:grid;gap:15px;text-align:center;margin:4px 0}
+.sur-line{margin:0;font-size:1.05rem;line-height:1.75;opacity:0;transform:translateY(10px);animation:surIn 1s ease forwards}
+.sur-line.now{animation-duration:.01s}
+.sur-last{font-family:var(--script);font-size:1.45rem;line-height:1.5;color:var(--accent)}
+.sur-sign{margin:6px 0 0;font-family:var(--script);font-size:1.5rem;color:var(--accent)}
+.sur-actions{display:flex;gap:12px;align-items:center;justify-content:center;margin-top:8px;min-height:40px}
+.sur-skip{background:none;border:0;color:var(--ink-soft);font-size:.82rem;text-decoration:underline;padding:8px}
+@keyframes surIn{to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.sur-line{animation:none;opacity:1;transform:none}}
+.sur-actions{position:sticky;bottom:-22px;padding:10px 0 4px;background:linear-gradient(transparent,var(--paper-b) 45%)}
+
+/* ===== Password recovery ===== */
+.lock-forgot{background:none;border:0;color:var(--ink-soft);font-size:.85rem;text-decoration:underline;padding:6px}
+.rec-box{display:grid;gap:10px;width:100%;justify-items:center}
+.rec-box[hidden],.rec-box input[hidden],.rec-box button[hidden]{display:none}
+.rec-code{display:block;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:1.45rem;letter-spacing:.12em;padding:14px 16px;border-radius:14px;background:var(--input-bg);color:var(--input-ink);border:1px dashed var(--line-2);user-select:all;word-break:break-all}
