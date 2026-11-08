@@ -13,7 +13,12 @@
   /* ---------------------------------------------------------------
      0. CONFIG  (dusre pages se connect karne ke liye yahi do jagah badlein)
      --------------------------------------------------------------- */
-  const ROLE = 'owner';                       // TEMP: login ke baad server se aayega ('owner' | 'partner'). Home ke home.js mein bhi yahi.
+  /* ME = main kaun hoon ('owner' | 'partner'; sync login se aata hai, login na ho to 'owner').
+     VIEW = abhi kis ki diary khuli hai (Mine ya Her). Likh sirf apni diary sakte hain: canEdit() = VIEW === ME. */
+  let ME = 'owner', VIEW = 'owner';
+  const otherOf = r => (r === 'owner' ? 'partner' : 'owner');
+  const canEdit = () => VIEW === ME;
+  const kk = (name, who) => ((who || VIEW) === 'owner' ? name : name + ':partner');   // owner ke purane keys wahi rehte hain (data safe)
   const TZ = 'Asia/Karachi';
   const BUILT_PAGES = { home: true, story: true, gallery: true, letters: true, chat: true };   // jaise pages ban jayen: gallery:true, letters:true, questions:true
   const PAGE_URL = { home: 'index.html', story: 'story.html', gallery: 'gallery.html', letters: 'letters.html', chat: 'messages.html' };
@@ -291,10 +296,11 @@
   /* Publish: published + prev + draft-delete EK hi transaction mein. Fail ho to purana published bilkul safe rehta hai. */
   async function kvPublish(pub, prev) {
     const db = await openDB();
-    if (!db) { memKV.set('published', clone(pub)); if (prev) memKV.set('prev', clone(prev)); memKV.delete('draft'); return; }
+    const kP = kk('published'), kV = kk('prev'), kD = kk('draft');
+    if (!db) { memKV.set(kP, clone(pub)); if (prev) memKV.set(kV, clone(prev)); memKV.delete(kD); return; }
     await new Promise((res, rej) => {
       const tx = db.transaction('kv', 'readwrite'), st = tx.objectStore('kv');
-      st.put(pub, 'published'); if (prev) st.put(prev, 'prev'); st.delete('draft');
+      st.put(pub, kP); if (prev) st.put(prev, kV); st.delete(kD);
       tx.oncomplete = res; tx.onerror = tx.onabort = () => rej(tx.error || new Error('Publish was stopped'));
     });
   }
@@ -317,7 +323,8 @@
   async function loadImages(st) { await Promise.all([...imageIds(st)].filter(id => !id.startsWith('demo:')).map(id => imgGet(id).catch(() => null))); }
   async function gcImages() {                  // jo photos kisi version mein use nahi hotin unhein hata do
     try {
-      const keep = new Set([...imageIds(S.pub), ...imageIds(E.draft), ...imageIds(await kvGet('draft')), ...imageIds(await kvGet('prev'))]);
+      const keep = new Set([...imageIds(S.pub), ...imageIds(E.draft)]);
+      for (const w of ['owner', 'partner']) for (const n of ['published', 'draft', 'prev']) { const v = await kvGet(kk(n, w)); if (v) imageIds(v).forEach(i => keep.add(i)); }
       for (const k of await imgKeys()) if (!keep.has(k)) await imgDel(k);
     } catch { /* gc fail hona koi masla nahi */ }
   }
@@ -1066,6 +1073,7 @@
   const B = {};
   const setVars = (el, str) => str.split(';').forEach(p => { const i = p.indexOf(':'); if (i > 0) el.style.setProperty(p.slice(0, i).trim(), p.slice(i + 1).trim()); });
   const POS_KEY = 'olw_story_pos';
+  const posKey = () => (VIEW === ME ? POS_KEY : POS_KEY + '_her');
   const lsGet = (k, d) => { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch { return d; } };
   const lsSet = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch { /* ignore */ } };
   const rad = d => d * Math.PI / 180;
@@ -1178,7 +1186,7 @@
     const fav = $('#stFav'), isFav = !!(fp && lsGet('olw_story_fav', []).includes(fp.p.id));
     fav.setAttribute('aria-pressed', String(isFav)); fav.disabled = !fp;
     const fl = fav.querySelector('.st-fl'); if (fl) fl.textContent = isFav ? 'Remove bookmark' : 'Bookmark this page';
-    if (fp && S.mode !== 'edit') lsSet(POS_KEY, fp.p.id);
+    if (fp && S.mode !== 'edit') lsSet(posKey(), fp.p.id);
     book.classList.toggle('closed', !S.open);
   }
   const it_ = pos => firstReal(pos);
@@ -1460,7 +1468,7 @@
     const f = { contents: openContents, search: openSearch, cover: () => (S.open ? closeBook() : toast('You are already on the cover')), print: printStory, export: exportBackup, import: () => $('#fileJson').click() }[b.dataset.act];
     if (f) f();
   });
-  function applyRole() { $$('.st-owner').forEach(el => (el.hidden = ROLE !== 'owner')); }
+  function applyRole() { $$('.st-owner').forEach(el => (el.hidden = !canEdit())); }
   $('#stEdit').addEventListener('click', () => enterEdit());
 
   /* bookmarks (abhi is device mein; backend ke baad har user ke saath) */
@@ -1552,7 +1560,7 @@
   }
   let pendingImport = null;
   $('#fileJson').addEventListener('change', async e => {
-    const f = e.target.files[0]; e.target.value = ''; if (!f || ROLE !== 'owner') return;
+    const f = e.target.files[0]; e.target.value = ''; if (!f || !canEdit()) return;
     const body = $('#imBody'), err = $('#imError'), go = $('#imGo'); body.replaceChildren(); err.hidden = true; go.hidden = true; pendingImport = null;
     $('#dlgImport').showModal();
     try {
@@ -1573,7 +1581,7 @@
     try {
       for (const [id, d] of Object.entries(pendingImport.images)) await imgPut(id, d);
       const d = pendingImport.st; d.rev = S.pub.rev; d.demo = false;
-      await kvSet('draft', d); E.draft = d; E.baseRev = S.pub.rev; pendingImport = null; E.hasDraft = true;
+      await kvSet(kk('draft'), d); E.draft = d; E.baseRev = S.pub.rev; pendingImport = null; E.hasDraft = true;
       $('#dlgImport').close(); if (S.mode === 'edit') { E.hist = []; E.hi = -1; pushHist(); refresh(); } else await enterEdit(true);
       toast('Backup is now in your draft. Preview it, then publish.', 4200);
     } catch { $('#imError').textContent = 'Could not restore. Your old draft and published diary are safe.'; $('#imError').hidden = false; }
@@ -1646,7 +1654,7 @@
   async function flushSave() {
     clearTimeout(E.saveT); if (!E.dirty || !E.draft || E.saving) return;
     E.saving = true;
-    try { await kvSet('draft', E.draft); E.dirty = false; E.saveErr = false; setStatus(`Draft saved • ${timeNow()}`); }
+    try { await kvSet(kk('draft'), E.draft); E.dirty = false; E.saveErr = false; setStatus(`Draft saved • ${timeNow()}`); }
     catch { E.saveErr = true; setStatus('Draft NOT saved!'); toast('Could not save the draft (storage may be full). Please download a backup.', 4500); }
     finally { E.saving = false; if (E.dirty && !E.saveErr) E.saveT = setTimeout(flushSave, 400); }
   }
@@ -1676,7 +1684,8 @@
     const b = $('#stBanner'); b.replaceChildren();
     if (S.mode === 'edit') b.append('Editing a draft. Readers see the old diary until you Publish.');
     else if (S.mode === 'preview') b.append('Preview: the reader will see the diary exactly like this. It is not published yet.');
-    else if (ROLE === 'owner' && E.hasDraft) b.append('You have an unpublished draft. ', h('button', { type: 'button', class: 'link', onclick: () => enterEdit() }, 'Continue editing'));
+    else if (!canEdit()) { /* doosre ki diary: sirf padhna; Mine/His-Her pill aur toast kafi hain */ }
+    else if (E.hasDraft) b.append('You have an unpublished draft. ', h('button', { type: 'button', class: 'link', onclick: () => enterEdit() }, 'Continue editing'));
     b.hidden = !b.childNodes.length;
   }
   function setMode(m) {
@@ -1687,11 +1696,11 @@
   }
   const starterStory = () => { const s = blankStory(); s.pages.push(blankPage(s.chapters[0].id)); return s; };
   async function enterEdit(fromImport = false) {
-    if (ROLE !== 'owner') return;
+    if (!canEdit()) return;
     if (S.mode === 'preview') { setMode('edit'); return; }
     if (S.mode === 'edit') return;
     let d = E.draft, raw = null;
-    if (!d) { try { raw = await kvGet('draft'); if (raw) d = normalizeStory(raw); } catch { d = null; } }
+    if (!d) { try { raw = await kvGet(kk('draft')); if (raw) d = normalizeStory(raw); } catch { d = null; } }
     if (!d) { d = S.pub.demo ? starterStory() : clone(S.pub); d.rev = S.pub.rev; E.dirty = true; }
     if (!d.pages.length) d.pages.push(blankPage(d.chapters[0].id));
     await loadImages(d);
@@ -2098,10 +2107,10 @@
   $('#dfSave').addEventListener('click', async () => { pushHist(); E.dirty = true; await flushSave(); if (!E.saveErr) toast('Draft saved'); });
   $('#dfDiscard').addEventListener('click', async () => {
     if (!(await ask('Discard the draft?', 'All unpublished changes will be removed. The published diary stays as it is.', 'Discard', 'No'))) return;
-    clearTimeout(E.saveT); await kvDel('draft'); E.draft = null; E.dirty = false; E.hasDraft = false; E.hist = []; E.hi = -1; setMode('read'); gcImages(); toast('Draft discarded');
+    clearTimeout(E.saveT); await kvDel(kk('draft')); E.draft = null; E.dirty = false; E.hasDraft = false; E.hist = []; E.hi = -1; setMode('read'); gcImages(); toast('Draft discarded');
   });
   $('#dfRestore').addEventListener('click', async () => {
-    const prev = await kvGet('prev'); if (!prev) return toast('There is no previous published version yet');
+    const prev = await kvGet(kk('prev')); if (!prev) return toast('There is no previous published version yet');
     if (!(await ask('Restore the previous published version?', 'The previous published version will come into the draft and replace the current draft (you can Undo). You publish it yourself.', 'Restore', 'No'))) return;
     try { const d = normalizeStory(prev); await loadImages(d); d.rev = S.pub.rev; E.draft = d; E.baseRev = d.rev; touch('now'); refresh(); toast('The previous version is now in your draft'); } catch { toast('Could not open the previous version'); }
   });
@@ -2138,11 +2147,11 @@
   $('#puGo').addEventListener('click', async () => {
     const btn = $('#puGo'), err = $('#puError'); btn.disabled = true; err.hidden = true;
     try {
-      const cur = await kvGet('published'); if ((cur ? cur.rev : 0) !== E.baseRev) throw new Error('Another tab already published the diary. Download a backup and start again.');
+      const cur = await kvGet(kk('published')); if ((cur ? cur.rev : 0) !== E.baseRev) throw new Error('Another tab already published the diary. Download a backup and start again.');
       const nw = normalizeStory(clone(E.draft)); nw.rev = (cur ? cur.rev : 0) + 1; nw.demo = false;
       await kvPublish(nw, S.pub.demo ? null : clone(S.pub));
       S.pub = nw; E.draft = null; E.dirty = false; E.hasDraft = false; E.hist = []; E.hi = -1; E.selPhoto = E.selDeco = null; clearTimeout(E.saveT);
-      $('#dlgPublish').close(); setMode('read'); toast('Published ♡ The reader now sees the new diary.', 4000); gcImages();
+      $('#dlgPublish').close(); setMode('read'); toast('Published ♡ The reader now sees the new diary.', 4000); gcImages(); cloudPush(VIEW, nw);
     } catch (ex) { err.textContent = (ex && ex.message) || 'Could not publish. Your old published diary is safe.'; err.hidden = false; }
     finally { btn.disabled = false; }
   });
@@ -2156,7 +2165,7 @@
   const KB = { on: false, mode: lsGet('olw_story_kb', 'own') === 'system' ? 'system' : 'own', layer: 'abc', shift: true, caps: false, cat: 0, last: null, range: null, hold: false, pos: null, hideT: 0, holdT: 0, rep: 0, rep2: 0 };
   const EDITABLE = '[contenteditable="true"]';
   const kbDock = $('#stKbDock'), kbKeys = $('#stKb'), kbTools = $('#stKbTools');
-  const kbEnabled = () => ROLE === 'owner' && matchMedia('(pointer:coarse)').matches;
+  const kbEnabled = () => canEdit() && matchMedia('(pointer:coarse)').matches;
   const isEd = el => !!(el && el.closest && el.closest(EDITABLE) && book.contains(el));
   const kbIco = n => h('span', { class: 'ico', html: svgIcon(n) });
   const KB_LAYERS = {
@@ -2336,23 +2345,131 @@
 
 
   /* ---------------------------------------------------------------
+     14c. MINE / HER  (do diaries) + Google sync
+     - Har banda apni diary likhta hai (Mine). Doosre ki diary sirf padh sakta hai (Her / His).
+     - Publish karte hi diary Firebase mein jati hai; doosre phone par apne aap aa jati hai.
+     - Login / sync na ho to sab pehle jaisa chalta hai (sirf is phone mein).
+     --------------------------------------------------------------- */
+  const herHis = () => (otherOf(ME) === 'partner' ? 'her' : 'his');
+  const sheHe = () => (otherOf(ME) === 'partner' ? 'she' : 'he');
+  const cloudOn = () => !!(window.OLW && OLW.configured && OLW.signedIn && OLW.db);
+  const CLOUD = { imgs: new Set() };
+  const seenGet = () => lsGet('olw_story_seen', {});
+  const seenSet = (who, t) => { const m = seenGet(); m[who] = t; lsSet('olw_story_seen', m); };
+
+  /* jis ki diary abhi publish nahi hui, uske liye shant sa page */
+  function waitingStory() {
+    const s = blankStory(); s.demo = true; s.waiting = true;
+    s.cover = Object.assign(blankCover(), { title: (herHis() === 'her' ? 'Her' : 'His') + ' Diary ♡', subtitle: 'Jald aa rahi hai...' });
+    const p = blankPage(s.chapters[0].id); p.title = 'Abhi kuch nahi likha'; p.body = [herHis() === 'her' ? 'Jab woh apni diary publish karegi, yahan apne aap aa jayegi ♡' : 'Jab woh apni diary publish karega, yahan apne aap aa jayegi ♡']; s.pages.push(p);
+    return s;
+  }
+
+  async function loadView() {
+    let pub = null;
+    try { const raw = await kvGet(kk('published')); if (raw) pub = normalizeStory(raw); } catch { pub = null; }
+    if (!pub) pub = canEdit() ? demoStory() : waitingStory();
+    S.pub = S.story = pub;
+    try { E.hasDraft = canEdit() && !!(await kvGet(kk('draft'))); } catch { E.hasDraft = false; }
+    await loadImages(pub);
+    S.vp = buildVP(pub);
+    const sp = lsGet(posKey(), ''), i = posOfPage(sp); S.pos = i > 0 ? (S.two ? i & ~1 : i) : 0;
+  }
+
+  /* --- Mine / Her switch --- */
+  function paintWho() {
+    const box = $('#stWho'); if (!box) return;
+    $('#whoMine').setAttribute('aria-selected', String(VIEW === ME)); $('#whoHer').setAttribute('aria-selected', String(VIEW !== ME));
+    $('#whoHer').textContent = herHis() === 'her' ? 'Her' : 'His';
+    box.hidden = false;
+  }
+  async function switchView(to) {
+    const who = to === 'her' ? otherOf(ME) : ME;
+    if (who === VIEW || S.busy) return;
+    if (S.mode !== 'read') return toast('Close the editor first', 2200);
+    if (S.open) await closeBook();
+    S.busy = true;
+    try {
+      VIEW = who; lsSet('olw_story_view', to);
+      await loadView();
+      applyRole(); applyLook(); renderCoverFace(); setBanner(); updateStacks(); updateChrome(); paintWho(); layout();
+      toast(VIEW === ME ? 'My diary' : `${herHis() === 'her' ? 'Her' : 'His'} diary (read only)`, 1800);
+    } catch (ex) { console.error(ex); toast('The diary could not open. Please try again.', 3500); }
+    finally { S.busy = false; }
+  }
+  document.addEventListener('click', e => {
+    const b = e.target.closest('#stWho button'); if (b) switchView(b.dataset.who);
+  });
+
+  /* --- cloud: push (meri diary upar) --- */
+  async function cloudPush(who, st) {
+    if (!cloudOn() || who !== ME || !st || st.demo) return;
+    try {
+      for (const id of imageIds(st)) {
+        if (id.startsWith('demo:') || CLOUD.imgs.has(id)) continue;
+        const d = await imgGet(id); if (!d) continue;
+        await OLW.putBlob('simg-' + id, d); CLOUD.imgs.add(id);
+      }
+      const upd = await OLW.putBlob('story-' + who, JSON.stringify(st));
+      seenSet(who, upd);
+    } catch (e) { OLW.err(e); toast('Saved on this phone, but it could not sync yet. Please check your internet.', 4500); }
+  }
+
+  /* --- cloud: pull (doosri taraf se aayi diary neeche) --- */
+  let pullChain = Promise.resolve();
+  const onStoryMeta = (id, meta) => (pullChain = pullChain.then(() => pullStory(id, meta)));
+  async function pullStory(id, meta) {
+    const who = id.slice(6); if (who !== 'owner' && who !== 'partner') return;
+    if ((meta.updated || 0) <= (seenGet()[who] || 0)) return;
+    try {
+      const s = await OLW.getBlob(id, meta); if (!s) return;
+      const st = normalizeStory(JSON.parse(s));
+      for (const iid of imageIds(st)) {
+        if (iid.startsWith('demo:') || await imgGet(iid)) continue;
+        const d = await OLW.getBlob('simg-' + iid); if (d && okDataUrl(d)) await imgPut(iid, d);
+      }
+      const cur = await kvGet(kk('published', who));
+      if (who === ME && cur && !cur.demo && (cur.rev || 0) > st.rev) { seenSet(who, meta.updated); cloudPush(ME, normalizeStory(cur)); return; }   // mera apna naya hai, cloud purana
+      await kvSet(kk('published', who), st); seenSet(who, meta.updated);
+      if (who === VIEW && S.mode === 'read' && !S.busy) {
+        await loadView(); applyLook(); renderCoverFace(); setBanner(); updateStacks(); updateChrome(); layout();
+        if (S.open) showSpread();
+        toast(who === ME ? 'Diary updated from your other device ♡' : `${herHis() === 'her' ? 'Her' : 'His'} new diary is here ♡`, 3200);
+      }
+    } catch (e) { console.warn('story pull', e); }
+  }
+  async function onStoryInitial(ids) {
+    if (ids.has('story-' + ME)) return;
+    try { const cur = await kvGet(kk('published', ME)); if (cur && !cur.demo) await cloudPush(ME, normalizeStory(cur)); } catch { /* ignore */ }
+  }
+  function startCloud() {
+    if (!window.OLW || !OLW.configured) return;
+    OLW.watch('simg-', id => CLOUD.imgs.add(id.slice(5)), () => { /* ids already added */ });
+    OLW.watch('story-', onStoryMeta, onStoryInitial);
+  }
+
+  /* --- kaun hoon main: login se (na ho to owner) --- */
+  function initWho() {
+    ME = lsGet('olw_story_me', 'owner') === 'partner' ? 'partner' : 'owner';          // pichla jaana hua role (turant); login se confirm hota hai
+    VIEW = lsGet('olw_story_view', 'mine') === 'her' ? otherOf(ME) : ME;
+    if (window.OLW && OLW.configured) OLW.onAuth(u => {
+      if (!u) return; const r = OLW.role === 'partner' ? 'partner' : 'owner'; lsSet('olw_story_me', r);
+      if (r !== ME) location.reload();
+    });
+  }
+
+
+  /* ---------------------------------------------------------------
      15. START
      --------------------------------------------------------------- */
   async function init() {
-    applyRole(); paintIcons(); makeTextures(); buildBackdrop(); buildBook(); buildStudio(); layout();
-    let pub = null, raw = null;
-    try { raw = await kvGet('published'); if (raw) pub = normalizeStory(raw); } catch { pub = null; }
-    if (!pub) pub = demoStory();
-    S.pub = S.story = pub; S.mode = 'read';
-    try { E.hasDraft = ROLE === 'owner' && !!(await kvGet('draft')); } catch { E.hasDraft = false; }
-    await loadImages(pub);
-    S.vp = buildVP(pub);
-    const sp = lsGet(POS_KEY, ''), i = posOfPage(sp); S.pos = i > 0 ? (S.two ? i & ~1 : i) : 0;
+    initWho(); applyRole(); paintIcons(); makeTextures(); buildBackdrop(); buildBook(); buildStudio(); layout();
+    await loadView(); paintWho();
     applyLook(); renderCoverFace(); updateChrome(); setBanner(); layout(); updateStacks(); updateChrome();
-    book.classList.add('ready');
+    book.classList.add('ready'); startCloud();
     if (!persistent) toast('Saving is blocked in this browser. Changes last only for this session. Please download a backup.', 6000);
     document.fonts && document.fonts.ready.then(() => { if (S.open && S.mode === 'read') showSpread(); });
-    window.__story = { S, E, beginTurn, setTurn, endTurn };
+    window.__story = { imgPut, imgGet, S, E, beginTurn, setTurn, endTurn, switchView, get VIEW() { return VIEW; }, get ME() { return ME; } };
   }
   $('#stPrev').addEventListener('click', () => go_(-1)); $('#stNext').addEventListener('click', () => go_(1));
   book.addEventListener('click', e => { if (!S.open && !S.busy && !e.target.closest('[contenteditable="true"]')) openBook(); });
