@@ -150,10 +150,14 @@
 
 <!-- SURPRISE DIALOG -->
 <dialog id="surpriseDialog" aria-labelledby="surTitle">
-  <div class="dlg paper-dlg center">
+  <div class="dlg paper-dlg center sur-dlg">
     <h2 id="surTitle" class="script big">For you ♡</h2>
-    <p id="surpriseMsg"></p>
-    <button class="btn small" data-close type="button">Close</button>
+    <div id="surpriseMsg" class="sur-lines" aria-live="polite"></div>
+    <p id="surSign" class="sur-sign" hidden></p>
+    <div class="sur-actions">
+      <button class="sur-skip" id="surSkip" type="button">Skip</button>
+      <button class="btn small" id="surClose" data-close type="button" hidden>Close ♡</button>
+    </div>
   </div>
 </dialog>
 
@@ -174,7 +178,7 @@
       <label>Introduction text<textarea name="intro" rows="3" maxlength="300"></textarea></label>
       <label>"Why I Made This" text<textarea name="why" rows="4" maxlength="800"></textarea></label>
       <label>Sign-off<input name="signoff" maxlength="40"></label>
-      <label>Surprise message<textarea name="surprise" rows="3" maxlength="400"></textarea></label>
+      <label>Surprise message<textarea name="surprise" rows="8" maxlength="1500"></textarea><small>Har nayi line alag line mein likhein. Surprise khulne par woh ek ek karke aayegi, jaise koi dheere dheere dil ki baat keh raha ho.</small></label>
       <div class="row">
         <label>Next special date<input type="date" name="specialDate"></label>
         <label>Date label<input name="specialLabel" maxlength="40" placeholder="e.g. Anniversary"></label>
@@ -203,8 +207,9 @@
         <div class="dlg-actions">
           <button type="button" class="btn small" id="pwSave">Password lagayein</button>
           <button type="button" class="btn ghost small" id="pwRemove">Password hata dein</button>
+          <button type="button" class="btn ghost small" id="pwRecovery" hidden>Recovery code banayein</button>
         </div>
-        <p class="hint">Yeh sirf is device/browser ka screen-lock hai, encryption nahi. Password bhool gaye to recovery nahi hai (browser data clear karna parega, jis se saved settings bhi jayengi). Asli security login system aane par milegi.</p>
+        <p class="hint">Yeh sirf is device/browser ka screen-lock hai, encryption nahi. Password bhool jayein to lock screen par &quot;Password bhool gaye?&quot; dabayein aur Recovery Code likhein. Recovery Code nahi hai to browser data clear karna parega (saved settings bhi jayengi). Asli security login system aane par milegi.</p>
       </details>
       <p class="error" id="settingsError" role="alert" hidden></p>
     </div>
@@ -231,8 +236,28 @@
     <label class="chk"><input type="checkbox" id="lockShow"> Password dikhayein</label>
     <p class="error" id="lockError" role="alert" hidden></p>
     <button class="btn" type="submit">Kholein ♡</button>
+    <button class="lock-forgot" id="lockForgot" type="button">Password bhool gaye?</button>
+    <div class="rec-box" id="recBox" hidden>
+      <p class="hint" id="recHint">Password lagate waqt jo Recovery Code mila tha wo likhein.</p>
+      <input type="text" id="recInput" aria-label="Recovery code" placeholder="ABCD-EFGH-JKLM" autocomplete="off" autocapitalize="characters" spellcheck="false">
+      <p class="error" id="recError" role="alert" hidden></p>
+      <button class="btn small" id="recGo" type="button">Password hata dein</button>
+    </div>
   </form>
 </div>
+
+<!-- RECOVERY CODE DIALOG -->
+<dialog id="recDialog" aria-labelledby="recTitle">
+  <div class="dlg paper-dlg center">
+    <h2 id="recTitle" class="script big">Recovery Code</h2>
+    <p>Yeh code kisi safe jagah likh lein ya screenshot le lein. Password bhool jane par lock screen par isi se reset hoga. Yeh dobara nahi dikhaya jayega.</p>
+    <code id="recCode" class="rec-code"></code>
+    <div class="dlg-actions">
+      <button class="btn ghost small" id="recCopy" type="button">Copy</button>
+      <button class="btn small" data-close type="button">Maine save kar liya</button>
+    </div>
+  </div>
+</dialog>
 
 <!-- PASSWORD PROMPT (settings kholne ke liye) -->
 <dialog id="askDialog" aria-labelledby="askTitle">
