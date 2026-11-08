@@ -257,3 +257,26 @@ body[data-hide~=tagline] .tagline,body[data-hide~=tagline] .tagDiv,body[data-hid
 .pw[data-ds=sunset] .p-photo,.pw[data-ds=navy] .p-photo,.pw[data-ds=emerald] .p-photo{transform:rotate(3deg)}
 
 .pw[data-ds=emerald] .p-from{margin-left:9cqw}
+
+/* ---------- v4: free photo + new designs ---------- */
+.p-photo.free{position:absolute;float:none;margin:0;z-index:1;shape-outside:none}
+.p-photo.free.over{z-index:6}
+body.lt-editing .p-photo,body.lt-styling .p-photo{cursor:grab;touch-action:none}
+body.lt-editing .p-photo.drag,body.lt-styling .p-photo.drag{cursor:grabbing;outline:2px dashed rgba(141,104,201,.8);outline-offset:3px}
+.p-rs{display:none;position:absolute;right:-3.2cqw;bottom:-3.2cqw;width:6.4cqw;height:6.4cqw;min-width:20px;min-height:20px;border-radius:50%;background:#8d68c9;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.4);cursor:nwse-resize;touch-action:none;z-index:3}
+body.lt-editing .p-rs,body.lt-styling .p-rs{display:block}
+.pw .p-in{position:relative}
+.pw[data-ds=minimal] .p-in{padding:14cqw 13cqw 16cqw}.pw[data-ds=linen] .p-in{padding:14cqw 12cqw 16cqw}.pw[data-ds=pastel] .p-in{padding:17cqw 10cqw 19cqw}.pw[data-ds=sprig] .p-in{padding:16cqw 12cqw 18cqw 14cqw}.pw[data-ds=modern] .p-in{padding:11cqw 9cqw 14cqw 16cqw}.pw[data-ds=moon] .p-in{padding:15cqw 10cqw 18cqw}
+.pw[data-ds=minimal]{--pa:#fffdf8!important;--pb:#f6f0e4!important}
+.pw[data-ds=linen]{--pa:#fbf6ec!important;--pb:#f1e8d6!important}
+.pw[data-ds=pastel]{--pa:#fffaf8!important;--pb:#fbeeea!important}
+.pw[data-ds=sprig]{--pa:#fbfaf1!important;--pb:#eef0dc!important}
+.pw[data-ds=modern]{--pa:#fcfbf7!important;--pb:#f1eee6!important}
+.pw[data-ds=moon]{--pa:#1f2a4e!important;--pb:#0f1630!important;--ink:#eadfc2!important}
+.ds .mn{position:absolute;inset:4cqw;border:.35cqw solid;border-radius:.6cqw}.ds .mn.m2{inset:5.6cqw;border-width:.15cqw}
+.ds .ln{position:absolute;inset:0;background:radial-gradient(rgba(150,110,60,.06) 1px,transparent 1.5px) 0 0/6px 6px}
+.ds .mb{position:absolute;left:6cqw;top:0;bottom:0;width:.7cqw}.ds .mb.t{left:8cqw;width:.25cqw}.ds .mb.h{left:5cqw;top:6cqw;bottom:auto;width:3.4cqw;height:3.4cqw;border-radius:50%}
+.ds .mo{position:absolute;inset:0;background:radial-gradient(50% 30% at 85% 8%,rgba(255,225,150,.16),transparent 70%)}
+.pw[data-ds=moon] .p-photo figcaption{color:#3a2f4a}
+body.lt-editing .p-in,body.lt-styling .p-in{pointer-events:none}
+.chip,.tg{user-select:none;-webkit-user-select:none}
