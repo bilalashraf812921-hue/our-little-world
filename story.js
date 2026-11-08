@@ -13,10 +13,7 @@
   /* ---------------------------------------------------------------
      0. CONFIG  (dusre pages se connect karne ke liye yahi do jagah badlein)
      --------------------------------------------------------------- */
-  let ROLE = 'owner';                         // Google login se aata hai (OLW.role): 'owner' | 'partner'. Login na ho to 'owner' (sirf local).
-  let VIEW = 'me';                            // 'me' = meri diary (edit ho sakti hai), 'other' = doosre ki diary (sirf parhna)
-  const mine = () => VIEW === 'me';
-  let MINE = null, OTHER = null;              // meri published diary / doosre ki diary (cloud se)
+  const ROLE = 'owner';                       // TEMP: login ke baad server se aayega ('owner' | 'partner'). Home ke home.js mein bhi yahi.
   const TZ = 'Asia/Karachi';
   const BUILT_PAGES = { home: true, story: true, gallery: true, letters: true, chat: true };   // jaise pages ban jayen: gallery:true, letters:true, questions:true
   const PAGE_URL = { home: 'index.html', story: 'story.html', gallery: 'gallery.html', letters: 'letters.html', chat: 'messages.html' };
@@ -266,7 +263,7 @@
      5. STORAGE  (IndexedDB; agar browser na de to sirf memory, aur saaf bata diya jata hai)
      Backend connect karte waqt: kvGet/kvSet/kvPublish/imgPut/imgGet ko server calls se badal dein.
      --------------------------------------------------------------- */
-  let DB_NAME = 'olw_story_v1';               // partner ke liye 'olw_story_v1_partner' (boot mein set hota hai)
+  const DB_NAME = 'olw_story_v1';
   let dbPromise = null, persistent = true;
   const memKV = new Map(), memImg = new Map(), IMG = new Map();     // IMG = in-memory cache of dataURLs
   function openDB() {
@@ -320,7 +317,7 @@
   async function loadImages(st) { await Promise.all([...imageIds(st)].filter(id => !id.startsWith('demo:')).map(id => imgGet(id).catch(() => null))); }
   async function gcImages() {                  // jo photos kisi version mein use nahi hotin unhein hata do
     try {
-      const keep = new Set([...imageIds(S.pub), ...imageIds(MINE), ...imageIds(OTHER), ...imageIds(E.draft), ...imageIds(await kvGet('draft')), ...imageIds(await kvGet('prev'))]);
+      const keep = new Set([...imageIds(S.pub), ...imageIds(E.draft), ...imageIds(await kvGet('draft')), ...imageIds(await kvGet('prev'))]);
       for (const k of await imgKeys()) if (!keep.has(k)) await imgDel(k);
     } catch { /* gc fail hona koi masla nahi */ }
   }
@@ -367,7 +364,20 @@
     mail: '<rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/>',
     chat: '<path d="M21 12a8 8 0 0 1-11.6 7.1L3 21l1.9-5.4A8 8 0 1 1 21 12z"/>',
     chev: '<path d="m6 9 6 6 6-6"/>', calendar: '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/>',
-    up: '<path d="M12 19V5M6 11l6-6 6 6"/>', down: '<path d="M12 5v14M6 13l6 6 6-6"/>', x: '<path d="M6 6l12 12M18 6 6 18"/>'
+    up: '<path d="M12 19V5M6 11l6-6 6 6"/>', down: '<path d="M12 5v14M6 13l6 6 6-6"/>', x: '<path d="M6 6l12 12M18 6 6 18"/>',
+    type: '<path d="M4 7V5h16v2M12 5v14M9 19h6"/>',
+    page: '<path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6M8 13h8M8 17h5"/>',
+    brush: '<path d="M12 3a9 9 0 1 0 0 18c1.2 0 2-.8 2-1.8 0-.5-.2-.9-.5-1.2-.3-.3-.5-.7-.5-1.2 0-1 .8-1.8 1.8-1.8H17a4 4 0 0 0 4-4c0-4.4-4-8-9-8z"/><path d="M7.5 11h.01M10 7h.01M15 7h.01"/>',
+    smile: '<circle cx="12" cy="12" r="9"/><path d="M8 14s1.5 2.5 4 2.5S16 14 16 14M9 9.5h.01M15 9.5h.01"/>',
+    layers: '<path d="m12 3 9 5-9 5-9-5z"/><path d="m3 13 9 5 9-5"/><path d="m3 17.5 9 5 9-5"/>',
+    wall: '<rect x="3" y="4" width="18" height="16" rx="2"/><path d="m3 16 5-5 4 4 3-3 6 6"/><circle cx="16.5" cy="9" r="1.2"/>',
+    kbd: '<rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M7 14h10"/>',
+    kbdown: '<rect x="2" y="3" width="20" height="11" rx="2"/><path d="M6 7h.01M10 7h.01M14 7h.01M18 7h.01M7 11h10M9 18l3 3 3-3"/>',
+    sliders: '<path d="M4 6h9M19 6h1M4 12h3M13 12h7M4 18h11M19 18h1"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="17" cy="18" r="2"/>',
+    del: '<path d="M21 5H9l-6 7 6 7h12a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1z"/><path d="m12 9 6 6M18 9l-6 6"/>',
+    shift: '<path d="M12 4 4 13h5v7h6v-7h5z"/>',
+    enter: '<path d="M20 5v7a3 3 0 0 1-3 3H5M9 11l-4 4 4 4"/>',
+    smaller: '<path d="M3 18 8 6l5 12M5 14h6M16 12h5"/>', bigger: '<path d="M3 18 8 6l5 12M5 14h6M18 9v6M15 12h6"/>'
   };
   const svgIcon = n => `<svg viewBox="0 0 24 24" aria-hidden="true">${ICONS[n] || ''}</svg>`;
   function paintIcons(root = document) {
@@ -1056,7 +1066,6 @@
   const B = {};
   const setVars = (el, str) => str.split(';').forEach(p => { const i = p.indexOf(':'); if (i > 0) el.style.setProperty(p.slice(0, i).trim(), p.slice(i + 1).trim()); });
   const POS_KEY = 'olw_story_pos';
-  const posKey = () => POS_KEY + (VIEW === 'other' ? '_o' : '');
   const lsGet = (k, d) => { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch { return d; } };
   const lsSet = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch { /* ignore */ } };
   const rad = d => d * Math.PI / 180;
@@ -1084,7 +1093,8 @@
   function layout() {
     const W = stage.clientWidth, H = stage.clientHeight; if (W < 80 || H < 80) return;
     const padX = clamp(W * .025, 6, 40), padY = clamp(H * .03, 6, 30), c = .035;
-    const two = W >= 820 && W / H > 1.05;
+    const land = window.innerWidth > window.innerHeight;       // phone landscape = PC jaisa 2-page spread
+    const two = W / H > 1.05 && (W >= 820 || (land && W >= 500));
     let ar = ASPECT;
     const peekOn = !two && W < 760 && S.mode !== 'edit', pk = peekOn ? clamp(Math.round(W * .05), 12, 24) : 0;   // phone: agle/pichle page ki jhalak
     if (!two) {                                    // phone: page screen ki height ke hisaab se lamba
@@ -1168,7 +1178,7 @@
     const fav = $('#stFav'), isFav = !!(fp && lsGet('olw_story_fav', []).includes(fp.p.id));
     fav.setAttribute('aria-pressed', String(isFav)); fav.disabled = !fp;
     const fl = fav.querySelector('.st-fl'); if (fl) fl.textContent = isFav ? 'Remove bookmark' : 'Bookmark this page';
-    if (fp && S.mode !== 'edit') lsSet(posKey(), fp.p.id);
+    if (fp && S.mode !== 'edit') lsSet(POS_KEY, fp.p.id);
     book.classList.toggle('closed', !S.open);
   }
   const it_ = pos => firstReal(pos);
@@ -1450,7 +1460,7 @@
     const f = { contents: openContents, search: openSearch, cover: () => (S.open ? closeBook() : toast('You are already on the cover')), print: printStory, export: exportBackup, import: () => $('#fileJson').click() }[b.dataset.act];
     if (f) f();
   });
-  function applyRole() { $$('.st-owner').forEach(el => (el.hidden = !mine())); }
+  function applyRole() { $$('.st-owner').forEach(el => (el.hidden = ROLE !== 'owner')); }
   $('#stEdit').addEventListener('click', () => enterEdit());
 
   /* bookmarks (abhi is device mein; backend ke baad har user ke saath) */
@@ -1542,7 +1552,7 @@
   }
   let pendingImport = null;
   $('#fileJson').addEventListener('change', async e => {
-    const f = e.target.files[0]; e.target.value = ''; if (!f || !mine()) return;
+    const f = e.target.files[0]; e.target.value = ''; if (!f || ROLE !== 'owner') return;
     const body = $('#imBody'), err = $('#imError'), go = $('#imGo'); body.replaceChildren(); err.hidden = true; go.hidden = true; pendingImport = null;
     $('#dlgImport').showModal();
     try {
@@ -1636,7 +1646,7 @@
   async function flushSave() {
     clearTimeout(E.saveT); if (!E.dirty || !E.draft || E.saving) return;
     E.saving = true;
-    try { await kvSet('draft', E.draft); E.dirty = false; E.saveErr = false; setStatus(`Draft saved • ${timeNow()}`); if (LIVE) cloudPushSoon(); }
+    try { await kvSet('draft', E.draft); E.dirty = false; E.saveErr = false; setStatus(`Draft saved • ${timeNow()}`); }
     catch { E.saveErr = true; setStatus('Draft NOT saved!'); toast('Could not save the draft (storage may be full). Please download a backup.', 4500); }
     finally { E.saving = false; if (E.dirty && !E.saveErr) E.saveT = setTimeout(flushSave, 400); }
   }
@@ -1664,10 +1674,9 @@
   /* --- mode switching --- */
   function setBanner() {
     const b = $('#stBanner'); b.replaceChildren();
-    if (S.mode === 'edit') b.append('You are editing a draft. The reader keeps seeing the old diary until you press Publish.');
+    if (S.mode === 'edit') b.append('Editing a draft. Readers see the old diary until you Publish.');
     else if (S.mode === 'preview') b.append('Preview: the reader will see the diary exactly like this. It is not published yet.');
-    else if (VIEW === 'other') b.append(`You are reading ${otherWord().toLowerCase()} diary. Only ${ROLE === 'owner' ? 'she' : 'he'} can change it. Changes show up here live ♡`);
-    else if (mine() && E.hasDraft) b.append('You have an unpublished draft. ', h('button', { type: 'button', class: 'link', onclick: () => enterEdit() }, 'Continue editing'));
+    else if (ROLE === 'owner' && E.hasDraft) b.append('You have an unpublished draft. ', h('button', { type: 'button', class: 'link', onclick: () => enterEdit() }, 'Continue editing'));
     b.hidden = !b.childNodes.length;
   }
   function setMode(m) {
@@ -1678,7 +1687,7 @@
   }
   const starterStory = () => { const s = blankStory(); s.pages.push(blankPage(s.chapters[0].id)); return s; };
   async function enterEdit(fromImport = false) {
-    if (!mine()) return;
+    if (ROLE !== 'owner') return;
     if (S.mode === 'preview') { setMode('edit'); return; }
     if (S.mode === 'edit') return;
     let d = E.draft, raw = null;
@@ -1916,6 +1925,12 @@
     $('#phFrame').replaceChildren(...Object.entries(FRAMES).map(([k, n]) => h('option', { value: k, text: n })));
     $('#fFinish').replaceChildren(...Object.entries(FINISHES).map(([k, n]) => h('option', { value: k, text: n })));
     $('#fBgType').replaceChildren(...Object.entries(BG_TYPES).map(([k, n]) => h('option', { value: k, text: n })));
+    $('#bgTypes').replaceChildren(...Object.entries(BG_TYPES).map(([k, n]) => h('button', { type: 'button', class: 'st-bgt', 'data-v': k, 'data-t': k, onclick: () => { const L = E.draft && E.draft.look; if (!L) return; if (k === 'photo' && !L.bg.img) { $('#bgPhoto').click(); return; } L.bg.type = k; touch('now'); syncPanel(); rerenderSoon(); } }, h('i'), h('span', { text: n }))));
+    const BGC = ['#f1e6d2', '#f6dfe6', '#f2e2dc', '#e6defa', '#dbe9f6', '#dcefe3', '#fff4c9', '#cdbfa6', '#8f7db8', '#e58fb1', '#5b4a7a', '#2b2438'];
+    sw($('#swBg'), BGC.map(c => [c, c]), 'bg.color');
+    sw($('#swBg2'), BGC.map(c => [c, c]), 'bg.color2');
+    $('#swBgPair').dataset.bind = 'bg.pair';
+    $('#swBgPair').replaceChildren(...[['#f6dfe6', '#e6defa'], ['#fff4c9', '#f6dfe6'], ['#dbe9f6', '#e6defa'], ['#dcefe3', '#fff4c9'], ['#e58fb1', '#8f7db8'], ['#2b2438', '#5b4a7a']].map(([a, b]) => h('button', { type: 'button', class: 'st-sw', style: `--c:linear-gradient(135deg,${a},${b})`, 'aria-label': 'Gradient', onclick: () => { const L = E.draft && E.draft.look; if (!L) return; L.bg.type = 'gradient'; L.bg.color = a; L.bg.color2 = b; touch('now'); syncPanel(); rerenderSoon(); } })));
     $('#dcGrid').replaceChildren(...DECO_GROUPS.flatMap(([gname, items]) => [h('h4', { class: 'st-gh', text: gname }),
       h('div', { class: 'st-addgrid' }, ...Object.entries(items).map(([t, n]) => h('button', { type: 'button', class: 'st-add', onclick: () => addDeco(t) }, h('span', { class: 'st-add-ic', html: iconFor(t) }), n)))]));
     $('#stPresets').replaceChildren(...PRESETS.map(pr => h('button', { type: 'button', class: 'st-preset', onclick: () => applyPreset(pr) }, h('i', { style: `--a:${pr.cover};--b:${paperPair(pr.paper)[0]};--c:${pr.bg.color}` }), pr.n)));
@@ -1940,7 +1955,8 @@
       if (el.type === 'color') v = ctx === 'look' && key === 'paper' ? paperPair(v)[0] : (isHex(v) ? v : (ctx === 'lines' ? st.look.ink : '#000000'));
       if (el.type === 'checkbox') el.checked = !!v; else el.value = v ?? '';
     });
-    syncSwatches(); $('#bgC2Row').hidden = st.look.bg.type !== 'gradient';
+    syncSwatches(); $('#bgC2Row').hidden = st.look.bg.type !== 'gradient'; $('#bgGradRow').hidden = st.look.bg.type !== 'gradient';
+    $$('#bgTypes .st-bgt').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.v === st.look.bg.type)));
     $('#bgPhotoDel').disabled = !st.look.bg.img; $('#cvPhotoDel').disabled = !st.cover.img;
     const idx = p ? st.pages.indexOf(p) : -1;
     $('#pgInfo').textContent = p ? `Page ${idx + 1} of ${st.pages.length} • ${chapterOf(st, p).title}` : 'No pages yet. Press “New page”.';
@@ -1986,6 +2002,10 @@
     if (!(await ask('Delete this page?', `“${p.title || 'Untitled page'}” will be removed from the draft. You can still Undo before publishing.`, 'Delete', 'No'))) return;
     const i = st.pages.indexOf(p); st.pages.splice(i, 1); E.focusPid = (st.pages[i] || st.pages[i - 1] || {}).id || null; E.selPhoto = E.selDeco = null;
     touch('now'); refresh(); toast('Page removed. Use Undo to bring it back.');
+  });
+  $('#pgShrink').addEventListener('click', () => {
+    const p = curPage(); if (!p) return; p.scale = clamp((p.scale || 100) - 6, 70, 130); touch('now'); outputs(); syncPanel(); rerenderSoon();
+    toast(`Text size on this page: ${p.scale}%`, 1400);
   });
   $('#pgSpill').addEventListener('click', () => {
     const st = E.draft, p = curPage(); if (!p) return; const moved = [];
@@ -2078,7 +2098,7 @@
   $('#dfSave').addEventListener('click', async () => { pushHist(); E.dirty = true; await flushSave(); if (!E.saveErr) toast('Draft saved'); });
   $('#dfDiscard').addEventListener('click', async () => {
     if (!(await ask('Discard the draft?', 'All unpublished changes will be removed. The published diary stays as it is.', 'Discard', 'No'))) return;
-    clearTimeout(E.saveT); await kvDel('draft'); E.draft = null; E.dirty = false; E.hasDraft = false; E.hist = []; E.hi = -1; setMode('read'); gcImages(); toast('Draft discarded'); cloudPushNow();
+    clearTimeout(E.saveT); await kvDel('draft'); E.draft = null; E.dirty = false; E.hasDraft = false; E.hist = []; E.hi = -1; setMode('read'); gcImages(); toast('Draft discarded');
   });
   $('#dfRestore').addEventListener('click', async () => {
     const prev = await kvGet('prev'); if (!prev) return toast('There is no previous published version yet');
@@ -2122,128 +2142,197 @@
       const nw = normalizeStory(clone(E.draft)); nw.rev = (cur ? cur.rev : 0) + 1; nw.demo = false;
       await kvPublish(nw, S.pub.demo ? null : clone(S.pub));
       S.pub = nw; E.draft = null; E.dirty = false; E.hasDraft = false; E.hist = []; E.hi = -1; E.selPhoto = E.selDeco = null; clearTimeout(E.saveT);
-      MINE = nw; $('#dlgPublish').close(); setMode('read'); toast('Published ♡ The reader now sees the new diary.', 4000); gcImages(); cloudPushNow();
+      $('#dlgPublish').close(); setMode('read'); toast('Published ♡ The reader now sees the new diary.', 4000); gcImages();
     } catch (ex) { err.textContent = (ex && ex.message) || 'Could not publish. Your old published diary is safe.'; err.hidden = false; }
     finally { btn.disabled = false; }
   });
 
 
   /* ---------------------------------------------------------------
-     14b. CLOUD SYNC  (olw-sync.js ka OLW use hota hai)
-     - Meri diary: 'story-<role>' blob (text/design) + 'simg-<role>-<id>' blobs (photos). Dusra banda sirf padh sakta hai.
-     - LIVE on ho to draft ke changes bhi ~2.5 second mein dusre ko dikhte hain; off ho to sirf Publish par.
-     - Doosre ki diary 'story-<otherRole>' watch hoti hai aur foran screen par badal jati hai.
+     14b. APNA KEYBOARD (mobile / touch) + zaroori editing tools
+     Diary likhte waqt phone ka keyboard nahi, yeh apna keyboard aata hai (abc / 123 / Urdu / emoji)
+     aur uske upar tools: Undo, Redo, B I U H, text size, font. Strip mein ⌨ dabane se phone ka keyboard bhi use kar sakte hain.
      --------------------------------------------------------------- */
-  const LIVE_KEY = 'olw_story_live';
-  let LIVE = lsGet(LIVE_KEY, true) !== false;
-  const CLOUD = { t: null, busy: false, again: false, lastJson: '', chain: Promise.resolve(), wasIn: false };
-  const otherRole = () => (ROLE === 'owner' ? 'partner' : 'owner');
-  const otherWord = () => (ROLE === 'owner' ? 'Her' : 'His');
-  const sid = (r, id) => 'simg-' + r + '-' + String(id).replace(/[^\w-]/g, '_');
-  const upKey = () => 'olw_story_up_' + ROLE;
-  const cloudOK = () => !!(window.OLW && OLW.configured && OLW.signedIn && OLW.db);
-  const mySource = () => (LIVE && E.draft ? E.draft : (VIEW === 'me' ? S.pub : MINE));
-  const setLiveInfo = t => { const el = $('#liveInfo'); if (el) el.textContent = t; };
+  const KB = { on: false, mode: lsGet('olw_story_kb', 'own') === 'system' ? 'system' : 'own', layer: 'abc', shift: true, caps: false, cat: 0, last: null, range: null, hold: false, pos: null, hideT: 0, holdT: 0, rep: 0, rep2: 0 };
+  const EDITABLE = '[contenteditable="true"]';
+  const kbDock = $('#stKbDock'), kbKeys = $('#stKb'), kbTools = $('#stKbTools');
+  const kbEnabled = () => ROLE === 'owner' && matchMedia('(pointer:coarse)').matches;
+  const isEd = el => !!(el && el.closest && el.closest(EDITABLE) && book.contains(el));
+  const kbIco = n => h('span', { class: 'ico', html: svgIcon(n) });
+  const KB_LAYERS = {
+    abc: [['q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p'], ['a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l'], ['z', 'x', 'c', 'v', 'b', 'n', 'm']],
+    num: [['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'], ['-', '/', ':', ';', '(', ')', '₨', '&', '@', '"'], ['.', ',', '?', '!', "'", '♡', '~']],
+    urdu: [['ق', 'و', 'ع', 'ر', 'ت', 'ے', 'ء', 'ی', 'ہ', 'پ'], ['ا', 'س', 'د', 'ف', 'گ', 'ح', 'ج', 'ک', 'ل'], ['ز', 'ش', 'چ', 'ط', 'ب', 'ن', 'م', '،']],
+    urdu2: [['ً', 'ٌ', 'ٍ', 'َ', 'ُ', 'ِ', 'ّ', 'ْ', 'ٰ', '؟'], ['آ', 'ص', 'ڈ', 'غ', 'ھ', 'خ', 'ض', 'ذ', '۔'], ['ژ', 'ٹ', 'ث', 'ظ', 'ں', 'ۓ', 'ڑ', '!']]
+  };
+  const KB_EMO = [
+    '😀😃😄😁😆😅😂🤣😊😇🙂😉😌😍🥰😘😗😙😚😋😛😜🤪😝🤗🤭🤔😐😏😒🙄😬😴😪🥱😷🥺😢😭😤😡🤯😱😳🥵🥶',
+    '❤️🧡💛💚💙💜🖤🤍🤎💔❣️💕💞💓💗💖💘💝💟💋💌🌹🥀🌷🌸💐🌺🌻🌼✨💫⭐🌟🔥💯🎀',
+    '👍👎👌🤌✌️🤞🤟🤘🤙👈👉👆👇☝️👋🤚✋👏🙌🤲🤝🙏💪🫶🫂👀',
+    '🐶🐱🐭🐹🐰🦊🐻🐼🐨🐯🦁🐮🐷🐸🐵🐔🐧🐦🦉🦋🐝🐞🐢🐬🐳🐙🦄🐾🌿🍀🌴🌵',
+    '🍎🍊🍋🍌🍉🍇🍓🍒🍑🍍🍕🍔🍟🍿🍩🍪🎂🍰🧁🍫🍬🍭☕🍵🥤🍷🍦',
+    '✈️🚗🚲⛵🏝️🏔️🌅🌄🌈☀️🌙🌧️⛄🌊🏠🎡🌍🏖️🌃🎁🎈🎉🎊🎵🎶📷📸📱💍👑🕯️🧸'
+  ];
+  const KB_CAT = ['😀', '❤️', '👍', '🐶', '🍕', '✈️'];
+  const splitEmoji = s => (typeof Intl !== 'undefined' && Intl.Segmenter) ? [...new Intl.Segmenter(undefined, { granularity: 'grapheme' }).segment(s)].map(x => x.segment) : Array.from(s);
+  const kbVibe = () => { try { navigator.vibrate && navigator.vibrate(6); } catch (e) { /* ignore */ } };
 
-  function paintWho(flag) {
-    const w = $('#stWho'); if (!w) return;
-    w.hidden = !cloudOK();
-    const o = $('#stWhoO'); o.textContent = otherWord(); o.title = otherWord() + ' diary';
-    $$('[data-who]', w).forEach(b => b.setAttribute('aria-pressed', String(b.dataset.who === VIEW)));
-    if (flag && VIEW === 'me') o.classList.add('new'); if (VIEW === 'other') o.classList.remove('new');
-    const row = $('#liveRow'); if (row) row.hidden = !cloudOK();
-    const lw = $('#liveWho'); if (lw) lw.textContent = otherWord().toLowerCase();
-  }
-
-  async function cloudPush() {
-    if (!cloudOK()) return;
-    if (CLOUD.busy) { CLOUD.again = true; return; }
-    CLOUD.busy = true;
-    try {
-      do {
-        CLOUD.again = false;
-        const st = mySource(); if (!st || st.demo) break;
-        const up = lsGet(upKey(), {});
-        for (const id of imageIds(st)) {
-          if (id.startsWith('demo:') || up[id]) continue;
-          const d = await imgGet(id).catch(() => null); if (!d) continue;
-          await OLW.putBlob(sid(ROLE, id), d); up[id] = 1; lsSet(upKey(), up);
-        }
-        const json = JSON.stringify({ v: 1, story: st });
-        if (json === CLOUD.lastJson) continue;
-        await OLW.putBlob('story-' + ROLE, json);
-        CLOUD.lastJson = json; setLiveInfo(`Synced • ${timeNow()}`);
-      } while (CLOUD.again);
-    } catch (e) { OLW.err(e); setLiveInfo('Sync failed. It will retry on the next change.'); }
-    finally { CLOUD.busy = false; }
-  }
-  function cloudPushSoon() { if (!cloudOK()) return; clearTimeout(CLOUD.t); CLOUD.t = setTimeout(cloudPush, 2500); }
-  function cloudPushNow() { if (!cloudOK()) return; clearTimeout(CLOUD.t); cloudPush(); }
-
-  async function fetchImgs(st, role) {
-    for (const id of imageIds(st)) {
-      if (id.startsWith('demo:')) continue;
-      if (await imgGet(id).catch(() => null)) continue;
-      try { const d = await OLW.getBlob(sid(role, id)); if (okDataUrl(d)) await imgPut(id, d); } catch { /* photo baad mein aa jayegi */ }
-    }
-  }
-  async function readCloudStory(meta, role) {
-    const raw = await OLW.getBlob('story-' + role, meta); if (!raw) return null;
-    let data; try { data = JSON.parse(raw); } catch { return null; }
-    if (!data || !data.story) return null;
-    const st = normalizeStory(data.story); st.demo = false; await fetchImgs(st, role); return st;
-  }
-
-  function showOtherLive() {
-    if (S.busy) { setTimeout(showOtherLive, 600); return; }
-    S.pub = S.story = OTHER; refresh(); layout(); updateStacks(); setBanner();
-    toast(`${otherWord()} diary just updated ♡`, 2200);
-  }
-  async function onOtherMeta(meta) {
-    const seen = lsGet('olw_story_oseen', 0);
-    if (OTHER && seen >= (meta.updated || 0)) return;
-    const st = await readCloudStory(meta, otherRole()); if (!st) return;
-    const had = !!OTHER, changed = !had || !same(OTHER, st);
-    OTHER = st; lsSet('olw_story_oseen', meta.updated || 0); kvSet('other_pub', st).catch(() => { });
-    if (!changed) return;
-    if (VIEW === 'other') showOtherLive();
-    else { paintWho(true); if (had) toast(`${otherWord()} diary has new writing ♡`, 3200); }
-  }
-
-  async function switchView(v) {
-    if (v === VIEW || S.busy) return;
-    if (v === 'other' && !OTHER) return toast(`${otherWord()} diary is empty. Nothing written yet.`, 3200);
-    if (S.mode !== 'read') { await exitEdit(); if (S.mode !== 'read') return; }
-    if (v === 'other') { MINE = S.pub; VIEW = 'other'; S.pub = OTHER; await loadImages(OTHER); }
-    else { VIEW = 'me'; S.pub = MINE || S.pub; }
-    S.story = S.pub; const i = posOfPage(lsGet(posKey(), '')); S.pos = i > 0 ? (S.two ? i & ~1 : i) : 0;
-    applyRole(); refresh(); layout(); updateStacks(); setBanner(); paintWho();
-  }
-  $$('[data-who]').forEach(b => b.addEventListener('click', () => switchView(b.dataset.who)));
-  $('#liveToggle').checked = LIVE;
-  $('#liveToggle').addEventListener('change', e => {
-    LIVE = e.target.checked; lsSet(LIVE_KEY, LIVE); CLOUD.lastJson = '';
-    toast(LIVE ? 'Live is on: your changes show up for them while you write' : 'Live is off: they see only what you publish', 3200); cloudPushNow();
+  /* --- kahan likhna hai: abhi focus wali jagah (ya aakhri jagah jahan cursor tha) --- */
+  document.addEventListener('selectionchange', () => {
+    const s = getSelection(); if (!s || !s.rangeCount) return;
+    const n = s.anchorNode, el = n && (n.nodeType === 1 ? n : n.parentElement), ed = el && el.closest && el.closest(EDITABLE);
+    if (ed && book.contains(ed)) { KB.last = ed; KB.range = s.getRangeAt(0).cloneRange(); }
+    syncTools();
   });
-
-  function cloudStart() {
-    CLOUD.wasIn = cloudOK();
-    if (window.OLW && OLW.configured) OLW.onAuth(u => { if (!!u !== CLOUD.wasIn) location.reload(); });
-    paintWho(); if (!cloudOK()) return;
-    OLW.watch('story-' + otherRole(), (id, meta, type) => {
-      if (type === 'removed' || id !== 'story-' + otherRole()) return;
-      CLOUD.chain = CLOUD.chain.then(() => onOtherMeta(meta)).catch(e => OLW.err(e));
-    });
-    (async () => {
-      const m = await OLW.space().collection('bmeta').doc('story-' + ROLE).get();
-      if (!m.exists) { if (!S.pub.demo) cloudPushNow(); return; }
-      if (S.pub.demo && !E.hasDraft) {                       // naya device: apni cloud wali diary utha lo
-        const st = await readCloudStory(m.data(), ROLE); if (!st) return;
-        const up = lsGet(upKey(), {}); imageIds(st).forEach(id => (up[id] = 1)); lsSet(upKey(), up);
-        await kvSet('published', st); MINE = st; if (VIEW === 'me') { S.pub = st; refresh(); layout(); updateStacks(); }
-      }
-    })().catch(e => OLW.err(e));
+  function kbTarget() {
+    const a = document.activeElement;
+    if (isEd(a)) return a.closest(EDITABLE);
+    if (KB.last && KB.last.isConnected && book.contains(KB.last)) {
+      KB.last.focus({ preventScroll: true });
+      if (KB.range) { try { const s = getSelection(); s.removeAllRanges(); s.addRange(KB.range); } catch (e) { /* ignore */ } }
+      return KB.last;
+    }
+    return null;
   }
+  const textBefore = t => { try { const s = getSelection(); const r = document.createRange(); r.selectNodeContents(t); if (s.rangeCount && t.contains(s.anchorNode)) r.setEnd(s.anchorNode, s.anchorOffset); return r.toString(); } catch (e) { return ''; } };
+  function autoCap() {
+    if (KB.layer !== 'abc' || KB.caps) return; const t = kbTarget(); if (!t) return;
+    const b = textBefore(t), want = b.trim() === '' || /[.!?۔]\s+$/.test(b);
+    if (want !== KB.shift) { KB.shift = want; drawKb(); }
+  }
+  function typeCh(ch) {
+    const t = kbTarget(); if (!t) return; document.execCommand('insertText', false, ch);
+    if (KB.shift && !KB.caps && KB.layer === 'abc') { KB.shift = false; drawKb(); }
+    autoCap();
+  }
+  function keyEvt(t, key) { return t.dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true })); }
+  function kbBackspace() { const t = kbTarget(); if (!t) return; if (keyEvt(t, 'Backspace')) document.execCommand('delete'); autoCap(); }
+  function kbEnter() { const t = kbTarget(); if (!t) return; keyEvt(t, 'Enter'); setTimeout(autoCap, 30); }
+
+  /* --- keyboard banana --- */
+  function kbKey(label, o = {}) {
+    const b = h('button', { type: 'button', class: 'k' + (o.cls ? ' ' + o.cls : ''), 'aria-label': o.aria || label, tabindex: '-1' });
+    if (o.icon) b.append(kbIco(o.icon)); else b.textContent = label;
+    if (o.w) b.style.flex = o.w + ' 1 0';
+    const fire = () => { kbVibe(); o.fn(); };
+    const stop = () => { clearTimeout(KB.rep); clearInterval(KB.rep2); };
+    b.addEventListener('pointerdown', e => { e.preventDefault(); fire(); if (o.hold) { stop(); KB.rep = setTimeout(() => { KB.rep2 = setInterval(o.fn, 55); }, 380); } });
+    ['pointerup', 'pointerleave', 'pointercancel'].forEach(ev => b.addEventListener(ev, stop));
+    b.addEventListener('click', e => { if (e.detail === 0) o.fn(); });     // physical keyboard / accessibility
+    return b;
+  }
+  function setLayer(l) { KB.layer = l; drawKb(); }
+  function drawKb() {
+    if (KB.mode === 'system') { kbKeys.hidden = true; return; } kbKeys.hidden = false;
+    const L = KB.layer, urdu = L === 'urdu' || L === 'urdu2', up = KB.shift || KB.caps, rows = [];
+    kbKeys.dataset.layer = L;
+    const space = () => kbKey('space', { cls: 'sp', w: '4', fn: () => typeCh(' ') });
+    const enter = () => kbKey('', { icon: 'enter', cls: 'acc', w: '1.5', aria: 'New paragraph', fn: kbEnter });
+    const del = () => kbKey('', { icon: 'del', cls: 'fn', w: '1.5', aria: 'Delete', fn: kbBackspace, hold: 1 });
+    if (L === 'emoji') {
+      const recent = lsGet('olw_story_recent', []);
+      const tabs = h('div', { class: 'kb-tabs' }, kbKey('ABC', { cls: 'fn', fn: () => setLayer('abc') }), kbKey('🕘', { cls: 'tab' + (KB.cat === -1 ? ' on' : ''), fn: () => { KB.cat = -1; drawKb(); } }),
+        ...KB_CAT.map((c, i) => kbKey(c, { cls: 'tab' + (KB.cat === i ? ' on' : ''), fn: () => { KB.cat = i; drawKb(); } })));
+      const items = KB.cat === -1 ? recent : splitEmoji(KB_EMO[KB.cat] || KB_EMO[0]);
+      const grid = h('div', { class: 'kb-emo' }, ...items.map(em => h('button', { type: 'button', class: 'e', tabindex: '-1', text: em, 'aria-label': em, onpointerdown: ev => {
+        ev.preventDefault(); kbVibe(); typeCh(em); const r = lsGet('olw_story_recent', []).filter(x => x !== em); r.unshift(em); lsSet('olw_story_recent', r.slice(0, 24));
+      } })));
+      kbKeys.replaceChildren(tabs, grid, h('div', { class: 'kb-r' }, kbKey('ABC', { cls: 'fn', w: '1.5', fn: () => setLayer('abc') }), space(), del(), enter()));
+      return;
+    }
+    const base = KB_LAYERS[L] || KB_LAYERS.abc;
+    const letters = r => r.map(c => { const ch = (L === 'abc' && up) ? c.toUpperCase() : c; return kbKey(ch, { fn: () => typeCh(ch) }); });
+    rows.push(h('div', { class: 'kb-r' }, ...letters(base[0])), h('div', { class: 'kb-r pad' }, ...letters(base[1])));
+    const r3 = [];
+    if (L === 'abc') r3.push(kbKey('', { icon: 'shift', cls: 'fn' + (KB.caps ? ' caps' : KB.shift ? ' on' : ''), w: '1.5', aria: 'Shift', fn: () => { if (KB.caps) { KB.caps = false; KB.shift = false; } else if (KB.shift) { KB.caps = true; } else KB.shift = true; drawKb(); } }));
+    else if (urdu) r3.push(kbKey(L === 'urdu' ? 'ٰ◌' : 'ا', { cls: 'fn', w: '1.5', aria: 'More Urdu keys', fn: () => setLayer(L === 'urdu' ? 'urdu2' : 'urdu') }));
+    else r3.push(kbKey('', { cls: 'fn', w: '1.5', fn: () => { } }));
+    r3.push(...letters(base[2]), del()); rows.push(h('div', { class: 'kb-r' }, ...r3));
+    const r4 = [];
+    if (L === 'num') r4.push(kbKey('ABC', { cls: 'fn', w: '1.5', fn: () => setLayer('abc') }));
+    else r4.push(kbKey('?123', { cls: 'fn', w: '1.5', fn: () => setLayer('num') }));
+    r4.push(kbKey('😊', { cls: 'fn', aria: 'Emoji', fn: () => { KB.cat = KB.cat === -1 && !lsGet('olw_story_recent', []).length ? 0 : KB.cat; setLayer('emoji'); } }));
+    r4.push(urdu ? kbKey('ABC', { cls: 'fn', fn: () => setLayer('abc') }) : kbKey('اردو', { cls: 'fn', aria: 'Urdu keyboard', fn: () => setLayer('urdu') }));
+    r4.push(space(), kbKey(urdu ? '،' : '.', { fn: () => typeCh(urdu ? '،' : '.') }), enter());
+    rows.push(h('div', { class: 'kb-r' }, ...r4));
+    kbKeys.replaceChildren(...rows);
+  }
+
+  /* --- tools strip (keyboard ke upar) --- */
+  const kbWithPos = fn => {                          // tool dabane par page dobara ban sakta hai: cursor wapas wahi rakho
+    KB.pos = kbCapture(); KB.hold = true; fn();
+    clearTimeout(KB.holdT); KB.holdT = setTimeout(() => { kbRestore(KB.pos); KB.hold = false; KB.pos = null; }, 450);
+  };
+  function kbCapture() {
+    const a = document.activeElement, t = isEd(a) ? a.closest(EDITABLE) : (KB.last && KB.last.isConnected ? KB.last : null); if (!t) return null;
+    const pg = t.closest('.st-page[data-pid]'); const off = textBefore(t).length;
+    return { pid: pg && pg.dataset.pid, k: t.dataset.k, i: t.dataset.i, phid: t.dataset.phid, did: t.dataset.did, off };
+  }
+  function kbRestore(c) {
+    if (!c) return; let sel = `[data-k="${c.k}"]`; if (c.i != null) sel += `[data-i="${c.i}"]`; if (c.phid) sel += `[data-phid="${c.phid}"]`; if (c.did) sel += `[data-did="${c.did}"]`;
+    const root = c.pid ? book.querySelector(`.st-page[data-pid="${c.pid}"]`) : book, t = root && root.querySelector(sel + EDITABLE); if (!t) return;
+    t.focus({ preventScroll: true });
+    const r = document.createRange(), s = getSelection(), w = document.createTreeWalker(t, NodeFilter.SHOW_TEXT); let n, left = c.off, done = false;
+    while ((n = w.nextNode())) { if (left <= n.nodeValue.length) { r.setStart(n, left); done = true; break; } left -= n.nodeValue.length; }
+    if (!done) { r.selectNodeContents(t); r.collapse(false); } else r.collapse(true);
+    s.removeAllRanges(); s.addRange(r);
+  }
+  function kbFmt(cmd) { const b = $(`[data-cmd="${cmd}"]`); if (b) b.click(); setTimeout(syncTools, 30); }
+  function kbSize(d) { const p = curPage(); if (!p) return; kbWithPos(() => { p.scale = clamp((p.scale || 100) + d, 70, 130); touch('now'); outputs(); rerenderSoon(); toast(`Text size: ${p.scale}%`, 900); }); }
+  function kbHide() { const a = document.activeElement; if (a && a.blur) a.blur(); getSelection().removeAllRanges(); showKb(false); }
+  function kbOpenTools(tab) { kbHide(); setTab(tab); const st = $('#stStudio'); if (st.classList.contains('collapsed')) $('#stCollapse').click(); }
+  function buildTools() {
+    const t = (name, o) => { const b = h('button', { type: 'button', class: 'kt' + (o.cls ? ' ' + o.cls : ''), 'aria-label': o.aria, title: o.aria }); if (o.icon) b.append(kbIco(o.icon)); else if (o.html) b.innerHTML = o.html; else b.textContent = o.text; if (o.c) b.dataset.c = o.c; b.addEventListener('click', o.fn); return b; };
+    const sep = () => h('i', { class: 'kt-sep' });
+    const font = h('select', { class: 'kt-font', 'aria-label': 'Writing font on this page' }, h('option', { value: '', text: 'Diary font' }), ...BODY_FONTS.map(f => h('option', { value: f, text: f, style: `font-family:"${f}"` })));
+    font.addEventListener('change', () => { const p = curPage(); if (!p) return; kbWithPos(() => { p.bf = font.value; touch('now'); rerenderSoon(); syncPanel(); }); });
+    kbTools.replaceChildren(
+      t('hide', { icon: 'kbdown', aria: 'Close keyboard', fn: kbHide }), t('tools', { icon: 'sliders', aria: 'More tools: fonts, colours, design', fn: () => kbOpenTools('text') }), sep(),
+      t('undo', { icon: 'undo', aria: 'Undo', fn: () => kbWithPos(undo) }), t('redo', { icon: 'redo', aria: 'Redo', fn: () => kbWithPos(redo) }), sep(),
+      t('b', { html: '<b>B</b>', aria: 'Bold', c: 'bold', fn: () => kbFmt('bold') }), t('i', { html: '<i>I</i>', aria: 'Italic', c: 'italic', fn: () => kbFmt('italic') }),
+      t('u', { html: '<u>U</u>', aria: 'Underline', c: 'underline', fn: () => kbFmt('underline') }), t('h', { html: '<span class="st-hl">H</span>', aria: 'Highlight', fn: () => kbFmt('mark') }),
+      t('x', { icon: 'eraser', aria: 'Clear formatting', fn: () => kbFmt('clear') }), sep(),
+      t('s-', { icon: 'smaller', aria: 'Smaller text on this page', fn: () => kbSize(-4) }), t('s+', { icon: 'bigger', aria: 'Bigger text on this page', fn: () => kbSize(4) }), font, sep(),
+      t('kbd', { icon: 'kbd', aria: 'Switch between our keyboard and the phone keyboard', cls: 'kbswitch', fn: kbSwitch })
+    );
+  }
+  function syncTools() {
+    if (!KB.on) return;
+    ['bold', 'italic', 'underline'].forEach(c => { const b = kbTools.querySelector(`[data-c="${c}"]`); if (b) { let on = false; try { on = document.queryCommandState(c); } catch (e) { /* ignore */ } b.classList.toggle('on', on); } });
+    const f = kbTools.querySelector('.kt-font'), p = curPage(); if (f && p && document.activeElement !== f) f.value = p.bf || '';
+    const sw = kbTools.querySelector('.kbswitch'); if (sw) { sw.classList.toggle('on', KB.mode === 'system'); sw.title = KB.mode === 'system' ? 'Use our keyboard' : 'Use the phone keyboard'; }
+  }
+
+  /* --- phone keyboard ya apna keyboard --- */
+  function setInputMode() {
+    const own = KB.mode === 'own' && kbEnabled();
+    $$(EDITABLE, book).forEach(el => { if (own) { if (el.getAttribute('inputmode') !== 'none') el.setAttribute('inputmode', 'none'); } else if (el.hasAttribute('inputmode')) el.removeAttribute('inputmode'); });
+  }
+  new MutationObserver(setInputMode).observe(book, { childList: true, subtree: true });
+  function kbSwitch() {
+    const pos = kbCapture(); KB.mode = KB.mode === 'own' ? 'system' : 'own'; lsSet('olw_story_kb', KB.mode);
+    const a = document.activeElement; if (a && a.blur) a.blur(); setInputMode(); drawKb(); syncTools();
+    toast(KB.mode === 'own' ? 'Our keyboard is on' : 'Phone keyboard is on', 1200); KB.hold = true;
+    setTimeout(() => { kbRestore(pos); KB.hold = false; }, 80);
+  }
+
+  /* --- dikhana / chhupana --- */
+  function showKb(on) {
+    on = !!on && kbEnabled() && S.mode === 'edit'; if (on === KB.on) { if (on) { drawKb(); syncTools(); } return; }
+    KB.on = on; kbDock.hidden = !on; document.body.classList.toggle('st-kbon', on);
+    if (on) { if (!kbTools.firstChild) buildTools(); drawKb(); syncTools(); }
+    requestAnimationFrame(layout); setTimeout(layout, 160);
+  }
+  book.addEventListener('focusin', e => { if (S.mode === 'edit' && isEd(e.target) && kbEnabled()) { clearTimeout(KB.hideT); setInputMode(); showKb(true); } });
+  book.addEventListener('focusout', () => {
+    clearTimeout(KB.hideT);
+    KB.hideT = setTimeout(() => { if (KB.hold) return; const a = document.activeElement; if (isEd(a) || kbDock.contains(a)) return; showKb(false); }, 180);
+  });
+  kbDock.addEventListener('pointerdown', e => { if (!e.target.closest('select')) e.preventDefault(); });
+  kbDock.addEventListener('mousedown', e => { if (!e.target.closest('select')) e.preventDefault(); });
+  new MutationObserver(() => { if (S.mode !== 'edit' && KB.on) showKb(false); }).observe(document.body, { attributes: true, attributeFilter: ['class'] });
+  const _afterSpread = hooks.afterSpread;
+  hooks.afterSpread = () => { if (_afterSpread) _afterSpread(); if (KB.hold && KB.pos) kbRestore(KB.pos); setInputMode(); syncTools(); };
 
 
   /* ---------------------------------------------------------------
@@ -2254,24 +2343,19 @@
     let pub = null, raw = null;
     try { raw = await kvGet('published'); if (raw) pub = normalizeStory(raw); } catch { pub = null; }
     if (!pub) pub = demoStory();
-    S.pub = S.story = pub; S.mode = 'read'; MINE = pub;
-    try { const o = await kvGet('other_pub'); if (o) OTHER = normalizeStory(o); } catch { OTHER = null; }
-    try { E.hasDraft = !!(await kvGet('draft')); } catch { E.hasDraft = false; }
+    S.pub = S.story = pub; S.mode = 'read';
+    try { E.hasDraft = ROLE === 'owner' && !!(await kvGet('draft')); } catch { E.hasDraft = false; }
     await loadImages(pub);
     S.vp = buildVP(pub);
-    const sp = lsGet(posKey(), ''), i = posOfPage(sp); S.pos = i > 0 ? (S.two ? i & ~1 : i) : 0;
+    const sp = lsGet(POS_KEY, ''), i = posOfPage(sp); S.pos = i > 0 ? (S.two ? i & ~1 : i) : 0;
     applyLook(); renderCoverFace(); updateChrome(); setBanner(); layout(); updateStacks(); updateChrome();
     book.classList.add('ready');
     if (!persistent) toast('Saving is blocked in this browser. Changes last only for this session. Please download a backup.', 6000);
     document.fonts && document.fonts.ready.then(() => { if (S.open && S.mode === 'read') showSpread(); });
     window.__story = { S, E, beginTurn, setTurn, endTurn };
-    try { cloudStart(); } catch (ex) { console.warn('cloud', ex); }
   }
   $('#stPrev').addEventListener('click', () => go_(-1)); $('#stNext').addEventListener('click', () => go_(1));
   book.addEventListener('click', e => { if (!S.open && !S.busy && !e.target.closest('[contenteditable="true"]')) openBook(); });
-  (async () => {
-    try { if (window.OLW && OLW.configured) { await OLW.whenAuth(3500); if (OLW.signedIn) { ROLE = OLW.role; if (ROLE === 'partner') DB_NAME = 'olw_story_v1_partner'; } } } catch { /* local-only */ }
-    init().catch(err => { console.error(err); toast('The story could not load. Please reload the page.', 6000); });
-  })();
+  init().catch(err => { console.error(err); toast('The story could not load. Please reload the page.', 6000); });
 
 })();
