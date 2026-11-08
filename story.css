@@ -607,3 +607,14 @@ body.st-edit .st-banner{font-size:.7rem;padding:4px 10px;line-height:1.25}
 .st-bgt[aria-pressed="true"]{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent);font-weight:600}
 .st-bgt:active{filter:brightness(.93)}
 #swBgPair .st-sw,#swBg .st-sw,#swBg2 .st-sw{background:var(--c)}
+
+/* ===== Mine / Her switch (two diaries) ===== */
+.st-who{position:absolute;left:50%;top:calc(60px + env(safe-area-inset-top));transform:translateX(-50%);display:flex;padding:3px;border-radius:999px;background:rgba(255,252,248,.94);box-shadow:0 2px 10px rgba(60,40,70,.22),0 0 0 1px var(--line-2)}
+.st-who[hidden]{display:none}
+.st-who button{min-width:66px;height:30px;padding:0 14px;border-radius:999px;font-size:.82rem;font-weight:600;color:var(--plum-d);background:none;border:0}
+.st-who button[aria-selected="true"]{background:var(--accent);color:var(--on-accent);box-shadow:0 1px 4px rgba(60,40,70,.3)}
+@media (orientation:landscape) and (max-height:520px){.st-who{position:static;transform:none;margin-left:8px}.st-who button{height:28px;min-width:56px}}
+body #olwCloud{top:calc(64px + env(safe-area-inset-top));bottom:auto;left:12px}
+body #olwPop{top:calc(108px + env(safe-area-inset-top));bottom:auto;left:12px}
+body.st-edit #olwCloud,body.st-edit #olwPop,body.st-preview #olwCloud,body.st-preview #olwPop{display:none!important}
+@media (orientation:landscape) and (max-height:520px){body #olwCloud{top:54px}body #olwPop{top:98px}}
