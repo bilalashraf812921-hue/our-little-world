@@ -280,3 +280,46 @@ body.lt-editing .p-rs,body.lt-styling .p-rs{display:block}
 .pw[data-ds=moon] .p-photo figcaption{color:#3a2f4a}
 body.lt-editing .p-in,body.lt-styling .p-in{pointer-events:none}
 .chip,.tg{user-select:none;-webkit-user-select:none}
+
+/* ---------- v5: on-page typing, own keyboard, text boxes ---------- */
+.ced{outline:none;-webkit-user-select:text;user-select:text;caret-color:currentColor;cursor:text;border-radius:4px}
+b.ced,span.ced{display:inline-block;min-width:1ch;font-weight:inherit}
+.ced:empty::before{content:attr(data-ph);opacity:.4;pointer-events:none}
+p.ced:empty,div.ced:empty{min-height:1.25em}
+.ced:hover{box-shadow:0 0 0 1px rgba(141,104,201,.4)}
+.ced:focus{background:rgba(141,104,201,.1);box-shadow:0 0 0 2px rgba(141,104,201,.55)}
+body.lt-editing .p-in .ced{pointer-events:auto}
+.p-tb{position:absolute;z-index:5;color:var(--ink);font-size:calc(var(--bfs) * var(--tf,1));line-height:1.3;overflow-wrap:anywhere}
+.p-tb .tbt{white-space:pre-wrap;min-height:1.3em;word-break:break-word}
+body.lt-editing .p-tb{outline:1px dashed rgba(141,104,201,.5);outline-offset:3px}
+body.lt-editing .p-tb.sel{outline:2px solid rgba(141,104,201,.9)}
+.p-tb .tmv,.p-tb .trs,.p-tb .tdl{display:none;position:absolute;width:28px;height:28px;border-radius:50%;background:#8d68c9;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.4);touch-action:none;z-index:2;color:#fff;font:700 17px/24px var(--sans);text-align:center;font-style:normal}
+.p-tb.sel .tmv,.p-tb.sel .trs,.p-tb.sel .tdl{display:block}
+.p-tb .tmv{left:-14px;top:-14px;cursor:move}.p-tb .tmv::before{content:"✥"}
+.p-tb .trs{right:-14px;bottom:-14px;cursor:nwse-resize}.p-tb .trs::before{content:"⤡"}
+.p-tb .tdl{right:-14px;top:-14px;background:#d6455d}
+.pw[data-ds=moon] .p-tb,.pw[data-ds=stars] .p-tb,.pw[data-ds=chalk] .p-tb{color:var(--ink)}
+#paperHost{touch-action:manipulation}
+#olwKb{position:fixed;left:0;right:0;bottom:0;z-index:30;background:#f6ecf0;border-top:1px solid #dcc5cf;box-shadow:0 -8px 30px rgba(10,1,4,.4);padding:6px 6px calc(8px + env(safe-area-inset-bottom));color:#3b1a2c;font-family:var(--sans);-webkit-user-select:none;user-select:none;touch-action:manipulation}
+#olwKb[hidden]{display:none}
+.kb-top{display:flex;align-items:center;gap:6px;padding:2px 2px 6px;overflow-x:auto;scrollbar-width:none}.kb-top::-webkit-scrollbar,.kb-fonts::-webkit-scrollbar{display:none}
+.kb-for{flex:1 0 auto;font-size:.74rem;font-weight:600;color:#8a4a68;white-space:nowrap;min-width:96px}
+.kb-btn{flex:none;height:34px;min-width:38px;padding:0 10px;border-radius:10px;background:#fff;border:1px solid #e2cdd4;font:600 .85rem var(--sans);color:#5a2347;white-space:nowrap}
+.kb-btn.pri{background:#8d68c9;color:#fff;border-color:#8d68c9}
+.kb-fonts{display:flex;gap:6px;overflow-x:auto;padding:2px 2px 8px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.kb-fonts .f{flex:none;padding:6px 12px;border-radius:16px;background:#fff;border:1px solid #e2cdd4;font-size:1.05rem;line-height:1.25;color:#3b1a2c;white-space:nowrap}
+.kb-fonts .f.on{background:#8d68c9;color:#fff;border-color:#8d68c9}
+.kb-fonts .g{flex:none;align-self:center;font:600 .64rem var(--sans);letter-spacing:.08em;text-transform:uppercase;color:#a07a90;padding:0 2px}
+.kb-keys{display:grid;gap:6px}
+.kb-row{display:flex;gap:5px;justify-content:center}
+.kb-key{flex:1 1 0;max-width:46px;height:44px;border-radius:8px;background:#fff;border:1px solid #e2cdd4;box-shadow:0 1px 0 #d8bfc9;font:500 1.15rem var(--sans);color:#3b1a2c;display:grid;place-items:center;padding:0;min-width:0}
+.kb-key:active{background:#ead9f3}
+.kb-key.w{flex:1.5;max-width:64px;background:#ecdde4;font-size:.9rem}
+.kb-key.sp{flex:5;max-width:none;font-size:.85rem;color:#8a6578}
+.kb-key.on{background:#8d68c9;color:#fff}.kb-key.lock{background:#5a2d96}
+.kb-emo{display:grid;grid-template-columns:repeat(8,1fr);gap:2px;max-height:136px;overflow-y:auto}
+.kb-emo .ek{height:40px;font-size:1.4rem;background:none;border:0}
+#olwKb[data-keys="0"] .kb-keys{display:none}
+@media(min-width:900px){#olwKb{right:410px}body.lt-kb .lt-read{padding-bottom:140px}}
+@media(max-width:899px){body.lt-kb .lt-editor,body.lt-kb .lt-styler{display:none}body.lt-kb.lt-editing .lt-read{padding-bottom:calc(var(--kbh,320px) + 24px)}body.lt-kb .lt-toast{bottom:calc(var(--kbh,320px) + 12px)}}
+.kb-for{flex:1 1 0;min-width:0;overflow:hidden;text-overflow:ellipsis;font-size:.7rem}.kb-btn{padding:0 8px;min-width:34px}.kb-top{overflow-x:visible}
