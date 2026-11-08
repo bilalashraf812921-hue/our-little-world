@@ -16,7 +16,18 @@
     intro: 'Har din tumhare saath ek nayi kahani hai, aur main chahta hoon ke yeh kahani hamesha yun hi chalti rahe.',
     why: 'Kyunkay tum sirf meri mohabbat nahi, meri sab se khoobsurat kahani ho. Yeh website maine is liye banayi hai taake hum apni yaadon, khwabon aur har chhoti bari baat ko hamesha ke liye saath rakh saken.',
     signoff: 'Always you ♡',
-    surprise: 'Tum meri zindagi ka sab se khoobsurat tohfa ho ♡',
+    surprise: [
+      'Ruko... bas ek minute.',
+      'Yeh koi mehenga tohfa nahi hai. Bas kuch baatein hain, jo main aksar dil mein rakh leta hoon aur keh nahi pata.',
+      'Mujhe woh din yaad hai jab maine pehli baar socha tha, "Yeh insaan meri zindagi ka sab se khoobsurat hissa ban jayega." Aur tum ban gayi.',
+      'Jab tum hansti ho na, meri saari thakan utar jati hai.',
+      'Aur jab tum udaas hoti ho, dil chahta hai tumhara har gham main apne naam likhwa lun.',
+      'Main kabhi theek se keh nahi pata, lekin tumhare baghair yeh din, yeh raatein, yeh sab kuch adhoora lagta hai.',
+      'Agar kabhi lage ke tum akeli ho, toh bas itna yaad rakhna: main yahin hoon. Hamesha.',
+      'Yeh poori website, har photo, har khat, har lafz, sab sirf is liye hai ke tum jaan sako ke tum mere liye kya ho.',
+      'Tum meri woh dua ho jo qabool ho gayi.',
+      'I love you. Aaj bhi, kal bhi, aur jab tak saans hai. ♡'
+    ].join('\n'),
     specialDate: '', specialLabel: '', memoryTitle: '', togetherSince: '',
     accent: '#8a64a3', accentOn: false,   // accentOn=false => theme ka apna rang
     motion: 'auto', heroImg: '', memoryImg: ''
@@ -212,12 +223,13 @@
 
   /* ---------- Surprise ---------- */
   const reduced = () => matchMedia('(prefers-reduced-motion: reduce)').matches || document.documentElement.dataset.motion === 'off';
-  $('#surpriseBtn').addEventListener('click', () => {
-    $('#surpriseMsg').textContent = saved.surprise;
-    $('#surpriseDialog').showModal();
+  const OLD_SURPRISE = 'Tum meri zindagi ka sab se khoobsurat tohfa ho ♡';   // purani ek line wali default: ab nayi khat wali ban jati hai
+  let surTimers = [];
+  const surClear = () => { surTimers.forEach(clearTimeout); surTimers = []; };
+  function burstHearts(n) {
     if (reduced()) return;
     const box = $('#hearts');
-    for (let i = 0; i < 22; i++) {
+    for (let i = 0; i < n; i++) {
       const h = document.createElement('span');
       h.textContent = '♡';
       h.style.left = Math.random() * 100 + '%';
@@ -228,6 +240,46 @@
       box.append(h);
       setTimeout(() => h.remove(), 7000);
     }
+  }
+  function surpriseLines() {
+    let raw = (saved.surprise || '').trim();
+    const isDefault = !raw || raw === OLD_SURPRISE || raw === DEFAULTS.surprise;
+    if (isDefault) raw = DEFAULTS.surprise;
+    const L = raw.split(/\n+/).map(x => x.trim()).filter(Boolean);
+    if (isDefault && saved.togetherSince) {
+      const d = dayDiff(saved.togetherSince, todayPK());
+      if (d > 0) L.splice(L.length - 2, 0, `Aur haan... hamein saath ${plural(d)} ho chuke hain. Har din pichle din se zyada khoobsurat.`);
+    }
+    return L;
+  }
+  $('#surpriseDialog').addEventListener('close', surClear);
+  $('#surpriseBtn').addEventListener('click', () => {
+    const d = $('#surpriseDialog'), box = $('#surpriseMsg'), sign = $('#surSign'), skip = $('#surSkip'), close = $('#surClose');
+    const lines = surpriseLines();
+    let i = 0;
+    surClear(); box.replaceChildren(); sign.hidden = true; close.hidden = true; skip.hidden = false;
+    const add = instant => {
+      const p = document.createElement('p');
+      p.className = 'sur-line' + (instant ? ' now' : '') + (i === lines.length - 1 ? ' sur-last' : '');
+      p.textContent = lines[i++]; box.append(p); return p;
+    };
+    const finish = big => {
+      surClear(); skip.hidden = true; close.hidden = false;
+      sign.textContent = saved.signoff || ''; sign.hidden = !saved.signoff;
+      burstHearts(big ? 34 : 14);
+      close.scrollIntoView({ block: 'nearest', behavior: reduced() ? 'auto' : 'smooth' });
+    };
+    const step = () => {
+      if (i >= lines.length) return finish(true);
+      const p = add(false);
+      p.scrollIntoView({ block: 'nearest', behavior: reduced() ? 'auto' : 'smooth' });
+      surTimers.push(setTimeout(step, Math.min(3800, 1300 + p.textContent.length * 34)));
+    };
+    skip.onclick = () => { surClear(); while (i < lines.length) add(true); finish(false); };
+    d.showModal();
+    if (reduced()) { while (i < lines.length) add(true); finish(false); return; }
+    burstHearts(8);
+    surTimers.push(setTimeout(step, 700));
   });
 
   /* ---------- Settings (owner only, draft -> preview -> publish) ---------- */
@@ -337,6 +389,21 @@
     const salt = crypto.getRandomValues(new Uint8Array(16)), iter = 150000;
     return { salt: toB64(salt), iter, hash: await derive(pw, salt, iter) };
   }
+  /* Recovery code: password bhool jane par lock screen se reset (code sirf hash ban kar save hota hai) */
+  const REC_ALPHA = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789', REC_FAIL = 'olw_fail_rec';
+  const normRec = s => String(s || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+  async function makeRecovery() {
+    const r = crypto.getRandomValues(new Uint8Array(12));
+    const raw = [...r].map(b => REC_ALPHA[b % REC_ALPHA.length]).join('');
+    const code = raw.match(/.{4}/g).join('-');
+    return { code, rec: await createLock(normRec(code)) };
+  }
+  function showRecovery(code) {
+    $('#recCode').textContent = code; $('#recDialog').showModal();
+  }
+  $('#recCopy').addEventListener('click', async () => {
+    try { await navigator.clipboard.writeText($('#recCode').textContent); toast('Code copy ho gaya ✓'); } catch { toast('Copy nahi hua. Code ko haath se likh lein.'); }
+  });
   async function verifyPassword(pw) {
     const lock = getLock(); if (!lock) return { ok: true };
     let f = {}; try { f = JSON.parse(localStorage.getItem(FAIL_KEY) || '{}'); } catch { /* ignore */ }
@@ -402,6 +469,7 @@
       ? 'Password laga hua hai ✓ App kholne aur settings kholne par poocha jata hai.'
       : 'Abhi password nahi laga. App aur settings bina password ke khulti hain.';
     $('#pwCurRow').hidden = !has; $('#pwRemove').hidden = !has;
+    $('#pwRecovery').hidden = !has; $('#pwRecovery').textContent = has && getLock().rec ? 'Naya recovery code banayein' : 'Recovery code banayein';
     $('#pwSave').textContent = has ? 'Password badlein' : 'Password lagayein';
   }
   $('#pwSave').addEventListener('click', async () => {
@@ -409,12 +477,46 @@
     if (hasLock()) { const r = await verifyPassword(pw.cur.value); if (!r.ok) return pwErr(r.msg); }
     if (pw.n1.value.length < 4) return pwErr('Naya password kam az kam 4 characters ka hona chahiye.');
     if (pw.n1.value !== pw.n2.value) return pwErr('Dono naye passwords ek jaise nahi hain.');
-    try { localStorage.setItem(LOCK_KEY, JSON.stringify(await createLock(pw.n1.value))); }
+    let recCode = '';
+    try { const lock = await createLock(pw.n1.value), mr = await makeRecovery(); lock.rec = mr.rec; recCode = mr.code; localStorage.setItem(LOCK_KEY, JSON.stringify(lock)); }
     catch (ex) { return pwErr(ex.message || 'Password save nahi ho saka.'); }
     try { sessionStorage.setItem(OK_KEY, '1'); } catch { /* ignore */ }
     [pw.cur, pw.n1, pw.n2].forEach(i => (i.value = ''));
-    refreshPwUi(); toast('Password lag gaya ✓');
+    refreshPwUi(); toast('Password lag gaya ✓'); if (recCode) showRecovery(recCode);
   });
+  $('#pwRecovery').addEventListener('click', async () => {
+    pwErr('');
+    const r = await verifyPassword(pw.cur.value); if (!r.ok) return pwErr(r.msg || 'Pehle maujooda password likhein.');
+    try { const lock = getLock(), mr = await makeRecovery(); lock.rec = mr.rec; localStorage.setItem(LOCK_KEY, JSON.stringify(lock)); refreshPwUi(); showRecovery(mr.code); }
+    catch (ex) { pwErr(ex.message || 'Code ban nahi saka.'); }
+  });
+  $('#lockForgot').addEventListener('click', () => {
+    const lock = getLock(), box = $('#recBox');
+    box.hidden = !box.hidden; if (box.hidden) return;
+    const has = !!(lock && lock.rec);
+    $('#recHint').textContent = has ? 'Password lagate waqt jo Recovery Code mila tha wo likhein.' : 'Is password ke saath Recovery Code nahi bana tha. Browser settings se is website ka data clear karna parega.';
+    $('#recInput').hidden = !has; $('#recGo').hidden = !has; $('#recError').hidden = true;
+    if (has) setTimeout(() => $('#recInput').focus(), 50);
+  });
+  async function tryRecovery() {
+    const er = $('#recError'), lock = getLock(), say = m => { er.textContent = m; er.hidden = false; };
+    if (!lock || !lock.rec) return say('Recovery code maujood nahi.');
+    let f = {}; try { f = JSON.parse(localStorage.getItem(REC_FAIL) || '{}'); } catch { /* ignore */ }
+    if (f.until && Date.now() < f.until) return say(`Bohat ghalat koshishein. ${Math.ceil((f.until - Date.now()) / 1000)} second baad try karein.`);
+    let h; try { h = await derive(normRec($('#recInput').value), fromB64(lock.rec.salt), lock.rec.iter); } catch (ex) { return say(ex.message); }
+    if (h !== lock.rec.hash) {
+      const n = (f.n || 0) + 1;
+      try { localStorage.setItem(REC_FAIL, JSON.stringify(n >= 5 ? { n: 0, until: Date.now() + 60000 } : { n })); } catch { /* ignore */ }
+      return say(n >= 5 ? '5 ghalat koshishein. 1 minute ruk jayein.' : 'Recovery code ghalat hai.');
+    }
+    localStorage.removeItem(LOCK_KEY); localStorage.removeItem(FAIL_KEY); localStorage.removeItem(REC_FAIL);
+    try { sessionStorage.setItem(OK_KEY, '1'); } catch { /* ignore */ }
+    delete document.documentElement.dataset.locked;
+    $('#recInput').value = ''; $('#recBox').hidden = true; er.hidden = true; refreshPwUi();
+    toast('Password hata diya gaya. Settings mein naya password lagayein ♡', 6000);
+  }
+  $('#recGo').addEventListener('click', tryRecovery);
+  $('#recInput').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); tryRecovery(); } });
   $('#pwRemove').addEventListener('click', async () => {
     pwErr('');
     const r = await verifyPassword(pw.cur.value); if (!r.ok) return pwErr(r.msg);
