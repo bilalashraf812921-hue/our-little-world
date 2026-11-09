@@ -23,7 +23,7 @@
     image: '<rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-5-5L5 21"/>', close: '<path d="M6 6l12 12M18 6 6 18"/>', down: '<path d="m6 9 6 6 6-6"/>', reply: '<path d="M9 14 4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 6 6v3"/>',
     copy: '<rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h8"/>', trash: '<path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/>', check: '<path d="m5 12 5 5L20 7"/>', user: '<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
     back2: '<path d="M3 12h18M10 5l-7 7 7 7"/>', del: '<path d="M21 5H9l-6 7 6 7h12a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1z"/><path d="m13 9 4 6M17 9l-4 6"/>', shift: '<path d="M12 4 4 13h5v7h6v-7h5z"/>', globe: '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18"/>', cloud: '<path d="M7 18a4.5 4.5 0 0 1-.5-9A6 6 0 0 1 18 9.5 4 4 0 0 1 17.5 18z"/>',
-    heart: '<path d="M12 21s-8-5.2-8-11a4.5 4.5 0 0 1 8-2.8A4.5 4.5 0 0 1 20 10c0 5.8-8 11-8 11z"/>', pen: '<path d="M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16z"/>', plus: '<path d="M12 5v14M5 12h14"/>', tick: '<path d="m5 12.5 4.5 4.5L19 7"/>', tick2: '<path d="m1.5 12.5 4.5 4.5L16 7M9 16.5l1.5 1.5L22 7"/>', clock: '<circle cx="12" cy="12" r="8"/><path d="M12 8v4l2 2"/>'
+    heart: '<path d="M12 21s-8-5.2-8-11a4.5 4.5 0 0 1 8-2.8A4.5 4.5 0 0 1 20 10c0 5.8-8 11-8 11z"/>', pen: '<path d="M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16z"/>', plus: '<path d="M12 5v14M5 12h14"/>', tick: '<path d="m2 12 4 4 7-8"/>', tick2: '<path d="m2 12 4 4 7-8M10 15l1 1 8-9"/>', clock: '<circle cx="12" cy="12" r="8"/><path d="M12 8v4l2 2"/>'
   };
   const svgI = n => `<svg viewBox="0 0 24 24" aria-hidden="true">${ICONS[n] || ''}</svg>`;
   const ico = n => { const s = h('span', { class: 'ic' }); s.innerHTML = svgI(n); return s; };
@@ -60,7 +60,6 @@
   ];
   const P = (n, dark, bg, me, meT, them, themT, head, headT, comp, acc, kb) => ({ n, dark, bg, me, meT, them, themT, head, headT, comp, acc, kb });
   const PRESETS = {
-    violet:   Object.assign(P('Pastel Purple Love', 0, { type: 'gradient', c1: '#c8b2e2', c2: '#f3c1d2', angle: 180, doodle: 'none', ink: '#b58ad0' }, '#e2c8f8', '#3b1a5c', '#ffffff', '#3b1a5c', '#e8d9f5', '#4a1259', '#efe3f8', '#5b2a9e', { bg: '#eadcf5', key: '#ffffff', keyT: '#3b1a5c', acc: '#5b2a9e', shape: 'round' }), { font: 'Inter', size: 16, radius: 20 }),
     love:     Object.assign(P('Romantic Pink', 0, { type: 'gradient', c1: '#fbe9f1', c2: '#efe3f7', angle: 150, doodle: 'hearts', ink: '#b58ad0' }, '#e4d2f4', '#4a1d70', '#fde8ef', '#4a1d70', '#fdf1f5', '#4a1259', '#fbeaf2', '#7b3fa6', { bg: '#f3e6f2', key: '#ffffff', keyT: '#4a1d70', acc: '#7b3fa6', shape: 'round' }), { font: 'Cormorant Garamond', size: 18, radius: 20 }),
     burgundy: Object.assign(P('Luxury Burgundy', 0, { type: 'gradient', c1: '#f5ede8', c2: '#ece0d8', angle: 140, doodle: 'hearts', ink: '#8b2252' }, '#7b1a3a', '#f5e8d4', '#f9f0e6', '#3a1a1a', '#8b2252', '#f5e8d4', '#faf4ee', '#8b2252', { bg: '#f0e0d4', key: '#f9f0e6', keyT: '#3a1a1a', acc: '#8b2252', shape: 'square' }), { font: 'Cormorant Garamond', size: 17, radius: 8 }),
     white:    Object.assign(P('Minimal White', 0, { type: 'color', c1: '#f7f7f9', c2: '#efefef', angle: 180, doodle: 'dots', ink: '#cccccc' }, '#e8e8ea', '#1a1a2e', '#ffffff', '#1a1a2e', '#f0f0f2', '#1a1a2e', '#f8f8fa', '#5566aa', { bg: '#e8e8ea', key: '#ffffff', keyT: '#1a1a2e', acc: '#5566aa', shape: 'square' }), { font: 'Inter', size: 15, radius: 12 }),
@@ -80,7 +79,7 @@
       kb: { on: true, bg: p.kb.bg, key: p.kb.key, keyT: p.kb.keyT, acc: p.kb.acc, shape: p.kb.shape, h: 'normal', font: 'Inter', numrow: true, vibrate: true, sound: false, layout: 'abc' }, updated: 0 };
   }
   function normLook(x) {
-    const d = lookFrom(x && PRESETS[x.preset] ? x.preset : 'violet'); x = x && typeof x === 'object' ? x : {}; const b = x.bg || {}, k = x.kb || {};
+    const d = lookFrom(x && PRESETS[x.preset] ? x.preset : 'love'); x = x && typeof x === 'object' ? x : {}; const b = x.bg || {}, k = x.kb || {};
     const col = (v, def) => (isHex(v) ? v : def);
     const img = typeof b.img === 'string' && /^data:image\/(jpeg|png|webp);/.test(b.img) && b.img.length < 900000 ? b.img : '';
     return { preset: d.preset, dark: x.dark != null ? !!x.dark : d.dark,
@@ -101,13 +100,17 @@
   }
 
   /* ---------- state ---------- */
-  const S = { me: 'owner', msgs: [], look: lookFrom('violet'), prof: { owner: normProfile(), partner: normProfile() }, pres: { owner: 0, partner: 0 }, synced: false, q: '', reply: null, kbOpen: false, sys: false, starred: new Set(), pinned: [], hid: new Set(), sharedBg: null };
+  const S = { me: 'owner', msgs: [], look: lookFrom('love'), prof: { owner: normProfile(), partner: normProfile() }, pres: { owner: 0, partner: 0 }, synced: false, q: '', reply: null, kbOpen: false, sys: false, starred: new Set(), pinned: [], sharedBg: null };
   const other = () => (S.me === 'owner' ? 'partner' : 'owner');
   const nameOf = r => S.prof[r].name || (r === S.me ? 'Me' : 'My Love');
   const byId = id => S.msgs.find(m => m.id === id);
   const saveMsgs = () => DB.set('msgs', S.msgs);
   const saveLook = () => DB.set('look', S.look);
   const saveProf = () => DB.set('prof', S.prof);
+  /* shared background (dono phones par ek jaisa) */
+  let sbgUpd = 0, sbgT = 0;
+  const normSbg = x => (x && IMG_OK(x.img, 900000) ? { type: 'photo', img: x.img, blur: clamp(Math.round(+x.blur || 0), 0, 24), dim: clamp(Math.round(+x.dim || 0), 0, 70) } : null);
+  const saveSbg = () => DB.set('sbg', { bg: S.sharedBg, updated: sbgUpd });
   const fmtTime = t => new Date(t).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', timeZone: 'Asia/Karachi' });
   const dayKey = t => new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Karachi' }).format(new Date(t));
   function dayLabel(t) { const k = dayKey(t), now = Date.now(); if (k === dayKey(now)) return 'Today'; if (k === dayKey(now - 864e5)) return 'Yesterday'; return new Date(t).toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric', year: 'numeric', timeZone: 'Asia/Karachi' }); }
@@ -183,7 +186,7 @@
   }
   function renderHead() {
     const o = other(), box = $('#peerBtn'); const st = statusText();
-    box.replaceChildren(hides('avatar') ? null : avatarEl(o, 'hd'), h('span', { class: 'pn' }, h('b', { text: nameOf(o) }), st ? h('small', { class: st === 'online' ? 'ons' : '', text: st === 'online' ? 'Online' : st }) : null));
+    box.replaceChildren(hides('avatar') ? null : avatarEl(o, 'hd'), h('span', { class: 'pn' }, h('b', { text: nameOf(o) }), st ? h('small', { text: st }) : null));
     $('#btnSearch').hidden = hides('search'); renderSide();
   }
 
@@ -195,29 +198,30 @@
     const ts = S.look.tickStyle || 'tick';
     const s = h('span', { class: 'tk' + (seen ? ' seen' : '') + (pending ? ' pend' : '') });
     if (ts === 'text') {
-      const label = !S.synced ? '' : pending ? 'Sending' : seen ? 'Seen' : 'Sent';
+      const label = !S.synced ? '' : pending ? 'Sent' : seen ? 'Seen' : 'Delivered';
       s.dataset.st = label; s.innerHTML = svgI(pending ? 'clock' : seen ? 'tick2' : 'tick');
     } else if (ts === 'min') {
-      s.innerHTML = seen ? '·· ' : ok ? '· ' : '·'; if (seen) s.classList.add('seen');
+      s.innerHTML = seen ? '·· ' : ok ? '·· ' : '·'; if (seen) s.classList.add('seen');
     } else {
       /* tick, el, ts — all use svg ticks */
-      s.innerHTML = svgI(pending ? 'clock' : seen ? 'tick2' : 'tick');
+      s.innerHTML = svgI(!S.synced ? 'tick' : pending ? 'clock' : 'tick2');
     }
     return s;
   }
   function esc(t, q) { if (!q) return document.createTextNode(t); const f = document.createDocumentFragment(), l = t.toLowerCase(), qq = q.toLowerCase(); let i = 0, j; while ((j = l.indexOf(qq, i)) >= 0) { f.append(t.slice(i, j), h('mark', { text: t.slice(j, j + q.length) })); i = j + q.length; } f.append(t.slice(i)); return f; }
   const dateTxt = t => new Date(t).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'Asia/Karachi' });
-  function bubble(m, head, seenNote) {
+  function bubble(m, head) {
     const mine = m.by === S.me, row = h('div', { class: 'row ' + (mine ? 'me' : 'them') + (head ? ' hd' : ''), 'data-id': m.id });
     const b = h('div', { class: 'bub' + (S.starred.has(m.id) ? ' starred' : '') });
     if (m.reply) b.append(h('button', { type: 'button', class: 'rq', onclick: e => { e.stopPropagation(); jumpTo(m.reply.id); } }, h('b', { text: m.reply.by === S.me ? 'You' : nameOf(m.reply.by) }), h('span', { text: m.reply.img && !m.reply.text ? 'Photo' : m.reply.text })));
     if (m.img) b.append(h('img', { class: 'mimg', src: m.img, alt: 'Photo', loading: 'lazy', onclick: e => { e.stopPropagation(); openLightbox(m.img); } }));
     if (m.text) b.append(h('span', { class: 'tx' }, esc(m.text, S.q)));
+    { const tt = m.text ? ttParse(m.text) : null; if (tt) b.append(ttCard(tt)); }
     b.append(h('span', { class: 'mt' }, hides('time') ? null : h('time', { text: (hides('stamp') ? '' : dateTxt(m.t) + ' • ') + fmtTime(m.t) }), tickEl(m)));
     const rc = hides('react') ? [] : ['owner', 'partner'].map(r => m.react[r]).filter(Boolean); if (rc.length) b.append(h('span', { class: 'rc', text: [...new Set(rc)].join('') }));
     const av = hides('avatar') ? null : head ? avatarEl(m.by, 'mini') : h('span', { class: 'av mini sp' });
     const nm = head && !hides('names') ? h('span', { class: 'sn' }, h('b', { text: nameOf(m.by), style: S.prof[m.by].ncol ? 'color:' + S.prof[m.by].ncol : '' }), h('i', { text: m.by === S.me ? ' (you)' : '' }), isOn(m.by) ? h('em', { class: 'onl', text: 'online' }) : null) : null;
-    row.append(av, h('div', { class: 'col' }, nm, b, seenNote ? h('small', { class: 'seenl', text: 'Seen ' + fmtTime(m.seen) }) : null)); bindPress(row, m.id); return row;
+    row.append(av, h('div', { class: 'col' }, nm, b)); bindPress(row, m.id); return row;
   }
   let shown = 200;
   function renderMsgs(keep) {
@@ -225,8 +229,7 @@
     let list = S.msgs.slice().sort((a, b) => a.t - b.t); const q = S.q.trim(); if (q) list = list.filter(m => (m.text || '').toLowerCase().includes(q.toLowerCase()));
     const total = list.length; if (total > shown) list = list.slice(total - shown);
     const nodes = []; if (total > shown) nodes.push(h('button', { type: 'button', class: 'more', onclick: () => { shown += 200; renderMsgs(true); } }, 'Show earlier messages'));
-    let lastMine = null; for (let i = list.length - 1; i >= 0; i--) if (list[i].by === S.me) { lastMine = list[i]; break; }
-    let last = '', lastBy = ''; list.forEach(m => { const k = dayKey(m.t); const nd = k !== last; if (nd && !hides('dates')) nodes.push(h('div', { class: 'day' }, h('span', { text: dayLabel(m.t) }))); last = k; nodes.push(bubble(m, nd || m.by !== lastBy, m === lastMine && m.seen > 0 && !hides('ticks'))); lastBy = m.by; });
+    let last = '', lastBy = ''; list.forEach(m => { const k = dayKey(m.t); const nd = k !== last; if (nd && !hides('dates')) nodes.push(h('div', { class: 'day' }, h('span', { text: dayLabel(m.t) }))); last = k; nodes.push(bubble(m, nd || m.by !== lastBy)); lastBy = m.by; });
     if (!list.length) nodes.push(h('div', { class: 'empty' }, h('span', { class: 'big' }, '♡'), h('p', { text: q ? 'No messages found.' : 'Say hello to your person ♡' }), h('small', { text: 'Only the two of you can read this chat.' })));
     box.replaceChildren(...nodes);
     if (keep) box.scrollTop = box.scrollHeight - prev; else if (near || renderMsgs.first) { box.scrollTop = box.scrollHeight; renderMsgs.first = false; }
@@ -235,14 +238,8 @@
   function jumpTo(id) { const el = $(`.row[data-id="${CSS.escape(id)}"]`); if (el) { el.scrollIntoView({ block: 'center', behavior: 'smooth' }); el.classList.add('flash'); setTimeout(() => el.classList.remove('flash'), 1400); } else toast('That message is further up. Tap "Show earlier messages".'); }
   function markSeen() {
     if (!S.synced || document.hidden) return; const me = S.me, now = Date.now(), todo = S.msgs.filter(m => m.by !== me && !m.seen);
-    todo.forEach(m => {
-      if (seenBusy.has(m.id)) return; seenBusy.add(m.id);
-      const done = () => { seenBusy.delete(m.id); m.seen = now; m.u = Math.max(now, m.u || 0); saveMsgs(); };
-      if (!ok()) { seenBusy.delete(m.id); return; }
-      col('chat').doc(m.id).update({ seen: now, u: Math.max(now, m.u || 0) }).then(done).catch(() => { seenBusy.delete(m.id); });
-    });
+    todo.forEach(m => { m.seen = now; m.u = now; cloudSeen(m.id, now); }); if (todo.length) saveMsgs();
   }
-  const seenBusy = new Set();
 
   /* ---------- sending ---------- */
   async function send() {
@@ -276,19 +273,66 @@
       act('heart', isStarred ? 'Unstar' : 'Star Message', () => toggleStar(id)),
       act('plus', isPinned ? 'Unpin' : 'Pin Message', () => togglePin(id)),
       m.text ? act('copy', 'Copy', () => { try { navigator.clipboard.writeText(m.text); toast('Copied'); } catch (e) { toast('Could not copy'); } }) : null,
-      act('trash', 'Delete for me', () => delForMe(id), 'danger'),
-      m.by === S.me ? act('trash', 'Delete for everyone', () => delMsg(id), 'danger') : null);
+      m.by === S.me ? act('trash', 'Delete for both of us', () => delMsg(id), 'danger') : null);
     $('#sheetWrap').hidden = false;
   }
   function closeSheet() { $('#sheetWrap').hidden = true; $('#sheet').classList.remove('qs'); }
   async function setReact(id, e) { const m = byId(id); if (!m) return; const cur = m.react[S.me]; m.react[S.me] = cur === e ? '' : e; m.u = Date.now(); await saveMsgs(); renderMsgs(); cloudReact(m); }
-  async function delMsg(id) { if (!(await ask('Delete for everyone?', 'This message will disappear from both phones.', 'Delete for everyone'))) return; S.msgs = S.msgs.filter(m => m.id !== id); S.starred.delete(id); S.pinned = S.pinned.filter(x => x !== id); await saveMsgs(); renderMsgs(); cloudDel(id); }
-  async function delForMe(id) { if (!(await ask('Delete for me?', 'It will be removed only on this phone. The other person still sees it.', 'Delete for me'))) return; S.hid.add(id); try { localStorage.setItem('olw_hidden_msgs', JSON.stringify([...S.hid].slice(-3000))); } catch (e) { } S.msgs = S.msgs.filter(m => m.id !== id); S.starred.delete(id); S.pinned = S.pinned.filter(x => x !== id); await saveMsgs(); renderMsgs(); updateCounts(); }
+  async function delMsg(id) { if (!(await ask('Delete this message?', 'It will disappear from the other phone too.', 'Delete'))) return; S.msgs = S.msgs.filter(m => m.id !== id); await saveMsgs(); renderMsgs(); cloudDel(id); }
   function toggleStar(id) { if (S.starred.has(id)) S.starred.delete(id); else S.starred.add(id); try { localStorage.setItem('olw_starred', JSON.stringify([...S.starred])); } catch(e){} renderMsgs(true); updateCounts(); toast(S.starred.has(id) ? '★ Starred' : 'Unstarred'); }
   function togglePin(id) { const i = S.pinned.indexOf(id); if (i >= 0) S.pinned.splice(i, 1); else { S.pinned.unshift(id); if (S.pinned.length > 5) S.pinned.pop(); } try { localStorage.setItem('olw_pinned', JSON.stringify(S.pinned)); } catch(e){} renderMsgs(true); updateCounts(); toast(S.pinned.includes(id) ? '📌 Pinned' : 'Unpinned'); }
   function updateCounts() { const sc = $('#starCnt'), pc = $('#pinCnt'); if (sc) sc.textContent = S.starred.size; if (pc) pc.textContent = S.pinned.length; }
   function showStarred() { const list = S.msgs.filter(m => S.starred.has(m.id)); const sh = $('#sheet'); sh.replaceChildren(h('p', { class: 'sh-t', text: '★ Starred Messages' }), ...list.map(m => h('button', { type: 'button', class: 'q', text: (m.text || 'Photo') + ' — ' + fmtTime(m.t), onclick: () => { closeSheet(); jumpTo(m.id); } }))); if (!list.length) sh.append(h('p', { class: 'hint', text: 'No starred messages yet. Long-press a message to star it.' })); sh.classList.add('qs'); $('#sheetWrap').hidden = false; }
   function showPinned() { const list = S.msgs.filter(m => S.pinned.includes(m.id)); const sh = $('#sheet'); sh.replaceChildren(h('p', { class: 'sh-t', text: '📌 Pinned Messages' }), ...list.map(m => h('button', { type: 'button', class: 'q', text: (m.text || 'Photo') + ' — ' + fmtTime(m.t), onclick: () => { closeSheet(); jumpTo(m.id); } }))); if (!list.length) sh.append(h('p', { class: 'hint', text: 'No pinned messages yet. Long-press a message to pin it.' })); sh.classList.add('qs'); $('#sheetWrap').hidden = false; }
+  function showRemoved() { toast('Removed messages feature coming soon.'); }
+
+  /* ---------- TikTok links: card + player inside the chat, and "Share to Our Little World" ---------- */
+  const TT_RE = /https?:\/\/(?:[a-z0-9-]+\.)?tiktok\.com\/[^\s<>"']+/i;
+  function ttParse(text) {
+    const m = String(text || '').match(TT_RE); if (!m) return null;
+    const url = m[0].replace(/[.,!?)\]]+$/, '');
+    const id = (url.match(/\/(?:video|photo)\/(\d{8,25})/) || url.match(/[?&]item_id=(\d{8,25})/) || [])[1] || '';
+    return { url, id, user: (url.match(/tiktok\.com\/(@[\w.]+)/) || [])[1] || '' };
+  }
+  const ttCache = new Map();
+  function ttOembed(url) {
+    if (!ttCache.has(url)) ttCache.set(url, fetch('https://www.tiktok.com/oembed?url=' + encodeURIComponent(url)).then(r => (r.ok ? r.json() : null)).catch(() => null));
+    return ttCache.get(url);
+  }
+  function ttCard(info) {
+    const th = h('span', { class: 'tt-th' }, h('span', { class: 'tt-pl', text: '▶' })), t1 = h('b', { class: 'tt-t', text: 'TikTok video' }), t2 = h('small', { class: 'tt-s', text: info.user || 'Tap to watch here ♡' });
+    const card = h('button', { type: 'button', class: 'tt', 'aria-label': 'Play TikTok video', onclick: e => { e.stopPropagation(); openTikTok(info); } }, th, h('span', { class: 'tt-m' }, t1, t2));
+    ttOembed(info.url).then(o => {
+      if (!o) return; if (o.title) t1.textContent = String(o.title).slice(0, 90); if (o.author_name) t2.textContent = '@' + String(o.author_name).replace(/^@/, '').slice(0, 40);
+      if (typeof o.thumbnail_url === 'string' && /^https:\/\//.test(o.thumbnail_url)) th.style.backgroundImage = `url(${JSON.stringify(o.thumbnail_url)})`;
+    });
+    return card;
+  }
+  function closeTikTok() { const w = $('#ttPlayer'); if (w) { w.hidden = true; w.replaceChildren(); } }
+  async function openTikTok(info) {
+    let w = $('#ttPlayer');
+    if (!w) { w = h('div', { id: 'ttPlayer', hidden: true }); document.body.append(w); w.addEventListener('click', e => { if (e.target === w) closeTikTok(); }); }
+    const openLink = h('a', { class: 'tt-open', href: info.url, target: '_blank', rel: 'noopener noreferrer', text: 'Open in TikTok' });
+    const box = h('div', { class: 'tt-box' }, h('button', { type: 'button', class: 'ib tt-x', 'aria-label': 'Close', onclick: closeTikTok }, ico('close')));
+    const body = h('div', { class: 'tt-body' }, h('p', { class: 'tt-note', text: 'Loading video...' }));
+    box.append(body, openLink); w.replaceChildren(box); w.hidden = false;
+    let id = info.id;
+    if (!id) { const o = await ttOembed(info.url); const mm = o && String(o.html || '').match(/data-video-id="(\d{8,25})"/); id = mm ? mm[1] : (o && /^\d{8,25}$/.test(String(o.embed_product_id || '')) ? String(o.embed_product_id) : ''); }
+    if (w.hidden) return;
+    if (!id) { body.replaceChildren(h('p', { class: 'tt-note', text: 'This video cannot play inside the chat. Please open it in TikTok.' })); return; }
+    body.replaceChildren(h('iframe', { class: 'tt-frame', src: 'https://www.tiktok.com/embed/v2/' + id, allow: 'autoplay; fullscreen; encrypted-media; picture-in-picture', allowfullscreen: '', referrerpolicy: 'strict-origin-when-cross-origin', title: 'TikTok video' }));
+  }
+  /* Android "Share" menu -> this chat: the link arrives in the URL (?text=...&url=...) or is saved by the page guard while the app is locked */
+  function takeShared() {
+    let p = null;
+    try { const q = new URLSearchParams(location.search); if (q.has('url') || q.has('text') || q.has('title')) { p = { title: q.get('title') || '', text: q.get('text') || '', url: q.get('url') || '' }; history.replaceState(null, '', location.pathname); } } catch (e) { /* ignore */ }
+    if (!p) { try { const raw = localStorage.getItem('olw_share_pending'); if (raw) { localStorage.removeItem('olw_share_pending'); const o = JSON.parse(raw); if (o && Date.now() - (+o.t || 0) < 30 * 60 * 1000) p = o; } } catch (e) { /* ignore */ } }
+    if (!p) return;
+    const parts = []; [p.text, p.title, p.url].forEach(x => { x = String(x || '').trim(); if (x && !parts.some(y => y.includes(x))) parts.push(x); });
+    if (!parts.length) return;
+    const inp = $('#inp'); inp.value = parts.join('\n').slice(0, 1500); autosize(); drawBar();
+    toast('Shared link is ready. Press send ♡');
+  }
 
   /* ---------- big photo ---------- */
   function openLightbox(src) { const l = $('#lightbox'); l.replaceChildren(h('img', { src, alt: 'Photo' })); l.hidden = false; }
@@ -579,6 +623,8 @@
   function cloudReact(m) { if (!ok()) return; col('chat').doc(m.id).update({ ['react.' + S.me]: m.react[S.me], u: m.u }).catch(cErr); }
   function cloudDel(id) { if (!ok()) return; col('chat').doc(id).delete().catch(cErr); }
   function cloudPutProf() { if (!ok()) return; mdoc('chatprofile-' + S.me).set(JSON.parse(JSON.stringify(S.prof[S.me]))).catch(cErr); }
+  function pushSbg() { if (!ok()) return; mdoc('chatsharedbg').set(JSON.parse(JSON.stringify({ bg: S.sharedBg || null, updated: sbgUpd }))).catch(cErr); }
+  function cloudPutSharedBg() { sbgUpd = Date.now(); saveSbg(); clearTimeout(sbgT); sbgT = setTimeout(pushSbg, 700); }
   function cloudPutLook() { if (!ok()) return; mdoc('chatlook-' + S.me).set(JSON.parse(JSON.stringify(S.look))).catch(cErr); }
   function ping() { if (!ok() || document.hidden) return; mdoc('presence-' + S.me).set({ t: Date.now() }).catch(() => { }); }
   function stopListen() { CL.unsub.forEach(f => { try { f(); } catch (e) { } }); CL.unsub = []; CL.first = false; }
@@ -589,9 +635,8 @@
       snap.docChanges().forEach(c => {
         const d = c.doc, i = S.msgs.findIndex(m => m.id === d.id);
         if (c.type === 'removed') { if (i >= 0) { S.msgs.splice(i, 1); ch = true; } return; }
-        if (S.hid.has(d.id)) return;
         if (d.metadata.hasPendingWrites) return; const r = normMsg(Object.assign({}, d.data(), { id: d.id }));
-        if (i < 0) { S.msgs.push(r); ch = true; if (r.by !== S.me && !first) incoming = true; pend.delete(r.id); } else if ((r.u || 0) >= (S.msgs[i].u || 0) || (r.seen || 0) > (S.msgs[i].seen || 0)) { const keepSeen = Math.max(r.seen || 0, S.msgs[i].seen || 0); S.msgs[i] = r; S.msgs[i].seen = keepSeen; ch = true; pend.delete(r.id); }
+        if (i < 0) { S.msgs.push(r); ch = true; if (r.by !== S.me && !first) incoming = true; pend.delete(r.id); } else if ((r.u || 0) >= (S.msgs[i].u || 0)) { S.msgs[i] = r; ch = true; pend.delete(r.id); }
       });
       if (first) { CL.first = true; const ids = new Set(snap.docs.map(d => d.id)); S.msgs.filter(m => !ids.has(m.id)).forEach(m => cloudPut(m)); }
       if (ch) { saveMsgs(); renderMsgs(); if (incoming && document.hidden) document.title = '(1) Chat'; }
@@ -601,6 +646,11 @@
     }, cErr)));
     CL.unsub.push(mdoc('chatlook-' + S.me).onSnapshot(doc => {
       if (doc.metadata.hasPendingWrites) return; if (doc.exists) { const l = normLook(doc.data()); if (l.updated > (S.look.updated || 0)) { S.look = l; saveLook(); applyLook(); renderMsgs(true); } else if (S.look.updated > l.updated) cloudPutLook(); } else if (S.look.updated) cloudPutLook();
+    }, cErr));
+    CL.unsub.push(mdoc('chatsharedbg').onSnapshot(doc => {
+      if (doc.metadata.hasPendingWrites) return;
+      if (doc.exists) { const d = doc.data(), u = +d.updated || 0; if (u > sbgUpd) { S.sharedBg = normSbg(d.bg); sbgUpd = u; saveSbg(); applyLook(); if ($('#dlgLook').open) drawLook(); } else if (sbgUpd > u) pushSbg(); }
+      else if (sbgUpd) pushSbg();
     }, cErr));
     CL.unsub.push(mdoc('presence-' + other()).onSnapshot(doc => { S.pres[other()] = doc.exists ? +doc.data().t || 0 : 0; renderHead(); }, () => { }));
     ping();
@@ -621,6 +671,13 @@
     const prev = last ? (last.by === S.me ? 'You: ' : '') + (last.text || 'Photo') : 'Our conversations together...';
     c.replaceChildren(avatarEl(o, 'cvav'), h('span', { class: 'cv' }, h('b', { text: nameOf(o) + ' ♡' }), h('small', { text: prev }), isOn(o) ? h('em', { class: 'onl', text: 'online' }) : null), h('span', { class: 'chev' }, ico('back')));
     const me = $('#gProf'); if (me) me.replaceChildren(avatarEl(S.me, 'gpav'));
+    renderRPanel(); updateCounts();
+  }
+  function renderRPanel() {
+    const av = $('#rpAvatar'); if (!av) return; const o = other();
+    av.replaceChildren(avatarEl(o, 'rpav'));
+    $('#rpName').textContent = nameOf(o) + ' ♡'; $('#rpStatus').textContent = statusText() || S.prof[o].status || '';
+    const cp = $('#couplePhoto'); if (cp) { const img = (S.sharedBg && S.sharedBg.img) || S.prof[o].cover || S.prof[o].avatar || S.prof[S.me].cover || S.prof[S.me].avatar || ''; cp.style.backgroundImage = img ? `url(${JSON.stringify(img)})` : ''; cp.classList.toggle('has', !!img); }
   }
   function askNow() {
     const sh = $('#sheet'); sh.replaceChildren(h('p', { class: 'sh-t', text: 'Ask something ♡' }), ...ASKS.map(q => h('button', { type: 'button', class: 'q', text: q, onclick: () => { closeSheet(); const i = $('#inp'); i.value = q; autosize(); drawBar(); i.focus(); } }))); sh.classList.add('qs'); $('#sheetWrap').hidden = false;
@@ -639,9 +696,18 @@
     $('#qIn').oninput = e => { S.q = e.target.value; renderMsgs(); }; $('#qClose').onclick = () => { $('#searchBar').hidden = true; S.q = ''; $('#qIn').value = ''; renderMsgs(true); };
     $('#btnBrush').onclick = () => openLook(); $('#lookClose').onclick = () => closeDlg($('#dlgLook'));
     $$('#lookTabs [data-t]').forEach(b => (b.onclick = () => { LK.tab = b.dataset.t; drawLook(); }));
-    $('#lookReset').onclick = async () => { if (await ask('Reset the chat look?', 'Colours, background and keyboard go back to Pastel Purple Love.', 'Reset')) { S.look = Object.assign(lookFrom('violet'), { updated: Date.now() }); applyLook(); saveLookSoft(); drawLook(); } };
+    $('#lookReset').onclick = async () => { if (await ask('Reset the chat look?', 'Colours, background and keyboard go back to Love letter.', 'Reset')) { S.look = Object.assign(lookFrom('love'), { updated: Date.now() }); applyLook(); saveLookSoft(); drawLook(); } };
     $('#btnMenu').onclick = e => { e.stopPropagation(); toggleMenu(); };
-    $$('#menu [data-act]').forEach(b => (b.onclick = () => { toggleMenu(false); const a = b.dataset.act; if (a === 'me') openProfile(S.me); else if (a === 'look') openLook(); else if (a === 'search') $('#btnSearch').click(); else if (a === 'sync') { const c = document.getElementById('olwCloud'); if (c) c.click(); else toast('Sync is not set up yet. Fill olw-config.js first.'); } else if (a === 'ask') askNow(); else if (a === 'starred') showStarred(); else if (a === 'pin') showPinned(); else if (a === 'wallpaper') openLook('bg'); else if (a === 'home') location.href = 'index.html'; }));
+    const menuAct = act => {
+      if (act === 'me') openProfile(S.me); else if (act === 'look') openLook(); else if (act === 'wallpaper') openLook('bg'); else if (act === 'search') $('#btnSearch').click();
+      else if (act === 'pin') showPinned(); else if (act === 'starred') showStarred(); else if (act === 'ask') askNow(); else if (act === 'home') location.href = 'index.html';
+      else if (act === 'sync') { const c = document.getElementById('olwCloud'); if (c) c.click(); else toast('Sync is not set up yet. Fill olw-config.js first.'); }
+    };
+    $$('#menu [data-act]').forEach(b => (b.onclick = () => { toggleMenu(false); menuAct(b.dataset.act); }));
+    $$('.rp-opt[data-act]').forEach(b => (b.onclick = () => menuAct(b.dataset.act)));
+    const on = (sel, fn) => { const e = $(sel); if (e) e.onclick = fn; };
+    on('#qaStarred', showStarred); on('#qaPinned', showPinned); on('#qaRemoved', showRemoved); on('#rpRemovedBtn', showRemoved);
+    on('#newMsgBtn', () => $('#inp').focus()); on('#coupleFrame', () => openLook('bg'));
     document.addEventListener('click', e => { if (!e.target.closest('#menu,#btnMenu')) toggleMenu(false); });
     $('#profClose').onclick = () => closeDlg($('#dlgProf'));
     inp.addEventListener('input', () => { autosize(); drawBar(); });
@@ -656,17 +722,18 @@
     const box = $('#msgs'); box.addEventListener('scroll', () => { $('#toBottom').hidden = box.scrollHeight - box.scrollTop - box.clientHeight < 240; }); $('#toBottom').onclick = () => box.scrollTo({ top: box.scrollHeight, behavior: 'smooth' });
     document.addEventListener('visibilitychange', () => { if (!document.hidden) { document.title = 'Chat - Our Little World'; markSeen(); ping(); } });
     window.addEventListener('focus', markSeen);
-    document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeSheet(); $('#lightbox').hidden = true; } });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeSheet(); $('#lightbox').hidden = true; closeTikTok(); } });
     $$('dialog').forEach(d => d.addEventListener('click', e => { if (e.target === d) closeDlg(d); }));
     ['#lookBody'].forEach(s => $(s).addEventListener('scroll', () => { }));
   }
   async function init() {
     await DB.open();
-    const [ms, lk, pf] = await Promise.all([DB.get('msgs'), DB.get('look'), DB.get('prof')]);
+    const [ms, lk, pf, sb] = await Promise.all([DB.get('msgs'), DB.get('look'), DB.get('prof'), DB.get('sbg')]);
+    if (sb) { S.sharedBg = normSbg(sb.bg); sbgUpd = +sb.updated || 0; }
+    try { S.starred = new Set((JSON.parse(localStorage.getItem('olw_starred') || '[]') || []).filter(x => typeof x === 'string')); S.pinned = (JSON.parse(localStorage.getItem('olw_pinned') || '[]') || []).filter(x => typeof x === 'string').slice(0, 5); } catch (e) { /* ignore */ }
     S.msgs = (Array.isArray(ms) ? ms : []).map(normMsg); S.look = normLook(lk || undefined); if (pf) S.prof = { owner: normProfile(pf.owner), partner: normProfile(pf.partner) };
     S.sys = !('ontouchstart' in window);
-    try { S.starred = new Set(JSON.parse(localStorage.getItem('olw_starred') || '[]')); S.pinned = JSON.parse(localStorage.getItem('olw_pinned') || '[]'); S.hid = new Set(JSON.parse(localStorage.getItem('olw_hidden_msgs') || '[]')); S.msgs = S.msgs.filter(m => !S.hid.has(m.id)); } catch (e) { }
-    icons(); buildDeco(); bind(); applyLook(); renderMsgs.first = true; renderMsgs(); drawBar(); updateCounts();
+    icons(); buildDeco(); bind(); applyLook(); renderMsgs.first = true; renderMsgs(); drawBar(); takeShared();
     window.__chat = { S, send, setKb, openLook, openProfile, applyLook, normMsg, renderMsgs, drawLook, LK, pickPhoto, saveMsgs };
     if (window.OLW) OLW.onAuth(u => { S.synced = !!u; if (u) { S.me = OLW.role; listen(); } else stopListen(); renderHead(); renderMsgs(true); });
   }

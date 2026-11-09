@@ -5,11 +5,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Chat - Our Little World</title>
   <meta name="theme-color" content="#7b5fa6">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <script>
     (function () {
       var d = document.documentElement;
       try {
-        if (localStorage.getItem('olw_lock_v1') && !sessionStorage.getItem('olw_ok')) { location.replace('index.html'); return; }
+        if (localStorage.getItem('olw_lock_v1') && !sessionStorage.getItem('olw_ok')) {
+          try { var q = new URLSearchParams(location.search); if (q.has('url') || q.has('text') || q.has('title')) localStorage.setItem('olw_share_pending', JSON.stringify({ title: q.get('title') || '', text: q.get('text') || '', url: q.get('url') || '', t: Date.now() })); } catch (e2) { }
+          location.replace('index.html'); return;
+        }
         var t = JSON.parse(localStorage.getItem('olw_theme_v1') || '{}');
         var h = +new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Karachi', hour: 'numeric', hourCycle: 'h23' }).format(new Date());
         d.dataset.theme = (t.autoNight && (h >= 20 || h < 6)) ? 'midnight' : (t.theme || 'lavender');
@@ -56,6 +61,7 @@
         <div class="qa-title">Quick Access</div>
         <button type="button" class="qa-row" id="qaStarred"><span class="qa-ic star-ic">★</span><span>Starred Messages</span><span class="qa-cnt" id="starCnt">0</span></button>
         <button type="button" class="qa-row" id="qaPinned"><span class="qa-ic pin-ic">📌</span><span>Pinned Messages</span><span class="qa-cnt" id="pinCnt">0</span></button>
+        <button type="button" class="qa-row" id="qaRemoved"><span class="qa-ic lock-ic">🔒</span><span>Removed Messages</span></button>
       </div>
 
       <!-- couple photo frame -->
@@ -78,15 +84,15 @@
           <button type="button" class="ib ctop-ic" id="btnBrush" aria-label="Customize"><span data-i="brush"></span></button>
           <button type="button" class="ib ctop-ic" id="btnMenu" aria-label="More options" aria-expanded="false"><span data-i="dots"></span></button>
           <div id="menu" hidden role="menu">
-            <button type="button" data-act="me"><span data-i="user"></span>My Profile</button>
-            <button type="button" data-act="look"><span data-i="brush"></span>Chat Theme</button>
-            <button type="button" data-act="wallpaper"><span data-i="image"></span>Chat Wallpaper</button>
-            <button type="button" data-act="search"><span data-i="search"></span>Search in Chat</button>
-            <button type="button" data-act="pin"><span class="mi">📌</span>Pinned Messages</button>
-            <button type="button" data-act="starred"><span class="mi">★</span>Starred Messages</button>
-            <button type="button" data-act="ask"><span data-i="smile"></span>Ask Something ♡</button>
-            <button type="button" data-act="sync"><span data-i="cloud"></span>Sync</button>
-            <button type="button" data-act="home"><span data-i="home"></span>Home</button>
+            <button type="button" data-act="me">My Profile</button>
+            <button type="button" data-act="look">Chat Theme</button>
+            <button type="button" data-act="wallpaper">Chat Wallpaper</button>
+            <button type="button" data-act="search">Search in Chat</button>
+            <button type="button" data-act="pin">Pinned Messages</button>
+            <button type="button" data-act="starred">Starred Messages</button>
+            <button type="button" data-act="ask">Ask Something ♡</button>
+            <button type="button" data-act="sync">Sync</button>
+            <button type="button" data-act="home">Home</button>
           </div>
         </header>
 
@@ -132,6 +138,11 @@
         <button type="button" class="rp-opt" data-act="starred"><span>★</span><span>Star Messages</span><span class="rp-chev">›</span></button>
         <button type="button" class="rp-opt" data-act="wallpaper"><span data-i="image"></span><span>Chat Wallpaper</span><span class="rp-chev">›</span></button>
         <button type="button" class="rp-opt" data-act="look"><span data-i="brush"></span><span>Chat Theme</span><span class="rp-chev">›</span></button>
+      </div>
+      <!-- removed messages box -->
+      <div class="rp-removed" id="rpRemoved">
+        <div class="rp-rem-head"><span class="rp-rem-ic">🔒</span><div><b>Removed Messages</b><small>View deleted messages here.</small></div><span class="rp-locked-badge">Locked</span></div>
+        <button type="button" class="btn" id="rpRemovedBtn">Open Folder 🔒</button>
       </div>
     </aside>
 
@@ -202,5 +213,6 @@
 <script src="olw-config.js"></script>
 <script src="olw-sync.js"></script>
 <script src="messages.js"></script>
+<script>if ("serviceWorker" in navigator) addEventListener("load", function () { navigator.serviceWorker.register("sw.js").catch(function () { }); });</script>
 </body>
 </html>

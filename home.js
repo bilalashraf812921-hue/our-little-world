@@ -430,6 +430,7 @@
       try { sessionStorage.setItem(OK_KEY, '1'); } catch { /* ignore */ }
       delete document.documentElement.dataset.locked;
       $('#lockInput').value = ''; $('#lockError').hidden = true;
+      if (localStorage.getItem('olw_share_pending')) { location.replace('messages.html'); return; }
     } else {
       $('#lockError').textContent = r.msg; $('#lockError').hidden = false; $('#lockInput').select();
     }
@@ -514,6 +515,7 @@
     delete document.documentElement.dataset.locked;
     $('#recInput').value = ''; $('#recBox').hidden = true; er.hidden = true; refreshPwUi();
     toast('Password hata diya gaya. Settings mein naya password lagayein ♡', 6000);
+    if (localStorage.getItem('olw_share_pending')) location.replace('messages.html');
   }
   $('#recGo').addEventListener('click', tryRecovery);
   $('#recInput').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); tryRecovery(); } });

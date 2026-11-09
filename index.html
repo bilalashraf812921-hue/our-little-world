@@ -2,7 +2,9 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Our Little World</title>
   <meta name="theme-color" content="#efe6f3">
   <script>
@@ -384,6 +386,7 @@
 
 <script src="olw-config.js"></script>
 <script src="olw-sync.js" data-reload="1"></script>
+<script>if ("serviceWorker" in navigator) addEventListener("load", function () { navigator.serviceWorker.register("sw.js").catch(function () { }); });</script>
 <script src="home.js"></script>
 </body>
 </html>
