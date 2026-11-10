@@ -83,8 +83,8 @@
   const PAPERS = { cream: ['#f8f0de', '#ecdcbc'], white: ['#fcf9f3', '#efe9dd'], pink: ['#fcebf0', '#f0cdd9'], blush: ['#f9ebe6', '#eed5cc'], lavender: ['#f3eef6', '#e2d8ea'], sage: ['#eef2e6', '#d6e0c6'], kraft: ['#e8d4b0', '#d3b98a'], night: ['#4a4560', '#383450'] };
   const PAPER_NAMES = { cream: 'Cream', white: 'White', pink: 'Pink', blush: 'Blush', lavender: 'Lavender', sage: 'Sage', kraft: 'Kraft', night: 'Night' };
   const INKS = ['#5b3f93', '#a23a62', '#2d3b5a', '#5a3b24', '#7a2142', '#2f5a3d', '#3a3a44', '#f1e8d8'];
-  const HEAD_FONTS = ['Kaushan Script', 'Sacramento', 'Dancing Script', 'Great Vibes', 'Mrs Saint Delafield', 'La Belle Aurore', 'Allura', 'Caveat', 'Pacifico', 'Parisienne', 'Satisfy', 'Yellowtail', 'Cookie', 'Courgette', 'Lobster', 'Marck Script', 'Playball', 'Rouge Script', 'Alex Brush', 'Tangerine', 'Pinyon Script', 'Italianno', 'Mr Dafoe', 'Norican', 'Kristi', 'Birthstone', 'Fleur De Leah', 'Over the Rainbow', 'Gloria Hallelujah', 'Reenie Beanie', 'Playfair Display', 'Cinzel', 'Abril Fatface'];
-  const BODY_FONTS = ['Caveat', 'Kalam', 'Patrick Hand', 'Indie Flower', 'Handlee', 'Shadows Into Light', 'Cormorant Garamond', 'Zeyada', 'Gloria Hallelujah', 'Reenie Beanie', 'Nothing You Could Do', 'Covered By Your Grace', 'Over the Rainbow'];
+  const HEAD_FONTS = ['Kaushan Script', 'Sacramento', 'Dancing Script', 'Great Vibes', 'Mrs Saint Delafield', 'La Belle Aurore', 'Allura', 'Caveat', 'Pacifico', 'Parisienne', 'Satisfy', 'Yellowtail', 'Cookie', 'Courgette', 'Lobster', 'Marck Script', 'Playball', 'Rouge Script', 'Alex Brush', 'Tangerine', 'Pinyon Script', 'Italianno', 'Mr Dafoe', 'Norican', 'Kristi', 'Birthstone', 'Fleur De Leah', 'Over the Rainbow', 'Gloria Hallelujah', 'Reenie Beanie', 'Playfair Display', 'Cinzel', 'Abril Fatface', 'Noto Nastaliq Urdu', 'Gulzar', 'Lateef', 'Amiri', 'Aref Ruqaa', 'Noto Naskh Arabic', 'Mirza'];
+  const BODY_FONTS = ['Caveat', 'Kalam', 'Patrick Hand', 'Indie Flower', 'Handlee', 'Shadows Into Light', 'Cormorant Garamond', 'Zeyada', 'Gloria Hallelujah', 'Reenie Beanie', 'Nothing You Could Do', 'Covered By Your Grace', 'Over the Rainbow', 'Noto Nastaliq Urdu', 'Gulzar', 'Lateef', 'Amiri', 'Aref Ruqaa', 'Noto Naskh Arabic', 'Mirza'];
   const BG_TYPES = { knit: 'Knit blanket', wood: 'Wooden desk', linen: 'Linen cloth', solid: 'Solid colour', gradient: 'Gradient', photo: 'My photo' };
   const isHex = v => typeof v === 'string' && /^#[0-9a-f]{6}$/i.test(v);
   const mixHex = (a, b, t) => { const f = x => [1, 3, 5].map(i => parseInt(x.slice(i, i + 2), 16)), A = f(a), B = f(b); return '#' + A.map((v, i) => Math.round(v + (B[i] - v) * t).toString(16).padStart(2, '0')).join(''); };
@@ -1188,6 +1188,7 @@
     const fl = fav.querySelector('.st-fl'); if (fl) fl.textContent = isFav ? 'Remove bookmark' : 'Bookmark this page';
     if (fp && S.mode !== 'edit') lsSet(posKey(), fp.p.id);
     book.classList.toggle('closed', !S.open);
+    if (hooks.cm) hooks.cm();
   }
   const it_ = pos => firstReal(pos);
   function afterSpread() { if (hooks.afterSpread) hooks.afterSpread(); }
@@ -1465,7 +1466,7 @@
   });
   menu.addEventListener('click', e => {
     const b = e.target.closest('button'); if (!b) return; closeMenu();
-    const f = { contents: openContents, search: openSearch, cover: () => (S.open ? closeBook() : toast('You are already on the cover')), print: printStory, export: exportBackup, import: () => $('#fileJson').click() }[b.dataset.act];
+    const f = { contents: openContents, search: openSearch, cover: () => (S.open ? closeBook() : toast('You are already on the cover')), print: printStory, export: exportBackup, replies: () => window.__cmOpen && window.__cmOpen(), import: () => $('#fileJson').click() }[b.dataset.act];
     if (f) f();
   });
   function applyRole() { $$('.st-owner').forEach(el => (el.hidden = !canEdit())); }
@@ -2460,13 +2461,355 @@
 
 
   /* ---------------------------------------------------------------
+     14d. URDU LIKHAI: Urdu / Arabic harf aate hi text khud right-to-left ho jata hai,
+     Urdu font (Nastaliq) lag jata hai aur lines ke beech jagah barh jati hai.
+     English / Roman Urdu pehle jaisa. Diary ke data mein koi tabdeeli nahi.
+     --------------------------------------------------------------- */
+  (function urduSupport() {
+    const TXT = '.st-p,.st-title,.st-sign,.st-nt,.st-page figcaption,.st-cv-title,.st-cv-sub';
+    const AR = /[؀-ۿݐ-ݿﭐ-﷿ﹰ-﻿]/;
+    function mark(root) {
+      root.querySelectorAll(TXT).forEach(el => {
+        if (el.getAttribute('dir') !== 'auto') el.setAttribute('dir', 'auto');
+        const u = AR.test(el.textContent); if (el.classList.contains('ur') !== u) el.classList.toggle('ur', u);
+      });
+    }
+    let q = 0; const later = () => { if (q) return; q = requestAnimationFrame(() => { q = 0; mark(stage); }); };
+    new MutationObserver(later).observe(stage, { childList: true, subtree: true, characterData: true });
+    document.addEventListener('input', later, true);
+    later();
+  })();
+
+
+  /* ---------------------------------------------------------------
+     14e. REPLIES: diary padhne wala kisi bhi page par, kisi bhi jagah apna reply likh sakta hai.
+     - Reply page ke upar nahi likha jata. Page ke kinare par chhota sa button banta hai, dabane par khulta hai.
+     - Har banda apne replies apni file (scmt-<role>) mein rakhta hai, Firebase se doosre phone par jate hain.
+     - Diary ka data bilkul nahi chhuta.
+     --------------------------------------------------------------- */
+  (function replies() {
+    const KEY = w => 'cm:' + w;
+    const CM = { msgs: { owner: [], partner: [] }, view: 'list', cid: null, pick: false, draft: null, ring: null, live: false, pushT: 0, started: false };
+    const readTs = () => +lsGet('olw_cm_read', 0) || 0;
+    const roleName = w => (w === ME ? 'You' : (herHis() === 'her' ? 'Her' : 'Him'));
+    const isRole = w => w === 'owner' || w === 'partner';
+    const norm = (m, who) => {
+      if (!m || typeof m !== 'object') return null;
+      const id = String(m.id || ''), cid = String(m.cid || ''); if (!/^[\w-]{3,40}$/.test(id) || !/^[\w-]{3,40}$/.test(cid)) return null;
+      const n = x => (Number.isFinite(+x) ? clamp(+x, 0, 1) : null), del = !!m.del;
+      return { id, cid, d: isRole(m.d) ? m.d : 'owner', pid: String(m.pid || '').slice(0, 60), fx: n(m.fx), fy: n(m.fy), q: String(m.q || '').slice(0, 90), by: who, text: del ? '' : String(m.text || '').slice(0, 1500), t: +m.t || Date.now(), u: +m.u || +m.t || Date.now(), ...(del ? { del: true } : {}) };
+    };
+    const all = () => [...CM.msgs.owner, ...CM.msgs.partner];
+    function threads(diary) {
+      const by = new Map(); all().forEach(m => { if (m.d !== diary) return; (by.get(m.cid) || by.set(m.cid, []).get(m.cid)).push(m); });
+      const out = [];
+      by.forEach((ms, cid) => {
+        ms.sort((a, b) => a.t - b.t); const root = ms.find(m => m.id === cid); if (!root) return;
+        if (ms.every(m => m.del)) return;
+        out.push({ cid, root, ms, pid: root.pid, fx: root.fx == null ? .5 : root.fx, fy: root.fy == null ? .5 : root.fy, q: root.q });
+      });
+      return out;
+    }
+    const unreadN = () => { const r = readTs(); return all().filter(m => m.by !== ME && !m.del && m.t > r).length; };
+
+    /* ---- save / sync ---- */
+    async function loadAll() { for (const w of ['owner', 'partner']) { try { const raw = await kvGet(KEY(w)); CM.msgs[w] = (Array.isArray(raw) ? raw : []).map(m => norm(m, w)).filter(Boolean); } catch { CM.msgs[w] = []; } } }
+    const persist = w => kvSet(KEY(w), CM.msgs[w]).catch(() => { });
+    function merge(w, arr) {
+      const cur = new Map(CM.msgs[w].map(m => [m.id, m])); let ch = false, fresh = 0;
+      (Array.isArray(arr) ? arr : []).map(m => norm(m, w)).filter(Boolean).forEach(m => { const o = cur.get(m.id); if (!o) { cur.set(m.id, m); ch = true; if (w !== ME && !m.del && m.t > readTs()) fresh++; } else if (m.u > o.u) { cur.set(m.id, m); ch = true; } });
+      if (ch) CM.msgs[w] = [...cur.values()]; return { ch, fresh };
+    }
+    const seenM = () => lsGet('olw_cm_seen', {}), seenSetM = (w, t) => { const s = seenM(); s[w] = t; lsSet('olw_cm_seen', s); };
+    function pushMine() { clearTimeout(CM.pushT); CM.pushT = setTimeout(async () => { if (!cloudOn()) return; try { const upd = await OLW.putBlob('scmt-' + ME, JSON.stringify(CM.msgs[ME])); seenSetM(ME, upd); } catch (e) { OLW.err(e); } }, 500); }
+    let chain = Promise.resolve();
+    async function pullOne(id, meta) {
+      const w = id.slice(5); if (!isRole(w) || (meta.updated || 0) <= (seenM()[w] || 0)) return;
+      try {
+        const s = await OLW.getBlob(id, meta); if (!s) return;
+        const r = merge(w, JSON.parse(s)); seenSetM(w, meta.updated);
+        if (r.ch) { await persist(w); if (w === ME) pushMine(); refresh(); if (r.fresh && CM.live) toast(`New reply from ${roleName(w).toLowerCase()} ♡`, 3200); }
+      } catch (e) { console.warn('replies pull', e); }
+    }
+    async function initial(ids) { if (!ids.has('scmt-' + ME) && CM.msgs[ME].length) pushMine(); CM.live = true; }
+    async function start() {
+      await loadAll(); refresh();
+      if (window.OLW && OLW.configured && !CM.started) { CM.started = true; OLW.watch('scmt-', (id, meta) => (chain = chain.then(() => pullOne(id, meta))), initial); }
+      else CM.live = true;
+    }
+
+    /* ---- DOM ---- */
+    const ico = (d, w = 20) => `<svg viewBox="0 0 24 24" width="${w}" height="${w}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
+    const I = { chat: '<path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.5-4.6A8 8 0 1 1 21 12z"/>', back: '<path d="m15 5-7 7 7 7"/>', x: '<path d="M6 6l12 12M18 6 6 18"/>', plus: '<path d="M12 5v14M5 12h14"/>', trash: '<path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/>', pin: '<path d="M12 21s7-6.2 7-11.2A7 7 0 0 0 5 9.8C5 14.8 12 21 12 21z"/><circle cx="12" cy="9.8" r="2.4"/>', send: '<path d="M4 12 20 4l-4 16-4-6-8-2z"/>', pen: '<path d="M4 20h4L19 9l-4-4L4 16v4z"/><path d="m13.5 6.5 4 4"/>' };
+    const tab = h('button', { type: 'button', class: 'cm-tab cm-ls', id: 'cmListBtn', 'aria-label': 'Replies', title: 'See all replies' });
+    const rpB = h('button', { type: 'button', class: 'cm-tab cm-rp', id: 'cmReplyBtn', 'aria-label': 'Reply on this diary', title: 'Reply to what is written in this diary' });
+    const side = h('div', { class: 'cm-side' }, rpB, tab);
+    const panel = h('aside', { class: 'cm-panel', id: 'cmPanel', hidden: true, role: 'dialog', 'aria-label': 'Replies' });
+    const hint = h('div', { class: 'cm-hint', id: 'cmHint', hidden: true });
+    const body = h('div', { class: 'cm-body', id: 'cmBody' });
+    const ta = h('textarea', { class: 'cm-ta', rows: '1', dir: 'auto', placeholder: 'Write your reply...', maxlength: '1500', 'aria-label': 'Your reply' });
+    const sendB = h('button', { type: 'button', class: 'cm-send', 'aria-label': 'Send reply' }); sendB.innerHTML = ico(I.send, 20);
+    const ft = h('footer', { class: 'cm-ft', hidden: true }, ta, sendB);
+    const backB = h('button', { type: 'button', class: 'cm-ib cm-back', hidden: true, 'aria-label': 'Back to all replies' }); backB.innerHTML = ico(I.back);
+    const xB = h('button', { type: 'button', class: 'cm-ib cm-x', 'aria-label': 'Close' }); xB.innerHTML = ico(I.x);
+    const ti = h('h2', { class: 'cm-ti' });
+    panel.append(h('i', { class: 'cm-grab', 'aria-hidden': 'true' }), h('header', { class: 'cm-hd' }, backB, ti, xB), body, ft);
+    const bd = h('b', { class: 'cm-bd', hidden: true }); tab.innerHTML = ico(I.chat, 22) + '<small>Replies</small>'; tab.append(bd);
+    rpB.innerHTML = ico(I.pen, 22) + '<small>Reply</small>';
+    stage.append(side); document.body.append(panel, hint);
+
+    const pageNo = pid => { const i = posOfPage(pid); return i < 0 ? null : S.vp[i].n; };
+    const fmtT = t => { const d = new Date(t); return d.toLocaleDateString(undefined, { day: 'numeric', month: 'short' }) + ' · ' + d.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' }); };
+    const hereOk = () => !!S.story && !S.story.demo && !S.story.waiting;
+    const drawer = () => matchMedia('(min-width:900px), (orientation:landscape) and (max-height:520px)').matches;
+    const isOpen = () => !panel.hidden;
+
+    function updateTab() {
+      const off = !hereOk(); document.body.classList.toggle('cm-off', off); rpB.hidden = VIEW === ME;   // 'Reply' button sirf doosre ki diary (Her/His) mein; 'Replies' dono mein
+      const n = unreadN(); bd.hidden = !n; bd.textContent = n > 9 ? '9+' : String(n);
+      tab.setAttribute('aria-label', n ? `Replies (${n} new)` : 'Replies');
+    }
+    function pageEls() { return [B.slotL, B.slotR].map(s => s && s.querySelector('.st-page[data-pid]')).filter(Boolean); }
+    function renderMarks() {
+      $$('.cm-marks').forEach(e => e.remove()); if (S.mode !== 'read' || !hereOk()) return;
+      const ts = threads(VIEW);
+      pageEls().forEach(pg => {
+        const mine = ts.filter(t => t.pid === pg.dataset.pid).sort((a, b) => a.fy - b.fy); if (!mine.length) return;
+        const H = pg.clientHeight || 400, box = h('div', { class: 'cm-marks ' + (pg.dataset.side === 'left' ? 'l' : 'r') }); let lastY = -99;
+        mine.forEach(t => {
+          let y = Math.max(16, Math.min(H - 16, t.fy * H)); if (y < lastY + 30) y = lastY + 30; y = Math.min(y, H - 16); lastY = y;
+          const n = t.ms.filter(m => !m.del).length, un = t.ms.some(m => m.by !== ME && !m.del && m.t > readTs());
+          const b = h('button', { type: 'button', class: 'cm-mk' + (un ? ' un' : ''), style: `top:${(y / H * 100).toFixed(2)}%`, 'aria-label': `Open replies (${n})`, onclick: e => { e.stopPropagation(); openPanel('thread', t.cid); } });
+          b.innerHTML = ico(I.chat, 14) + (n > 1 ? `<i>${n}</i>` : ''); box.append(b);
+        });
+        pg.append(box);
+      });
+      placeRing();
+    }
+    function placeRing() {
+      $$('.cm-ring').forEach(e => e.remove()); const r = CM.ring; if (!r || S.mode !== 'read') return;
+      const pg = pageEls().find(p => p.dataset.pid === r.pid); if (!pg) return;
+      pg.append(h('i', { class: 'cm-ring', style: `left:${(r.fx * 100).toFixed(1)}%;top:${(r.fy * 100).toFixed(1)}%` }));
+    }
+    function refresh() { updateTab(); renderMarks(); if (isOpen() && !CM.pick) renderPanel(true); }
+
+    /* ---- panel ---- */
+    function openPanel(view, cid) {
+      if (S.mode !== 'read' || !hereOk()) return;
+      CM.pick = false; hint.hidden = true; document.body.classList.remove('cm-pick');
+      CM.view = view; CM.cid = cid || null;
+      if (view === 'thread') { const t = threads(VIEW).find(x => x.cid === cid); if (t) { CM.ring = { pid: t.pid, fx: t.fx, fy: t.fy }; if (S.open && posOfPage(t.pid) >= 0 && !pageEls().some(p => p.dataset.pid === t.pid)) navTo2(t.pid); } }
+      if (view === 'list') CM.ring = null;
+      panel.hidden = false; document.body.classList.toggle('cm-drawer', drawer()); lsSet('olw_cm_read', Date.now());
+      renderPanel(); placeRing(); updateTab(); renderMarks(); layoutSoon();
+    }
+    function closePanel() { panel.hidden = true; CM.ring = null; CM.draft = null; document.body.classList.remove('cm-drawer'); placeRing(); ta.blur(); layoutSoon(); }
+    const layoutSoon = () => { requestAnimationFrame(() => { layout(); setTimeout(renderMarks, 120); }); };
+    function navTo2(pid) { const i = posOfPage(pid); if (i >= 0) gotoPos(S.two ? i & ~1 : i); }
+
+    function ctxChip(pid, q, fx, fy) {
+      const n = pageNo(pid), go = h('button', { type: 'button', class: 'cm-ctx', onclick: () => { if (n == null) return toast('That page is no longer in the diary', 2200); CM.ring = { pid, fx, fy }; if (!pageEls().some(p => p.dataset.pid === pid)) navTo2(pid); setTimeout(placeRing, 120); } });
+      go.innerHTML = ico(I.pin, 16); go.append(h('span', {}, h('b', { text: n == null ? 'Page removed' : 'Page ' + pad2(n) }), h('small', { text: q ? '“' + q + '”' : 'Tap to show the spot' })));
+      return go;
+    }
+    function renderPanel(keepScroll) {
+      const sc = body.scrollTop; body.replaceChildren(); ft.hidden = CM.view === 'list' || VIEW === ME; backB.hidden = CM.view === 'list';   // apni diary mein likhna nahi, sirf doosre ke replies padhna
+      const who = VIEW === ME ? 'My diary' : (herHis() === 'her' ? 'Her diary' : 'His diary');
+      if (CM.view === 'list') {
+        ti.textContent = 'Replies • ' + who;
+        if (VIEW !== ME) {
+          const mk = h('button', { type: 'button', class: 'cm-new', onclick: startPick }); mk.innerHTML = ico(I.plus, 18); mk.append(h('span', { text: 'Reply on a spot' }));
+          body.append(mk, h('p', { class: 'cm-sub', text: 'Open the page, tap “Reply on a spot”, then touch the place you want to reply to. Your reply stays in the margin and never covers the writing.' }));
+        } else body.append(h('p', { class: 'cm-sub', text: (herHis() === 'her' ? 'Her' : 'His') + ' replies on your diary show up here and as small buttons in the page margin. Tap one to read it.' }));
+        const ts = threads(VIEW).sort((a, b) => ((posOfPage(a.pid) < 0 ? 1e9 : posOfPage(a.pid)) - (posOfPage(b.pid) < 0 ? 1e9 : posOfPage(b.pid))) || a.fy - b.fy);
+        if (!ts.length) body.append(h('p', { class: 'cm-empty', text: VIEW === ME ? 'No replies on your diary yet ♡' : 'No replies yet. Be the first ♡' }));
+        ts.forEach(t => {
+          const last = t.ms.filter(m => !m.del).slice(-1)[0], n = t.ms.filter(m => !m.del).length, un = t.ms.some(m => m.by !== ME && !m.del && m.t > readTs());
+          const pn = pageNo(t.pid);
+          body.append(h('button', { type: 'button', class: 'cm-card' + (un ? ' un' : ''), onclick: () => openPanel('thread', t.cid) },
+            h('b', { text: (pn == null ? 'Removed page' : 'Page ' + pad2(pn)) + (t.q ? ' · “' + t.q.slice(0, 40) + '”' : '') }),
+            h('span', { class: 'cm-pv', dir: 'auto', text: (last.by === ME ? 'You: ' : roleName(last.by) + ': ') + last.text }),
+            h('small', { text: n + (n === 1 ? ' reply · ' : ' replies · ') + fmtT(last.t) })));
+        });
+      } else if (CM.view === 'thread') {
+        const t = threads(VIEW).find(x => x.cid === CM.cid); if (!t) { CM.view = 'list'; return renderPanel(); }
+        ti.textContent = 'Reply thread'; body.append(ctxChip(t.pid, t.q, t.fx, t.fy));
+        t.ms.forEach(m => body.append(msgEl(m)));
+        ta.placeholder = 'Write your reply...';
+      } else {
+        const d = CM.draft; if (!d) { CM.view = 'list'; return renderPanel(); }
+        ti.textContent = 'New reply'; body.append(ctxChip(d.pid, d.q, d.fx, d.fy), h('p', { class: 'cm-sub', text: 'Write below. It will appear as a small button in the margin next to this spot.' }));
+        ta.placeholder = 'Write your reply here...';
+      }
+      if (keepScroll) body.scrollTop = sc; else if (CM.view === 'thread') body.scrollTop = body.scrollHeight;
+    }
+    function msgEl(m) {
+      const mine = m.by === ME, el = h('div', { class: 'cm-msg ' + (mine ? 'me' : 'them') + (m.del ? ' gone' : '') });
+      el.append(h('small', { class: 'cm-by', text: roleName(m.by) + ' · ' + fmtT(m.t) }));
+      el.append(h('p', { class: 'cm-t', dir: 'auto', text: m.del ? '🚫 This reply was deleted' : m.text }));
+      if (mine && !m.del) { const d = h('button', { type: 'button', class: 'cm-del', 'aria-label': 'Delete my reply', onclick: () => delMsg(m.id) }); d.innerHTML = ico(I.trash, 14); el.append(d); }
+      return el;
+    }
+    async function delMsg(id) {
+      if (!(await ask('Delete this reply?', 'It will disappear for both of you.', 'Delete', 'Cancel'))) return;
+      const m = CM.msgs[ME].find(x => x.id === id); if (!m) return; m.del = true; m.text = ''; m.u = Date.now();
+      await persist(ME); pushMine(); refresh(); toast('Reply deleted', 1600);
+    }
+    async function send() {
+      const text = ta.value.trim(); if (!text || VIEW === ME) return;
+      let cid, d, pid, fx, fy, q;
+      if (CM.view === 'thread') { const t = threads(VIEW).find(x => x.cid === CM.cid); if (!t) return; cid = t.cid; d = VIEW; pid = t.pid; fx = t.fx; fy = t.fy; q = t.q; }
+      else if (CM.view === 'new' && CM.draft) { const dr = CM.draft; cid = uid('c'); d = VIEW; pid = dr.pid; fx = dr.fx; fy = dr.fy; q = dr.q; }
+      else return;
+      const id = CM.view === 'new' ? cid : uid('m'), now = Date.now();
+      CM.msgs[ME].push(norm({ id, cid, d, pid, fx, fy, q, text, t: now, u: now }, ME));
+      ta.value = ''; autosize(); await persist(ME); pushMine();
+      if (CM.view === 'new') { CM.view = 'thread'; CM.cid = cid; CM.draft = null; CM.ring = { pid, fx, fy }; toast('Reply saved ♡', 1600); }
+      lsSet('olw_cm_read', Date.now()); renderMarks(); renderPanel(); updateTab();
+    }
+    const autosize = () => { ta.style.height = 'auto'; ta.style.height = Math.min(ta.scrollHeight, 130) + 'px'; };
+    ta.addEventListener('input', autosize);
+    ta.addEventListener('keydown', e => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); send(); } });
+    sendB.addEventListener('click', send);
+
+    /* ---- jagah chunna ---- */
+    async function startPick() {
+      if (VIEW === ME || S.mode !== 'read' || S.busy) return;
+      if (!S.open) { try { await openBook(); } catch { /* ignore */ } if (!S.open) { toast('Open the diary first, then tap the spot', 2800); return; } }
+      CM.pick = true; CM.draft = null; panel.hidden = true; document.body.classList.remove('cm-drawer'); document.body.classList.add('cm-pick'); layoutSoon();
+      hint.replaceChildren(h('span', { text: 'Tap the spot on the page where you want to reply' }), h('button', { type: 'button', onclick: endPick }, 'Cancel')); hint.hidden = false;
+    }
+    function endPick() { CM.pick = false; hint.hidden = true; document.body.classList.remove('cm-pick'); openPanel('list'); }
+    let dn = null;
+    stage.addEventListener('pointerdown', e => { dn = { x: e.clientX, y: e.clientY }; }, true);
+    stage.addEventListener('pointerup', e => {
+      if (!CM.pick || !dn || Math.hypot(e.clientX - dn.x, e.clientY - dn.y) > 10) return;
+      if (e.target.closest('button,.st-zoom,.cm-side')) return;
+      const pg = e.target.closest('.st-page[data-pid]'); if (!pg) { toast('Tap on a page', 1600); return; }
+      const r = pg.getBoundingClientRect(), fx = clamp((e.clientX - r.left) / r.width, .03, .97), fy = clamp((e.clientY - r.top) / r.height, .03, .97);
+      const tx = e.target.closest('.st-p,.st-title,.st-sign,figcaption,.st-nt'); const q = tx ? tx.textContent.replace(/\s+/g, ' ').trim().slice(0, 70) : '';
+      CM.pick = false; hint.hidden = true; document.body.classList.remove('cm-pick');
+      CM.draft = { pid: pg.dataset.pid, fx, fy, q }; CM.ring = { pid: pg.dataset.pid, fx, fy };
+      openPanel('new');
+      setTimeout(() => { try { ta.focus({ preventScroll: true }); } catch { /* ignore */ } }, 250);
+    }, true);
+
+    tab.addEventListener('click', () => { if (isOpen()) closePanel(); else openPanel('list'); });
+    rpB.addEventListener('click', () => { if (CM.pick) return endPick(); if (isOpen()) { panel.hidden = true; document.body.classList.remove('cm-drawer'); } startPick(); });
+    xB.addEventListener('click', closePanel);
+    backB.addEventListener('click', () => { CM.draft = null; openPanel('list'); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape' && (isOpen() || CM.pick) && !document.querySelector('dialog[open]')) { if (CM.pick) endPick(); else closePanel(); } });
+    window.addEventListener('resize', () => { if (isOpen()) document.body.classList.toggle('cm-drawer', drawer()); });
+    if (window.visualViewport) {
+      const kb = () => { const v = visualViewport, off = Math.max(0, Math.round(innerHeight - v.height - v.offsetTop)); panel.style.setProperty('--cmkb', (drawer() ? 0 : off) + 'px'); };
+      visualViewport.addEventListener('resize', kb); visualViewport.addEventListener('scroll', kb);
+    }
+    const _cm = hooks.cm; hooks.cm = () => { if (_cm) _cm(); updateTab(); renderMarks(); if (isOpen() && VIEW !== CM.viewOf) { CM.viewOf = VIEW; if (CM.view !== 'list') { CM.view = 'list'; CM.ring = null; } renderPanel(); } };
+    const menuItem = $('#stMenu') && h('button', { type: 'button', role: 'menuitem', 'data-act': 'replies' }); if (menuItem) { menuItem.innerHTML = '<span class="ico">' + ico(I.chat, 18) + '</span>Replies'; $('#stMenu').insertBefore(menuItem, $('#stMenu').children[2] || null); }
+    window.__cmOpen = () => { if (isOpen()) closePanel(); else openPanel('list'); };
+    window.__cm = { CM, threads, start, openPanel, closePanel, startPick };
+    CM.viewOf = VIEW; hooks.cmStart = start;
+  })();
+
+
+  /* ---------------------------------------------------------------
+     14f. LINKS: diary mein kahin bhi link paste karein, padhte waqt wo tap hone wala button ban jata hai.
+     TikTok / YouTube / Instagram / Facebook / Vimeo / seedhi video file: tap par video diary ke andar hi chalti hai.
+     Baaki links naye tab mein khulte hain. Diary ka saved text bilkul nahi badalta, sirf padhne ke waqt dikhta hai.
+     Likhte waqt (edit mode) link sada text hi rehta hai.
+     --------------------------------------------------------------- */
+  (function links() {
+    const URL_RE = /\b(?:https?:\/\/|www\.)[^\s<>"'​]+|\b(?:(?:vm|vt|www|m)\.)?(?:tiktok\.com|youtu\.be|youtube\.com|instagram\.com|fb\.watch|vimeo\.com)\/[^\s<>"'​]+/gi;
+    const TRIM = /[.,;:!?)\]}»"'،۔؟…]+$/;
+    const SEL = '.st-p,.st-nt,.st-sign,figcaption';
+    const ID_YT = /^[\w-]{6,15}$/;
+    function vidInfo(raw) {
+      let x; try { x = new URL(/^https?:/i.test(raw) ? raw : 'https://' + raw); } catch { return null; }
+      const hn = x.hostname.toLowerCase(), path = x.pathname, q = x.searchParams;
+      if (/(^|\.)tiktok\.com$/.test(hn)) {
+        const id = (path.match(/\/(?:video|photo)\/(\d{8,25})/) || [])[1] || (q.get('item_id') || '').match(/^\d{8,25}$/)?.[0] || '';
+        return { k: 'tt', href: x.href, id, tall: true, name: 'TikTok' };
+      }
+      if (/(^|\.)youtu\.be$/.test(hn) || /(^|\.)youtube(-nocookie)?\.com$/.test(hn)) {
+        let id = '', shorts = false;
+        if (/youtu\.be$/.test(hn)) id = path.slice(1).split('/')[0];
+        else if (path === '/watch') id = q.get('v') || '';
+        else { const m = path.match(/^\/(shorts|embed|live|v)\/([\w-]+)/); if (m) { id = m[2]; shorts = m[1] === 'shorts'; } }
+        if (!ID_YT.test(id)) return null;
+        const st = parseInt(q.get('t') || q.get('start') || '0', 10) || 0;
+        return { k: 'yt', href: x.href, src: `https://www.youtube-nocookie.com/embed/${id}?rel=0&playsinline=1&autoplay=1${st ? '&start=' + st : ''}`, tall: shorts, name: 'YouTube' };
+      }
+      if (/(^|\.)vimeo\.com$/.test(hn)) { const id = (path.match(/\/(\d{6,})/) || [])[1]; return id ? { k: 'vm', href: x.href, src: `https://player.vimeo.com/video/${id}?autoplay=1`, tall: false, name: 'Vimeo' } : null; }
+      if (/(^|\.)instagram\.com$/.test(hn)) { const m = path.match(/\/(reel|reels|p|tv)\/([\w-]+)/); return m ? { k: 'ig', href: x.href, src: `https://www.instagram.com/${m[1] === 'reels' ? 'reel' : m[1]}/${m[2]}/embed`, tall: true, name: 'Instagram' } : null; }
+      if (/(^|\.)facebook\.com$/.test(hn) || /(^|\.)fb\.watch$/.test(hn)) {
+        if (/fb\.watch$/.test(hn) || /\/(videos?|reel|watch)\b/.test(path)) return { k: 'fb', href: x.href, src: 'https://www.facebook.com/plugins/video.php?show_text=false&autoplay=true&href=' + encodeURIComponent(x.href), tall: /\/reel\//.test(path), name: 'Facebook' };
+        return null;
+      }
+      if (/\.(mp4|webm|mov|m4v|ogv)$/i.test(path)) return { k: 'file', href: x.href, src: x.href, tall: false, name: 'Video' };
+      return null;
+    }
+    const short = u => { const s = u.replace(/^https?:\/\//i, '').replace(/^www\./i, '').replace(/\/$/, ''); return s.length > 34 ? s.slice(0, 33) + '…' : s; };
+    function linkifyIn(root) {
+      const w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, { acceptNode: n => (n.parentElement && n.parentElement.closest('a.st-vl') ? NodeFilter.FILTER_REJECT : /(?:https?:\/\/|www\.|\.com\/|fb\.watch\/|youtu\.be\/)/i.test(n.nodeValue) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT) });
+      const nodes = []; while (w.nextNode()) nodes.push(w.currentNode);
+      nodes.forEach(n => {
+        const txt = n.nodeValue; URL_RE.lastIndex = 0; let last = 0, m, hit = false; const frag = document.createDocumentFragment();
+        while ((m = URL_RE.exec(txt))) {
+          let u = m[0]; const cut = u.match(TRIM); const tail = cut ? cut[0] : ''; if (tail) u = u.slice(0, -tail.length); if (u.length < 8) continue;
+          const info = vidInfo(u); hit = true;
+          frag.append(txt.slice(last, m.index));
+          frag.append(h('a', { class: 'st-vl' + (info ? ' vid' : ''), href: /^https?:/i.test(u) ? u : 'https://' + u, target: '_blank', rel: 'noopener noreferrer', title: u, 'data-vk': info ? info.k : '', text: (info ? '▶ ' : '') + short(u) }));
+          last = m.index + u.length; URL_RE.lastIndex = last;
+        }
+        if (!hit) return; frag.append(txt.slice(last)); n.replaceWith(frag);
+      });
+    }
+    function linkify() {
+      if (S.mode === 'edit') return;
+      [B.slotL, B.slotR].forEach(sl => { if (!sl) return; sl.querySelectorAll('.st-page[data-pid]').forEach(pg => pg.querySelectorAll(SEL).forEach(el => { if (el.isContentEditable) return; linkifyIn(el); })); });
+    }
+    const _c = hooks.cm; hooks.cm = () => { if (_c) _c(); linkify(); };
+
+    /* ---- video player ---- */
+    const oc = new Map();
+    const oembed = url => { if (!oc.has(url)) oc.set(url, fetch('https://www.tiktok.com/oembed?url=' + encodeURIComponent(url)).then(r => (r.ok ? r.json() : null)).catch(() => null)); return oc.get(url); };
+    let wrap = null;
+    function closeVid() { if (wrap) { wrap.hidden = true; wrap.replaceChildren(); } document.body.classList.remove('st-vidopen'); }
+    async function openVid(href) {
+      const info = vidInfo(href); if (!info) { window.open(href, '_blank', 'noopener'); return; }
+      if (!wrap) { wrap = h('div', { id: 'stVid', hidden: true, role: 'dialog', 'aria-label': 'Video' }); document.body.append(wrap); wrap.addEventListener('click', e => { if (e.target === wrap) closeVid(); }); }
+      const x = h('button', { type: 'button', class: 'vid-x', 'aria-label': 'Close video', onclick: closeVid }); x.textContent = '✕';
+      const open = h('a', { class: 'vid-open', href: info.href, target: '_blank', rel: 'noopener noreferrer', text: 'Open in ' + info.name });
+      const slot = h('div', { class: 'vid-body' }, h('p', { class: 'vid-note', text: 'Loading video...' }));
+      wrap.replaceChildren(h('div', { class: 'vid-box' + (info.tall ? ' tall' : ''), 'data-k': info.k }, x, slot, info.k === 'file' ? null : open)); wrap.hidden = false; document.body.classList.add('st-vidopen');
+      const frame = src => h('iframe', { class: 'vid-frame', src, allow: 'autoplay; fullscreen; encrypted-media; picture-in-picture; clipboard-write', allowfullscreen: '', referrerpolicy: 'strict-origin-when-cross-origin', title: info.name + ' video' });
+      if (info.k === 'file') { slot.replaceChildren(h('video', { class: 'vid-frame', src: info.src, controls: '', playsinline: '', autoplay: '' })); return; }
+      if (info.k === 'tt') {
+        let id = info.id;
+        if (!id) { const o = await oembed(info.href); const mm = o && String(o.html || '').match(/data-video-id="(\d{8,25})"/); id = mm ? mm[1] : (o && /^\d{8,25}$/.test(String(o.embed_product_id || '')) ? String(o.embed_product_id) : ''); }
+        if (wrap.hidden) return;
+        if (!id) { slot.replaceChildren(h('p', { class: 'vid-note', text: 'This video cannot play inside the diary. Please open it in TikTok.' })); return; }
+        slot.replaceChildren(frame('https://www.tiktok.com/embed/v2/' + id)); return;
+      }
+      slot.replaceChildren(frame(info.src));
+    }
+    stage.addEventListener('click', e => {
+      const a = e.target.closest && e.target.closest('a.st-vl.vid'); if (!a || S.mode === 'edit') return;
+      e.preventDefault(); e.stopPropagation(); openVid(a.href);
+    });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape' && wrap && !wrap.hidden) { e.stopPropagation(); closeVid(); } }, true);
+    window.__stVid = { vidInfo, openVid, closeVid };
+  })();
+
+
+  /* ---------------------------------------------------------------
      15. START
      --------------------------------------------------------------- */
   async function init() {
     initWho(); applyRole(); paintIcons(); makeTextures(); buildBackdrop(); buildBook(); buildStudio(); layout();
     await loadView(); paintWho();
     applyLook(); renderCoverFace(); updateChrome(); setBanner(); layout(); updateStacks(); updateChrome();
-    book.classList.add('ready'); startCloud();
+    book.classList.add('ready'); startCloud(); if (hooks.cmStart) hooks.cmStart();
     if (!persistent) toast('Saving is blocked in this browser. Changes last only for this session. Please download a backup.', 6000);
     document.fonts && document.fonts.ready.then(() => { if (S.open && S.mode === 'read') showSpread(); });
     window.__story = { imgPut, imgGet, S, E, beginTurn, setTurn, endTurn, switchView, get VIEW() { return VIEW; }, get ME() { return ME; } };
