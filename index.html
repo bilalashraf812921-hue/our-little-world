@@ -168,6 +168,10 @@
   <form class="dlg" id="settingsForm" method="dialog">
     <h2 id="setTitle">Home Page Settings</h2>
     <p class="hint" id="roleNotice" hidden>Yeh settings sirf owner account ke liye hain.</p>
+    <div class="inst-box" id="instBox">
+      <button type="button" class="btn" id="instBtn">📲 Install app</button>
+      <p class="hint" id="instHint"></p>
+    </div>
     <div id="settingsBody">
       <p class="hint">Changes live preview mein nazar aate hain. <b>Publish</b> dabane tak save nahi hotin; Cancel se purana design wapas aa jata hai.</p>
       <div class="set-actions">
@@ -386,7 +390,33 @@
 
 <script src="olw-config.js"></script>
 <script src="olw-sync.js" data-reload="1"></script>
+<script src="olw-notify.js"></script>
 <script>if ("serviceWorker" in navigator) addEventListener("load", function () { navigator.serviceWorker.register("sw.js").catch(function () { }); });</script>
+<script>
+(function () {
+  var dp = null, $ = function (i) { return document.getElementById(i); };
+  var standalone = function () { return (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true; };
+  var ios = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  function paint() {
+    var b = $('instBtn'), h = $('instHint'); if (!b || !h) return;
+    if (standalone()) { b.hidden = true; h.textContent = 'App install ho chuki hai ✓'; return; }
+    if (dp) { b.hidden = false; h.textContent = 'Ek tap par app install ho jayegi, phir TikTok se share karte waqt "More" mein aayegi.'; return; }
+    b.hidden = false;
+    h.textContent = ios
+      ? 'iPhone: Safari mein Share dabayein, phir "Add to Home Screen". (iPhone par TikTok share list mein nahi aata.)'
+      : 'Chrome ke menu (upar ⋮) mein "Install app" dabayein. Agar abhi na dikhe to page refresh karke thora ruk jayein.';
+  }
+  addEventListener('beforeinstallprompt', function (e) { e.preventDefault(); dp = e; paint(); });
+  addEventListener('appinstalled', function () { dp = null; paint(); });
+  document.addEventListener('click', function (e) {
+    if (!e.target.closest || !e.target.closest('#instBtn')) return;
+    e.preventDefault();
+    if (!dp) { paint(); var h = $('instHint'); if (h) h.style.fontWeight = '700'; return; }
+    dp.prompt(); dp.userChoice.then(function () { dp = null; paint(); }).catch(function () { });
+  });
+  document.addEventListener('DOMContentLoaded', paint); paint();
+})();
+</script>
 <script src="home.js"></script>
 </body>
 </html>

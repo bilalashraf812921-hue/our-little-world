@@ -95,15 +95,18 @@
   function normMsg(m) {
     m = m || {}; const r = m.reply && typeof m.reply === 'object' ? { id: String(m.reply.id || ''), by: m.reply.by === 'partner' ? 'partner' : 'owner', text: String(m.reply.text || '').slice(0, 120), img: !!m.reply.img } : null;
     const rc = m.react && typeof m.react === 'object' ? m.react : {};
-    return { id: /^[\w-]{3,40}$/.test(m.id || '') ? m.id : uid(), by: m.by === 'partner' ? 'partner' : 'owner', t: +m.t || Date.now(), text: String(m.text || '').slice(0, 4000), img: typeof m.img === 'string' && /^data:image\/(jpeg|png|webp);/.test(m.img) && m.img.length < 960000 ? m.img : '',
-      reply: r && r.id ? r : null, react: { owner: String(rc.owner || '').slice(0, 4), partner: String(rc.partner || '').slice(0, 4) }, seen: +m.seen || 0, u: +m.u || +m.t || Date.now() };
+    const gone = !!m.del;   // "delete for everyone": sirf nishaan reh jata hai, text/photo/reply/reaction saaf
+    return { id: /^[\w-]{3,40}$/.test(m.id || '') ? m.id : uid(), by: m.by === 'partner' ? 'partner' : 'owner', t: +m.t || Date.now(), text: gone ? '' : String(m.text || '').slice(0, 4000), img: !gone && typeof m.img === 'string' && /^data:image\/(jpeg|png|webp);/.test(m.img) && m.img.length < 960000 ? m.img : '',
+      reply: !gone && r && r.id ? r : null, react: gone ? { owner: '', partner: '' } : { owner: String(rc.owner || '').slice(0, 4), partner: String(rc.partner || '').slice(0, 4) }, seen: +m.seen || 0, u: +m.u || +m.t || Date.now(), ...(gone ? { del: true } : {}) };
   }
 
   /* ---------- state ---------- */
-  const S = { me: 'owner', msgs: [], look: lookFrom('love'), prof: { owner: normProfile(), partner: normProfile() }, pres: { owner: 0, partner: 0 }, synced: false, q: '', reply: null, kbOpen: false, sys: false, starred: new Set(), pinned: [], sharedBg: null };
+  const S = { me: 'owner', msgs: [], look: lookFrom('love'), prof: { owner: normProfile(), partner: normProfile() }, pres: { owner: 0, partner: 0 }, synced: false, q: '', reply: null, kbOpen: false, sys: false, starred: new Set(), pinned: [], hid: new Set(), sharedBg: null };
   const other = () => (S.me === 'owner' ? 'partner' : 'owner');
   const nameOf = r => S.prof[r].name || (r === S.me ? 'Me' : 'My Love');
   const byId = id => S.msgs.find(m => m.id === id);
+  const vis = () => S.msgs.filter(m => !S.hid.has(m.id));      // 'delete for me' wale messages sirf is phone se chhup jate hain
+  const saveHid = () => { try { localStorage.setItem('olw_hidden_msgs', JSON.stringify([...S.hid])); } catch (e) { } };
   const saveMsgs = () => DB.set('msgs', S.msgs);
   const saveLook = () => DB.set('look', S.look);
   const saveProf = () => DB.set('prof', S.prof);
@@ -213,8 +216,9 @@
   function bubble(m, head) {
     const mine = m.by === S.me, row = h('div', { class: 'row ' + (mine ? 'me' : 'them') + (head ? ' hd' : ''), 'data-id': m.id });
     const b = h('div', { class: 'bub' + (S.starred.has(m.id) ? ' starred' : '') });
-    if (m.reply) b.append(h('button', { type: 'button', class: 'rq', onclick: e => { e.stopPropagation(); jumpTo(m.reply.id); } }, h('b', { text: m.reply.by === S.me ? 'You' : nameOf(m.reply.by) }), h('span', { text: m.reply.img && !m.reply.text ? 'Photo' : m.reply.text })));
+    if (m.reply) { const qm = byId(m.reply.id), qgone = (qm && qm.del) || S.hid.has(m.reply.id); b.append(h('button', { type: 'button', class: 'rq', onclick: e => { e.stopPropagation(); if (!qgone) jumpTo(m.reply.id); } }, h('b', { text: m.reply.by === S.me ? 'You' : nameOf(m.reply.by) }), h('span', { text: qgone ? 'This message was deleted' : m.reply.img && !m.reply.text ? 'Photo' : m.reply.text }))); }
     if (m.img) b.append(h('img', { class: 'mimg', src: m.img, alt: 'Photo', loading: 'lazy', onclick: e => { e.stopPropagation(); openLightbox(m.img); } }));
+    if (m.del) b.append(h('span', { class: 'tx del', text: '🚫 This message was deleted' }));
     if (m.text) b.append(h('span', { class: 'tx' }, esc(m.text, S.q)));
     { const tt = m.text ? ttParse(m.text) : null; if (tt) b.append(ttCard(tt)); }
     b.append(h('span', { class: 'mt' }, hides('time') ? null : h('time', { text: (hides('stamp') ? '' : dateTxt(m.t) + ' • ') + fmtTime(m.t) }), tickEl(m)));
@@ -226,7 +230,7 @@
   let shown = 200;
   function renderMsgs(keep) {
     const box = $('#msgs'), near = box.scrollHeight - box.scrollTop - box.clientHeight < 120, prev = box.scrollHeight - box.scrollTop;
-    let list = S.msgs.slice().sort((a, b) => a.t - b.t); const q = S.q.trim(); if (q) list = list.filter(m => (m.text || '').toLowerCase().includes(q.toLowerCase()));
+    let list = vis().sort((a, b) => a.t - b.t); const q = S.q.trim(); if (q) list = list.filter(m => (m.text || '').toLowerCase().includes(q.toLowerCase()));
     const total = list.length; if (total > shown) list = list.slice(total - shown);
     const nodes = []; if (total > shown) nodes.push(h('button', { type: 'button', class: 'more', onclick: () => { shown += 200; renderMsgs(true); } }, 'Show earlier messages'));
     let last = '', lastBy = ''; list.forEach(m => { const k = dayKey(m.t); const nd = k !== last; if (nd && !hides('dates')) nodes.push(h('div', { class: 'day' }, h('span', { text: dayLabel(m.t) }))); last = k; nodes.push(bubble(m, nd || m.by !== lastBy)); lastBy = m.by; });
@@ -236,7 +240,10 @@
     $('#toBottom').hidden = true; markSeen(); renderSide();
   }
   function jumpTo(id) { const el = $(`.row[data-id="${CSS.escape(id)}"]`); if (el) { el.scrollIntoView({ block: 'center', behavior: 'smooth' }); el.classList.add('flash'); setTimeout(() => el.classList.remove('flash'), 1400); } else toast('That message is further up. Tap "Show earlier messages".'); }
+  /* Chat khula hai aur nazar ke saamne: baaki pages ka lal nishaan / alert hat jata hai */
+  function noteSeen() { if (document.hidden || !S.msgs.length) return; try { localStorage.setItem('olw_chat_seen_t', String(S.msgs.reduce((a, m) => Math.max(a, m.t || 0), 0))); } catch (e) { /* ignore */ } }
   function markSeen() {
+    noteSeen();
     if (!S.synced || document.hidden) return; const me = S.me, now = Date.now(), todo = S.msgs.filter(m => m.by !== me && !m.seen);
     todo.forEach(m => { m.seen = now; m.u = now; cloudSeen(m.id, now); }); if (todo.length) saveMsgs();
   }
@@ -268,22 +275,39 @@
     const emo = hides('react') ? null : h('div', { class: 'em' }, ...['❤️', '😂', '😮', '😢', '👍', '🙏'].map(e => h('button', { type: 'button', text: e, onclick: () => { setReact(id, e); closeSheet(); } })));
     const act = (ic, label, fn, cls) => h('button', { type: 'button', class: cls || '', onclick: () => { closeSheet(); fn(); } }, ico(ic), label);
     const isStarred = S.starred.has(id), isPinned = S.pinned.includes(id);
+    if (m.del) { sh.replaceChildren(act('trash', 'Delete for me', () => delForMe(id), 'danger')); $('#sheetWrap').hidden = false; return; }
     sh.replaceChildren(emo,
       act('reply', 'Reply', () => { S.reply = { id: m.id, by: m.by, text: m.text.slice(0, 120), img: !!m.img }; drawBar(); $('#inp').focus(); }),
       act('heart', isStarred ? 'Unstar' : 'Star Message', () => toggleStar(id)),
       act('plus', isPinned ? 'Unpin' : 'Pin Message', () => togglePin(id)),
       m.text ? act('copy', 'Copy', () => { try { navigator.clipboard.writeText(m.text); toast('Copied'); } catch (e) { toast('Could not copy'); } }) : null,
-      m.by === S.me ? act('trash', 'Delete for both of us', () => delMsg(id), 'danger') : null);
+      act('trash', 'Delete for me', () => delForMe(id), 'danger'),
+      m.by === S.me ? act('trash', 'Delete for everyone', () => delForAll(id), 'danger') : null);
     $('#sheetWrap').hidden = false;
   }
   function closeSheet() { $('#sheetWrap').hidden = true; $('#sheet').classList.remove('qs'); }
   async function setReact(id, e) { const m = byId(id); if (!m) return; const cur = m.react[S.me]; m.react[S.me] = cur === e ? '' : e; m.u = Date.now(); await saveMsgs(); renderMsgs(); cloudReact(m); }
-  async function delMsg(id) { if (!(await ask('Delete this message?', 'It will disappear from the other phone too.', 'Delete'))) return; S.msgs = S.msgs.filter(m => m.id !== id); await saveMsgs(); renderMsgs(); cloudDel(id); }
+  /* Delete for me: sirf mere phone se chhup jata hai (doosre ko koi farq nahi). Apne aur doosre, dono ke messages par. */
+  async function delForMe(id) {
+    if (!(await ask('Delete for me?', 'It will disappear only from this phone. ' + (byId(id) && byId(id).by === S.me ? 'The other person can still see it.' : 'It stays in ' + nameOf(other()) + '\'s chat.'), 'Delete for me'))) return;
+    S.hid.add(id); saveHid(); S.starred.delete(id); const pi = S.pinned.indexOf(id); if (pi >= 0) S.pinned.splice(pi, 1);
+    try { localStorage.setItem('olw_starred', JSON.stringify([...S.starred])); localStorage.setItem('olw_pinned', JSON.stringify(S.pinned)); } catch (e) { }
+    renderMsgs(true); updateCounts(); toast('Deleted for you');
+  }
+  /* Delete for everyone: sirf apna message. Dono phones par "This message was deleted" reh jata hai. */
+  async function delForAll(id) {
+    const m = byId(id); if (!m || m.by !== S.me || m.del) return;
+    if (!(await ask('Delete for everyone?', 'This message will be deleted for both of you. This cannot be undone.', 'Delete for everyone'))) return;
+    m.del = true; m.text = ''; m.img = ''; m.reply = null; m.react = { owner: '', partner: '' }; m.u = Date.now();
+    S.starred.delete(id); const pi = S.pinned.indexOf(id); if (pi >= 0) S.pinned.splice(pi, 1);
+    try { localStorage.setItem('olw_starred', JSON.stringify([...S.starred])); localStorage.setItem('olw_pinned', JSON.stringify(S.pinned)); } catch (e) { }
+    await saveMsgs(); renderMsgs(true); updateCounts(); cloudPut(m); toast('Deleted for everyone');
+  }
   function toggleStar(id) { if (S.starred.has(id)) S.starred.delete(id); else S.starred.add(id); try { localStorage.setItem('olw_starred', JSON.stringify([...S.starred])); } catch(e){} renderMsgs(true); updateCounts(); toast(S.starred.has(id) ? '★ Starred' : 'Unstarred'); }
   function togglePin(id) { const i = S.pinned.indexOf(id); if (i >= 0) S.pinned.splice(i, 1); else { S.pinned.unshift(id); if (S.pinned.length > 5) S.pinned.pop(); } try { localStorage.setItem('olw_pinned', JSON.stringify(S.pinned)); } catch(e){} renderMsgs(true); updateCounts(); toast(S.pinned.includes(id) ? '📌 Pinned' : 'Unpinned'); }
   function updateCounts() { const sc = $('#starCnt'), pc = $('#pinCnt'); if (sc) sc.textContent = S.starred.size; if (pc) pc.textContent = S.pinned.length; }
-  function showStarred() { const list = S.msgs.filter(m => S.starred.has(m.id)); const sh = $('#sheet'); sh.replaceChildren(h('p', { class: 'sh-t', text: '★ Starred Messages' }), ...list.map(m => h('button', { type: 'button', class: 'q', text: (m.text || 'Photo') + ' — ' + fmtTime(m.t), onclick: () => { closeSheet(); jumpTo(m.id); } }))); if (!list.length) sh.append(h('p', { class: 'hint', text: 'No starred messages yet. Long-press a message to star it.' })); sh.classList.add('qs'); $('#sheetWrap').hidden = false; }
-  function showPinned() { const list = S.msgs.filter(m => S.pinned.includes(m.id)); const sh = $('#sheet'); sh.replaceChildren(h('p', { class: 'sh-t', text: '📌 Pinned Messages' }), ...list.map(m => h('button', { type: 'button', class: 'q', text: (m.text || 'Photo') + ' — ' + fmtTime(m.t), onclick: () => { closeSheet(); jumpTo(m.id); } }))); if (!list.length) sh.append(h('p', { class: 'hint', text: 'No pinned messages yet. Long-press a message to pin it.' })); sh.classList.add('qs'); $('#sheetWrap').hidden = false; }
+  function showStarred() { const list = vis().filter(m => !m.del && S.starred.has(m.id)); const sh = $('#sheet'); sh.replaceChildren(h('p', { class: 'sh-t', text: '★ Starred Messages' }), ...list.map(m => h('button', { type: 'button', class: 'q', text: (m.text || 'Photo') + ' — ' + fmtTime(m.t), onclick: () => { closeSheet(); jumpTo(m.id); } }))); if (!list.length) sh.append(h('p', { class: 'hint', text: 'No starred messages yet. Long-press a message to star it.' })); sh.classList.add('qs'); $('#sheetWrap').hidden = false; }
+  function showPinned() { const list = vis().filter(m => !m.del && S.pinned.includes(m.id)); const sh = $('#sheet'); sh.replaceChildren(h('p', { class: 'sh-t', text: '📌 Pinned Messages' }), ...list.map(m => h('button', { type: 'button', class: 'q', text: (m.text || 'Photo') + ' — ' + fmtTime(m.t), onclick: () => { closeSheet(); jumpTo(m.id); } }))); if (!list.length) sh.append(h('p', { class: 'hint', text: 'No pinned messages yet. Long-press a message to pin it.' })); sh.classList.add('qs'); $('#sheetWrap').hidden = false; }
   function showRemoved() { toast('Removed messages feature coming soon.'); }
 
   /* ---------- TikTok links: card + player inside the chat, and "Share to Our Little World" ---------- */
@@ -638,8 +662,8 @@
         if (d.metadata.hasPendingWrites) return; const r = normMsg(Object.assign({}, d.data(), { id: d.id }));
         if (i < 0) { S.msgs.push(r); ch = true; if (r.by !== S.me && !first) incoming = true; pend.delete(r.id); } else if ((r.u || 0) >= (S.msgs[i].u || 0)) { S.msgs[i] = r; ch = true; pend.delete(r.id); }
       });
-      if (first) { CL.first = true; const ids = new Set(snap.docs.map(d => d.id)); S.msgs.filter(m => !ids.has(m.id)).forEach(m => cloudPut(m)); }
-      if (ch) { saveMsgs(); renderMsgs(); if (incoming && document.hidden) document.title = '(1) Chat'; }
+      if (first) { CL.first = true; const ids = new Set(snap.docs.map(d => d.id)), live = new Set(snap.docs.filter(d => !(d.data() || {}).del).map(d => d.id)); S.msgs.filter(m => !ids.has(m.id) || (m.del && live.has(m.id))).forEach(m => cloudPut(m)); }
+      if (ch) { saveMsgs(); renderMsgs(); noteSeen(); if (incoming && document.hidden) document.title = '(1) Chat'; }
     }, cErr));
     ['owner', 'partner'].forEach(r => CL.unsub.push(mdoc('chatprofile-' + r).onSnapshot(doc => {
       if (doc.metadata.hasPendingWrites) return; if (doc.exists) { const p = normProfile(doc.data()); if (p.updated > (S.prof[r].updated || 0)) { S.prof[r] = p; saveProf(); renderHead(); renderMsgs(true); } else if (r === S.me && S.prof[r].updated > p.updated) cloudPutProf(); } else if (r === S.me && S.prof[r].updated) cloudPutProf();
@@ -667,8 +691,8 @@
     [['l0', '#9a72bf', '#b995d6'], ['l1', '#b995d6', '#c9aee2'], ['r0', '#9a72bf', '#b995d6'], ['r1', '#c9aee2', '#9a72bf'], ['bl', '#b995d6', '#9a72bf'], ['br', '#9a72bf', '#c9aee2']].forEach(([c, a, b]) => { const s = h('i', { class: 'sp ' + c }); s.innerHTML = SPRIG(a, b); d.append(s); });
   }
   function renderSide() {
-    const c = $('#convBtn'); if (!c) return; const o = other(), last = S.msgs.slice().sort((a, b) => b.t - a.t)[0];
-    const prev = last ? (last.by === S.me ? 'You: ' : '') + (last.text || 'Photo') : 'Our conversations together...';
+    const c = $('#convBtn'); if (!c) return; const o = other(), last = vis().sort((a, b) => b.t - a.t)[0];
+    const prev = last ? (last.by === S.me ? 'You: ' : '') + (last.del ? 'This message was deleted' : (last.text || 'Photo')) : 'Our conversations together...';
     c.replaceChildren(avatarEl(o, 'cvav'), h('span', { class: 'cv' }, h('b', { text: nameOf(o) + ' ♡' }), h('small', { text: prev }), isOn(o) ? h('em', { class: 'onl', text: 'online' }) : null), h('span', { class: 'chev' }, ico('back')));
     const me = $('#gProf'); if (me) me.replaceChildren(avatarEl(S.me, 'gpav'));
     renderRPanel(); updateCounts();
@@ -730,6 +754,7 @@
     await DB.open();
     const [ms, lk, pf, sb] = await Promise.all([DB.get('msgs'), DB.get('look'), DB.get('prof'), DB.get('sbg')]);
     if (sb) { S.sharedBg = normSbg(sb.bg); sbgUpd = +sb.updated || 0; }
+    try { S.hid = new Set((JSON.parse(localStorage.getItem('olw_hidden_msgs') || '[]') || []).filter(x => typeof x === 'string')); } catch (e) { }
     try { S.starred = new Set((JSON.parse(localStorage.getItem('olw_starred') || '[]') || []).filter(x => typeof x === 'string')); S.pinned = (JSON.parse(localStorage.getItem('olw_pinned') || '[]') || []).filter(x => typeof x === 'string').slice(0, 5); } catch (e) { /* ignore */ }
     S.msgs = (Array.isArray(ms) ? ms : []).map(normMsg); S.look = normLook(lk || undefined); if (pf) S.prof = { owner: normProfile(pf.owner), partner: normProfile(pf.partner) };
     S.sys = !('ontouchstart' in window);

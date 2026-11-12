@@ -538,10 +538,10 @@
   function stopListen() { CLOUD.unsub.forEach(f => { try { f(); } catch (e) { } }); CLOUD.unsub = []; CLOUD.first = { g: false, m: false, s: false }; }
   async function onUser(u) {
     stopListen();
-    if (!u) { CLOUD.user = null; S.me = ''; renderSync(); return; }
+    if (!u) { CLOUD.user = null; S.me = ''; window.OLW_NOTIFY && OLW_NOTIFY.detach(); renderSync(); return; }
     const mail = (u.email || '').toLowerCase(), allowed = [SYNC.owner, SYNC.partner].filter(Boolean).map(x => x.toLowerCase());
     if (allowed.length && !allowed.includes(mail)) { toast('This Google account is not allowed here.'); CLOUD.auth.signOut(); return; }
-    CLOUD.user = u; S.me = mail; listen(); renderSync(); $('#btnMe').classList.add('on'); toast('Synced as ' + u.email);
+    CLOUD.user = u; S.me = mail; window.OLW_NOTIFY && OLW_NOTIFY.attach(CLOUD.db, SYNC.space, (!SYNC.owner || SYNC.owner.toLowerCase() === mail) ? 'owner' : 'partner'); listen(); renderSync(); $('#btnMe').classList.add('on'); toast('Synced as ' + u.email);
   }
   function listen() {
     CLOUD.unsub.push(spaceRef().collection('gallery').onSnapshot(snap => {

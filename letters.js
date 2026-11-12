@@ -760,10 +760,11 @@
   function stopListen() { CLOUD.unsub.forEach(f => { try { f(); } catch (e) { } }); CLOUD.unsub = []; CLOUD.first = { letters: false, look: false }; }
   async function onUser(u) {
     stopListen();
-    if (!u) { CLOUD.user = null; ME.email = ''; ROLE = 'owner'; renderSync(); return; }
+    if (!u) { CLOUD.user = null; ME.email = ''; ROLE = 'owner'; window.OLW_NOTIFY && OLW_NOTIFY.detach(); renderSync(); return; }
     const mail = (u.email || '').toLowerCase(), allowed = [SYNC.owner, SYNC.partner].filter(Boolean).map(x => x.toLowerCase());
     if (allowed.length && !allowed.includes(mail)) { toast('This Google account is not allowed here.'); CLOUD.auth.signOut(); return; }
     CLOUD.user = u; ME.email = mail; ROLE = (!SYNC.owner || SYNC.owner.toLowerCase() === mail) ? 'owner' : 'partner';
+    window.OLW_NOTIFY && OLW_NOTIFY.attach(CLOUD.db, SYNC.space, ROLE);
     listen(); renderSync(); toast('Synced as ' + u.email);
   }
   function refreshAfterSync(curId) {
